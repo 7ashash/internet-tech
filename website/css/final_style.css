@@ -1062,10 +1062,12 @@ body.dark-mode .captcha-mockup {
     .nav-container {
         padding: 0 14px;
         gap: 12px;
+        align-items: center;
     }
 
     .navbar-logo-img {
-        max-height: 56px;
+        max-height: 64px;
+        max-width: 150px;
     }
 
     .nav-icon-link {
@@ -1099,6 +1101,58 @@ body.dark-mode .captcha-mockup {
     .social-btn {
         width: 38px;
         height: 38px;
+    }
+
+    .big-navbar {
+        padding: 14px 0;
+    }
+
+    .nav-container {
+        padding: 0 12px;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    .nav-logo {
+        flex: 0 1 120px;
+    }
+
+    .navbar-logo-img {
+        max-height: 92px;
+        max-width: 120px;
+    }
+
+    .nav-right-cluster {
+        margin-left: auto;
+        gap: 10px;
+        align-items: flex-end;
+        flex-direction: column;
+    }
+
+    .auth-nav {
+        width: auto;
+        justify-content: flex-end;
+    }
+
+    .auth-trigger-btn,
+    .auth-logout-btn,
+    .auth-dashboard-link {
+        padding: 10px 16px;
+        font-size: 0.92rem;
+        white-space: nowrap;
+    }
+
+    .auth-user-chip {
+        align-items: flex-end;
+        justify-content: flex-end;
+    }
+
+    .custom-menu-btn {
+        padding: 8px 14px;
+    }
+
+    .theme-toggle {
+        padding: 8px;
     }
 
     .nav-icon-divider,

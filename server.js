@@ -457,7 +457,7 @@ app.post('/api/admin/content', requireAdmin, (req, res) => {
 
 app.get('/api/admin/users', requireAdmin, (req, res) => {
   const users = db.prepare(`
-    SELECT id, name, university_id, email, role, is_active, created_at, activated_at, last_login_at
+    SELECT id, name, university_id, email, role, is_active, activation_token, created_at, activated_at, last_login_at
     FROM users
     ORDER BY created_at DESC
   `).all().map((user) => ({
@@ -467,6 +467,7 @@ app.get('/api/admin/users', requireAdmin, (req, res) => {
     email: user.email,
     role: user.role,
     isActive: Boolean(user.is_active),
+    activationUrl: user.activation_token ? `${BASE_URL}/activate.html?token=${encodeURIComponent(user.activation_token)}` : null,
     createdAt: user.created_at,
     activatedAt: user.activated_at,
     lastLoginAt: user.last_login_at

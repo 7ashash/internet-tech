@@ -476,10 +476,14 @@
               <div><strong>University ID:</strong> ${escapeHtml(user.universityId || '-')}</div>
               <div><strong>Role:</strong> ${escapeHtml(user.role)}</div>
               <div><strong>Active:</strong> ${user.isActive ? 'Yes' : 'No'}</div>
+              ${!user.isActive && user.activationUrl ? `<div class="mt-2"><strong>Activation Link:</strong> <span class="small">${escapeHtml(user.activationUrl)}</span></div>` : ''}
+              ${!user.isActive && user.activationUrl ? `<div class="mt-2 small" style="white-space: pre-line; color: #475467; background: #f8fbff; border: 1px dashed #d7e1ed; border-radius: 14px; padding: 12px;">${escapeHtml(buildActivationMessage(user))}</div>` : ''}
             </div>
             <div class="card-foot">
               <button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="toggleUserStatus(${user.id}, ${user.isActive ? 'false' : 'true'})">${user.isActive ? 'Deactivate' : 'Activate'}</button>
               <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" onclick="changeUserRole(${user.id}, '${user.role === 'admin' ? 'user' : 'admin'}')">${user.role === 'admin' ? 'Make user' : 'Make admin'}</button>
+              ${!user.isActive && user.activationUrl ? `<button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" onclick="copyActivationLink('${escapeHtml(user.activationUrl)}')">Copy Activation Link</button>` : ''}
+              ${!user.isActive && user.activationUrl ? `<button class="btn btn-success btn-sm rounded-pill px-3" type="button" onclick="copyActivationMessage(${user.id})">Copy Activation Message</button>` : ''}
               <button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteUser(${user.id}, '${escapeHtml(user.name)}')">Delete</button>
             </div>
           </article>
@@ -513,6 +517,10 @@
     }
 
     function renderAll() { renderNews(); renderEvents(); renderUsers(); renderMessages(); }
+
+    function buildActivationMessage(user) {
+      return `Hello ${user.name},\n\nActivate your account by opening this link:\n${user.activationUrl}\n\nIf you did not create this account, ignore this email.`;
+    }
 
     function loadAll() {
       setSaveState('warn', 'Loading');
@@ -594,6 +602,32 @@
       }).then(loadAll).catch(function (error) {
         alert(error.message);
       });
+    };
+
+    window.copyActivationLink = function (url) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url)
+          .then(function () { alert('Activation link copied. You can now send it to the user.'); })
+          .catch(function () { window.prompt('Copy this activation link:', url); });
+        return;
+      }
+      window.prompt('Copy this activation link:', url);
+    };
+
+    window.copyActivationMessage = function (id) {
+      const user = state.users.find(function (item) { return item.id === id; });
+      if (!user || !user.activationUrl) {
+        alert('Activation message is not available for this user.');
+        return;
+      }
+      const message = buildActivationMessage(user);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(message)
+          .then(function () { alert('Activation message copied. You can now paste it anywhere.'); })
+          .catch(function () { window.prompt('Copy this activation message:', message); });
+        return;
+      }
+      window.prompt('Copy this activation message:', message);
     };
 
     window.markMessageReviewed = function (id) {
