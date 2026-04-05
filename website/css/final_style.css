@@ -1153,21 +1153,22 @@ body.dark-mode .captcha-mockup {
         align-items: center;
         justify-content: flex-end;
         gap: 8px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         max-width: 100%;
         min-width: 0;
     }
 
     .auth-user-name {
-        max-width: 86px;
-        text-align: right;
-        font-size: 0.8rem;
-        line-height: 1.2;
+        display: none;
     }
 
     .auth-logout-btn,
     .auth-dashboard-link {
         flex-shrink: 0;
+    }
+
+    .auth-dashboard-link {
+        display: none !important;
     }
 
     .custom-menu-btn {
