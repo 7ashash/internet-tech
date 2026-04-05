@@ -234,6 +234,7 @@ textarea {
     color: var(--white);
     font-size: 0.92rem;
     font-weight: 600;
+    overflow-wrap: anywhere;
 }
 
 .auth-modal {
@@ -1128,12 +1129,15 @@ body.dark-mode .captcha-mockup {
         align-items: center;
         flex-direction: row;
         flex-wrap: nowrap;
+        min-width: 0;
     }
 
     .auth-nav {
         width: auto;
         justify-content: flex-end;
         order: 1;
+        min-width: 0;
+        max-width: calc(100vw - 190px);
     }
 
     .auth-trigger-btn,
@@ -1149,7 +1153,21 @@ body.dark-mode .captcha-mockup {
         align-items: center;
         justify-content: flex-end;
         gap: 8px;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .auth-user-name {
+        max-width: 86px;
+        text-align: right;
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+
+    .auth-logout-btn,
+    .auth-dashboard-link {
+        flex-shrink: 0;
     }
 
     .custom-menu-btn {
