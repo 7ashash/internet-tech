@@ -1,0 +1,30 @@
+-----
+Date: 2026-04-05T00:00:10.963Z
+To: 7ashashoz@must.edu.eg
+Subject: Activate your MUST website account
+Hello omar ayman,
+
+Activate your account by opening this link:
+http://127.0.0.1:3000/activate.html?token=0d8d2f01e7a07f150a91ee20ef1998a302bc782de4e25dd4
+
+If you did not create this account, ignore this email.
+-----
+Date: 2026-04-05T00:09:05.221Z
+To: omar@must.edu.eg
+Subject: Activate your MUST website account
+Hello omar 2,
+
+Activate your account by opening this link:
+http://127.0.0.1:3000/activate.html?token=6bd8f2349f7f59d34bb8c5d5341bfd2ea8d4851a7fb2c07b
+
+If you did not create this account, ignore this email.
+-----
+Date: 2026-04-05T01:04:14.289Z
+To: 200033242@must.edu.eg
+Subject: Activate your MUST website account
+Hello omar ayman abdelfatteh,
+
+Activate your account by opening this link:
+http://127.0.0.1:3000/activate.html?token=346c2f2f4cb15d3a0ec272424b7cf1c6912f4ceed584b98e
+
+If you did not create this account, ignore this email.

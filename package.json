@@ -1,0 +1,26 @@
+{
+  "name": "internet-technology",
+  "version": "1.0.0",
+  "description": "MUST website and admin dashboard backend",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test": "echo \"No automated tests configured yet\""
+  },
+  "engines": {
+    "node": "25.x"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.8.0",
+    "connect-sqlite3": "^0.9.16",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "nodemailer": "^8.0.4"
+  }
+}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activate Account</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: Montserrat, Arial, sans-serif;
+      background: linear-gradient(135deg, #102749 0%, #1A3668 65%, #0f2342 100%);
+      color: #122033;
+      padding: 24px;
+    }
+    .card {
+      width: min(100%, 560px);
+      background: #fff;
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+      text-align: center;
+    }
+    .eyebrow {
+      color: #008C45;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.82rem;
+    }
+    h1 { color: #1A3668; margin-bottom: 12px; }
+    p { line-height: 1.7; color: #4b5563; }
+    .status {
+      margin-top: 24px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: 600;
+    }
+    .loading { background: #eef4fb; color: #1A3668; }
+    .success { background: #edf9f1; color: #18794e; }
+    .error { background: #fff1f1; color: #b42318; }
+    a {
+      display: inline-block;
+      margin-top: 24px;
+      text-decoration: none;
+      background: #008C45;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="eyebrow">MUST Account</div>
+    <h1>Activating your account</h1>
+    <p>Your university account is being verified now. Once activation succeeds, you can return to the website and sign in.</p>
+    <div class="status loading" id="activationStatus">Checking activation token...</div>
+    <a href="/website/index.html">Back to website</a>
+  </div>
+
+  <script>
+    (function () {
+      var statusBox = document.getElementById('activationStatus');
+      var token = new URLSearchParams(window.location.search).get('token');
+
+      if (!token) {
+        statusBox.className = 'status error';
+        statusBox.textContent = 'Missing activation token.';
+        return;
+      }
+
+      fetch('/api/auth/activate?token=' + encodeURIComponent(token), { cache: 'no-store' })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+          if (!data.ok) {
+            throw new Error(data.error || 'Activation failed');
+          }
+          statusBox.className = 'status success';
+          statusBox.textContent = data.message;
+        })
+        .catch(function (error) {
+          statusBox.className = 'status error';
+          statusBox.textContent = error.message;
+        });
+    }());
+  </script>
+</body>
+</html>
