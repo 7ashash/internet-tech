@@ -22,7 +22,7 @@
       --must-soft: #eef4fb;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Montserrat', system-ui, sans-serif; background: linear-gradient(180deg, #f7faff 0%, #eef3fa 100%); color: #1f2937; }
+    body { margin: 0; font-family: 'Montserrat', system-ui, sans-serif; background: linear-gradient(180deg, #f7faff 0%, #eef3fa 100%); color: #1f2937; overflow-x: hidden; }
     .auth-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1.5rem; background: radial-gradient(circle at top right, rgba(0,140,69,.16), transparent 28%), linear-gradient(135deg, #102749 0%, #1A3668 62%, #0f2342 100%); z-index: 1000; }
     .auth-screen.hidden { display: none; }
     .auth-card { width: min(100%, 430px); background: rgba(255,255,255,.97); border-radius: 22px; padding: 1.5rem; box-shadow: 0 30px 80px rgba(0,0,0,.24); border: 1px solid rgba(255,255,255,.25); }
@@ -30,7 +30,7 @@
     .auth-input { width: 100%; padding: .95rem 1rem; border-radius: 14px; border: 1px solid var(--must-border); outline: none; }
     .auth-input:focus { border-color: var(--must-primary); box-shadow: 0 0 0 4px rgba(26,54,104,.08); }
     .auth-error { display: none; color: #b42318; background: #fef3f2; border: 1px solid #fecdca; border-radius: 14px; padding: .8rem .9rem; font-size: .92rem; }
-    .layout { display: none; min-height: 100vh; }
+    .layout { display: none; min-height: 100vh; overflow-x: hidden; }
     .sidebar { position: fixed; inset: 0 auto 0 0; width: 282px; background: linear-gradient(180deg, #17305c 0%, #1A3668 58%, #102749 100%); color: #fff; padding: 1.25rem; box-shadow: var(--must-shadow); overflow-y: auto; }
     .brand { display: flex; gap: .9rem; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,.12); }
     .brand img { width: 58px; height: 58px; object-fit: contain; background: #fff; border-radius: 16px; padding: 6px; }
@@ -60,23 +60,25 @@
     .grid-two { display: grid; grid-template-columns: minmax(330px, 430px) minmax(0, 1fr); gap: 1.2rem; align-items: start; }
     .editor-card { border: 1px solid var(--must-border); border-radius: 18px; background: linear-gradient(180deg, #fff, #fbfdff); overflow: hidden; }
     .editor-header { padding: 1rem 1.1rem; border-bottom: 1px solid #eef3f8; }
-    .editor-body { padding: 1.1rem; }
+    .editor-body { padding: 1.1rem; overflow-x: hidden; }
     .manager-form .form-control, .manager-form textarea { border-radius: 14px; border: 1px solid var(--must-border); padding: .8rem .95rem; }
     .manager-form .form-control:focus, .manager-form textarea:focus { border-color: var(--must-primary); box-shadow: 0 0 0 4px rgba(26,54,104,.08); }
     .stats-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .85rem; margin-bottom: 1rem; }
     .mini-stat { border: 1px solid var(--must-border); border-radius: 18px; padding: .95rem 1rem; background: #fff; }
     .mini-stat strong { display: block; color: var(--must-primary); font-size: 1.15rem; }
-    .item-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-    .content-card { border: 1px solid var(--must-border); border-radius: 22px; padding: 1rem; background: linear-gradient(180deg, #fff, #fbfdff); height: 100%; }
-    .content-card .summary { color: var(--must-muted); font-size: .93rem; line-height: 1.55; min-height: 66px; }
-    .content-card .card-foot { display: flex; justify-content: space-between; align-items: center; gap: .6rem; border-top: 1px solid #eef3f8; padding-top: .85rem; margin-top: .9rem; }
+    .item-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; min-width: 0; }
+    .content-card { border: 1px solid var(--must-border); border-radius: 22px; padding: 1rem; background: linear-gradient(180deg, #fff, #fbfdff); height: 100%; min-width: 0; overflow: hidden; }
+    .content-card .summary { color: var(--must-muted); font-size: .93rem; line-height: 1.55; min-height: 66px; min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+    .content-card .card-foot { display: flex; justify-content: flex-start; align-items: center; gap: .6rem; flex-wrap: wrap; border-top: 1px solid #eef3f8; padding-top: .85rem; margin-top: .9rem; }
+    .content-card .card-foot .btn { min-width: 0; white-space: normal; line-height: 1.25; }
     .date-box { width: 62px; min-width: 62px; border-radius: 18px; background: #edf3fb; color: var(--must-primary); text-align: center; padding: .55rem .25rem; font-weight: 700; }
     .empty-state { border: 1px dashed var(--must-border); border-radius: 18px; padding: 2rem 1rem; text-align: center; color: var(--must-muted); background: #fbfdff; grid-column: 1 / -1; }
     .sticky-box { position: sticky; top: 6.3rem; }
     .toolbar { display: flex; justify-content: space-between; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: .9rem; }
     .helper { background: #f8fbff; border: 1px dashed var(--must-border); color: var(--must-muted); border-radius: 18px; padding: .95rem 1rem; }
     @media (max-width: 1199.98px) { .grid-two { grid-template-columns: 1fr; } .sticky-box { position: static; } }
-    @media (max-width: 991.98px) { .sidebar { position: static; width: 100%; border-radius: 0 0 24px 24px; } .main { margin-left: 0; } .topbar { position: static; } .stats-row, .item-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 991.98px) { .sidebar { position: static; width: 100%; border-radius: 0 0 24px 24px; } .main { margin-left: 0; padding: 1rem .85rem 1.4rem; } .topbar { position: static; padding: 1rem; } .stats-row, .item-grid { grid-template-columns: 1fr; } .content-card .card-foot .btn { flex: 1 1 calc(50% - .35rem); } }
+    @media (max-width: 575.98px) { .panel { padding: 1rem; } .editor-header, .editor-body { padding: 1rem; } .content-card { padding: .95rem; } .content-card .summary { font-size: .9rem; } .content-card .card-foot .btn { flex: 1 1 100%; } }
   </style>
 </head>
 <body>
@@ -343,6 +345,8 @@
     const CONTENT_API = '/api/admin/content';
     const USERS_API = '/api/admin/users';
     const MESSAGES_API = '/api/admin/messages';
+    const LOCAL_ACTIVATION_BASE_URL = 'http://127.0.0.1:3000';
+    const ONLINE_ACTIVATION_BASE_URL = 'https://internet-tech-production.up.railway.app';
 
     const authScreen = document.getElementById('authScreen');
     const dashboardLayout = document.getElementById('dashboardLayout');
@@ -468,6 +472,7 @@
         return;
       }
       usersList.innerHTML = state.users.map(function (user) {
+        const localActivationUrl = buildActivationUrl(user, 'local');
         return `
           <article class="content-card">
             <h4 class="h6 mb-2">${escapeHtml(user.name)}</h4>
@@ -476,14 +481,14 @@
               <div><strong>University ID:</strong> ${escapeHtml(user.universityId || '-')}</div>
               <div><strong>Role:</strong> ${escapeHtml(user.role)}</div>
               <div><strong>Active:</strong> ${user.isActive ? 'Yes' : 'No'}</div>
-              ${!user.isActive && user.activationUrl ? `<div class="mt-2"><strong>Activation Link:</strong> <span class="small">${escapeHtml(user.activationUrl)}</span></div>` : ''}
-              ${!user.isActive && user.activationUrl ? `<div class="mt-2 small" style="white-space: pre-line; color: #475467; background: #f8fbff; border: 1px dashed #d7e1ed; border-radius: 14px; padding: 12px;">${escapeHtml(buildActivationMessage(user))}</div>` : ''}
+              ${!user.isActive && localActivationUrl ? `<div class="mt-2"><strong>Local Activation Link:</strong> <span class="small">${escapeHtml(localActivationUrl)}</span></div>` : ''}
+              ${!user.isActive && localActivationUrl ? `<div class="mt-2 small" style="white-space: pre-line; color: #475467; background: #f8fbff; border: 1px dashed #d7e1ed; border-radius: 14px; padding: 12px;">${escapeHtml(buildActivationMessage(user, 'local'))}</div>` : ''}
             </div>
             <div class="card-foot">
               <button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="toggleUserStatus(${user.id}, ${user.isActive ? 'false' : 'true'})">${user.isActive ? 'Deactivate' : 'Activate'}</button>
               <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" onclick="changeUserRole(${user.id}, '${user.role === 'admin' ? 'user' : 'admin'}')">${user.role === 'admin' ? 'Make user' : 'Make admin'}</button>
-              ${!user.isActive && user.activationUrl ? `<button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" onclick="copyActivationLink('${escapeHtml(user.activationUrl)}')">Copy Activation Link</button>` : ''}
-              ${!user.isActive && user.activationUrl ? `<button class="btn btn-success btn-sm rounded-pill px-3" type="button" onclick="copyActivationMessage(${user.id})">Copy Activation Message</button>` : ''}
+              ${!user.isActive && localActivationUrl ? `<button class="btn btn-success btn-sm rounded-pill px-3" type="button" onclick="copyActivationMessage(${user.id}, 'local')">Copy Local Message</button>` : ''}
+              ${!user.isActive && localActivationUrl ? `<button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" onclick="copyActivationMessage(${user.id}, 'online')">Copy Online Message</button>` : ''}
               <button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteUser(${user.id}, '${escapeHtml(user.name)}')">Delete</button>
             </div>
           </article>
@@ -518,8 +523,23 @@
 
     function renderAll() { renderNews(); renderEvents(); renderUsers(); renderMessages(); }
 
-    function buildActivationMessage(user) {
-      return `Hello ${user.name},\n\nActivate your account by opening this link:\n${user.activationUrl}\n\nIf you did not create this account, ignore this email.`;
+    function getActivationToken(user) {
+      const sourceUrl = String((user && user.activationUrl) || '');
+      const tokenMatch = sourceUrl.match(/[?&]token=([^&]+)/);
+      return tokenMatch ? tokenMatch[1] : '';
+    }
+
+    function buildActivationUrl(user, mode) {
+      const token = getActivationToken(user);
+      if (!token) return '';
+      const baseUrl = mode === 'online' ? ONLINE_ACTIVATION_BASE_URL : LOCAL_ACTIVATION_BASE_URL;
+      return `${baseUrl}/activate.html?token=${token}`;
+    }
+
+    function buildActivationMessage(user, mode) {
+      const activationUrl = buildActivationUrl(user, mode || 'local');
+      if (!activationUrl) return '';
+      return `Hello ${user.name},\n\nActivate your account by opening this link:\n${activationUrl}\n\nIf you did not create this account, ignore this email.`;
     }
 
     function loadAll() {
@@ -604,26 +624,17 @@
       });
     };
 
-    window.copyActivationLink = function (url) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url)
-          .then(function () { alert('Activation link copied. You can now send it to the user.'); })
-          .catch(function () { window.prompt('Copy this activation link:', url); });
-        return;
-      }
-      window.prompt('Copy this activation link:', url);
-    };
-
-    window.copyActivationMessage = function (id) {
+    window.copyActivationMessage = function (id, mode) {
       const user = state.users.find(function (item) { return item.id === id; });
-      if (!user || !user.activationUrl) {
+      const activationMode = mode === 'online' ? 'online' : 'local';
+      const message = user ? buildActivationMessage(user, activationMode) : '';
+      if (!user || !message) {
         alert('Activation message is not available for this user.');
         return;
       }
-      const message = buildActivationMessage(user);
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(message)
-          .then(function () { alert('Activation message copied. You can now paste it anywhere.'); })
+          .then(function () { alert((activationMode === 'online' ? 'Online' : 'Local') + ' activation message copied. You can now paste it anywhere.'); })
           .catch(function () { window.prompt('Copy this activation message:', message); });
         return;
       }
