@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var menuCloseBtn = document.querySelector('.nav-menu-close');
   var navMenu = document.querySelector('.nav-menu');
   var menuBackdrop = document.querySelector('.menu-backdrop');
-  var menuLinks = document.querySelectorAll('.nav-menu a[href^="#"], .nav-menu a[target="_blank"]');
+  var menuLinks = document.querySelectorAll('.nav-menu a');
   var submenuToggles = document.querySelectorAll('.submenu-toggle');
   var themeToggle = document.querySelector('.theme-toggle');
   var authModal = document.getElementById('authModal');
@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var authUserChip = document.getElementById('authUserChip');
   var authUserName = document.getElementById('authUserName');
   var adminDashboardLink = document.getElementById('adminDashboardLink');
+  var adminMenuDashboardItem = document.getElementById('adminMenuDashboardItem');
   var siteLogoutBtn = document.getElementById('siteLogoutBtn');
   var contactForm = document.getElementById('contactForm');
   var contactFeedback = document.getElementById('contactFeedback');
@@ -338,6 +339,9 @@ document.addEventListener('DOMContentLoaded', function () {
       openAuthModalBtn.classList.remove('hidden');
       authUserChip.classList.add('hidden');
       adminDashboardLink.classList.add('hidden');
+      if (adminMenuDashboardItem) {
+        adminMenuDashboardItem.classList.add('hidden');
+      }
       authUserName.textContent = 'Guest';
       return;
     }
@@ -345,7 +349,11 @@ document.addEventListener('DOMContentLoaded', function () {
     openAuthModalBtn.classList.add('hidden');
     authUserChip.classList.remove('hidden');
     authUserName.textContent = currentUser.name || currentUser.email || 'User';
-    adminDashboardLink.classList.toggle('hidden', currentUser.role !== 'admin');
+    var isAdmin = currentUser.role === 'admin';
+    adminDashboardLink.classList.toggle('hidden', !isAdmin);
+    if (adminMenuDashboardItem) {
+      adminMenuDashboardItem.classList.toggle('hidden', !isAdmin);
+    }
   }
 
   function loadSession() {

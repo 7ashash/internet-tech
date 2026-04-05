@@ -1125,19 +1125,23 @@ body.dark-mode .captcha-mockup {
 
     .nav-right-cluster {
         margin-left: auto;
-        gap: 8px;
+        display: grid;
+        grid-template-columns: auto auto auto;
+        grid-template-areas:
+            "name name name"
+            "theme auth menu";
+        gap: 8px 10px;
         align-items: center;
-        flex-direction: row;
-        flex-wrap: nowrap;
+        justify-content: end;
         min-width: 0;
     }
 
     .auth-nav {
         width: auto;
         justify-content: flex-end;
-        order: 1;
+        grid-area: auth;
         min-width: 0;
-        max-width: calc(100vw - 190px);
+        max-width: min(200px, calc(100vw - 190px));
     }
 
     .auth-trigger-btn,
@@ -1150,16 +1154,28 @@ body.dark-mode .captcha-mockup {
     }
 
     .auth-user-chip {
+        display: grid;
+        grid-template-columns: auto;
+        grid-template-areas:
+            "name"
+            "logout";
+        justify-items: end;
         align-items: center;
-        justify-content: flex-end;
         gap: 8px;
-        flex-wrap: nowrap;
+        width: 100%;
         max-width: 100%;
         min-width: 0;
     }
 
     .auth-user-name {
-        display: none;
+        display: block;
+        grid-area: name;
+        max-width: min(220px, calc(100vw - 150px));
+        text-align: right;
+        font-size: 0.95rem;
+        line-height: 1.2;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     .auth-logout-btn,
@@ -1167,12 +1183,16 @@ body.dark-mode .captcha-mockup {
         flex-shrink: 0;
     }
 
+    .auth-logout-btn {
+        grid-area: logout;
+    }
+
     .auth-dashboard-link {
         display: none !important;
     }
 
     .custom-menu-btn {
-        order: 2;
+        grid-area: menu;
         padding: 8px 12px;
         min-width: 58px;
         justify-content: center;
@@ -1184,8 +1204,9 @@ body.dark-mode .captcha-mockup {
     }
 
     .theme-toggle {
-        order: 0;
+        grid-area: theme;
         padding: 6px;
+        justify-self: center;
     }
 
     .nav-icon-divider,
