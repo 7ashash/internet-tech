@@ -28,3 +28,13 @@ Activate your account by opening this link:
 http://127.0.0.1:3000/activate.html?token=346c2f2f4cb15d3a0ec272424b7cf1c6912f4ceed584b98e
 
 If you did not create this account, ignore this email.
+-----
+Date: 2026-04-05T02:41:21.094Z
+To: 200021@must.edu.eg
+Subject: Activate your MUST website account
+Hello ahmed,
+
+Activate your account by opening this link:
+http://127.0.0.1:3000/activate.html?token=c6531db3e707c2564805d959e7521e35bf869d7c8c6154da
+
+If you did not create this account, ignore this email.
