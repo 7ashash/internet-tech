@@ -1131,7 +1131,7 @@ body.dark-mode .captcha-mockup {
             "name name name"
             "theme auth menu";
         gap: 8px 10px;
-        align-items: center;
+        align-items: end;
         justify-content: end;
         min-width: 0;
     }
@@ -1142,6 +1142,7 @@ body.dark-mode .captcha-mockup {
         grid-area: auth;
         min-width: 0;
         max-width: min(200px, calc(100vw - 190px));
+        align-self: end;
     }
 
     .auth-trigger-btn,
@@ -1174,8 +1175,9 @@ body.dark-mode .captcha-mockup {
         text-align: right;
         font-size: 0.95rem;
         line-height: 1.2;
-        white-space: normal;
-        overflow-wrap: anywhere;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .auth-logout-btn,
@@ -1196,6 +1198,7 @@ body.dark-mode .captcha-mockup {
         padding: 8px 12px;
         min-width: 58px;
         justify-content: center;
+        align-self: end;
     }
 
     .custom-menu-btn svg {
@@ -1207,6 +1210,7 @@ body.dark-mode .captcha-mockup {
         grid-area: theme;
         padding: 6px;
         justify-self: center;
+        align-self: end;
     }
 
     .nav-icon-divider,
