@@ -8,6 +8,10 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 
+function normalizeBaseUrl(url) {
+  return String(url || '').trim().replace(/\/+$/, '');
+}
+
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
 const DB_PATH = path.join(DATA_DIR, 'app.db');
@@ -16,7 +20,8 @@ const UPLOADS_DIR = path.join(ROOT, 'website', 'images', 'uploads');
 const SITE_CONTENT_KEY = 'homepage';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'must-dev-session-secret';
 const PORT = Number(process.env.PORT || 3000);
-const BASE_URL = process.env.BASE_URL || `http://127.0.0.1:${PORT}`;
+const CONFIGURED_BASE_URL = normalizeBaseUrl(process.env.BASE_URL);
+const BASE_URL = CONFIGURED_BASE_URL || `http://127.0.0.1:${PORT}`;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@must.edu.eg';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MustAdmin2026!';
 const SQLiteStore = SQLiteStoreFactory(session);
@@ -301,8 +306,8 @@ function logMail(to, subject, text) {
   fs.appendFileSync(MAIL_LOG_PATH, block, 'utf8');
 }
 
-async function sendActivationEmail(user, token) {
-  const activationUrl = `${BASE_URL}/activate.html?token=${encodeURIComponent(token)}`;
+async function sendActivationEmail(user, token, baseUrl) {
+  const activationUrl = `${normalizeBaseUrl(baseUrl || BASE_URL)}/activate.html?token=${encodeURIComponent(token)}`;
   const subject = 'Activate your MUST website account';
   const text = `Hello ${user.name},\n\nActivate your account by opening this link:\n${activationUrl}\n\nIf you did not create this account, ignore this email.`;
 
@@ -335,6 +340,22 @@ function sanitizeUser(row) {
 
 function now() {
   return new Date().toISOString();
+}
+
+function getBaseUrl(req) {
+  if (CONFIGURED_BASE_URL) {
+    return CONFIGURED_BASE_URL;
+  }
+
+  if (!req) {
+    return BASE_URL;
+  }
+
+  const forwardedProto = String(req.get('x-forwarded-proto') || '').split(',')[0].trim();
+  const forwardedHost = String(req.get('x-forwarded-host') || '').split(',')[0].trim();
+  const protocol = forwardedProto || req.protocol || 'http';
+  const host = forwardedHost || req.get('host') || `127.0.0.1:${PORT}`;
+  return normalizeBaseUrl(`${protocol}://${host}`);
 }
 
 function getSiteContent() {
@@ -388,6 +409,7 @@ function requireAdmin(req, res, next) {
 }
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
@@ -402,7 +424,7 @@ app.use(session({
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
-    secure: false,
+    secure: process.env.NODE_ENV === 'production' ? 'auto' : false,
     maxAge: 1000 * 60 * 60 * 24
   }
 }));
@@ -460,7 +482,7 @@ app.post('/api/auth/register', async (req, res) => {
     `).run(name, universityId, email, passwordHash, token, now());
 
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(created.lastInsertRowid);
-    const activationUrl = await sendActivationEmail(user, token);
+    const activationUrl = await sendActivationEmail(user, token, getBaseUrl(req));
 
     res.status(201).json({
       ok: true,
@@ -665,6 +687,7 @@ app.post('/api/admin/content', requireAdmin, (req, res) => {
 });
 
 app.get('/api/admin/users', requireAdmin, (req, res) => {
+  const baseUrl = getBaseUrl(req);
   const users = db.prepare(`
     SELECT id, name, university_id, email, role, is_active, activation_token, created_at, activated_at, last_login_at
     FROM users
@@ -676,7 +699,7 @@ app.get('/api/admin/users', requireAdmin, (req, res) => {
     email: user.email,
     role: user.role,
     isActive: Boolean(user.is_active),
-    activationUrl: user.activation_token ? `${BASE_URL}/activate.html?token=${encodeURIComponent(user.activation_token)}` : null,
+    activationUrl: user.activation_token ? `${baseUrl}/activate.html?token=${encodeURIComponent(user.activation_token)}` : null,
     createdAt: user.created_at,
     activatedAt: user.activated_at,
     lastLoginAt: user.last_login_at
@@ -688,6 +711,11 @@ app.get('/api/admin/users', requireAdmin, (req, res) => {
 app.post('/api/admin/users/:id/status', requireAdmin, (req, res) => {
   const userId = Number(req.params.id);
   const isActive = req.body.isActive ? 1 : 0;
+
+  if (req.session.user && req.session.user.id === userId && !isActive) {
+    return res.status(400).json({ ok: false, error: 'You cannot deactivate the admin account currently logged in' });
+  }
+
   db.prepare('UPDATE users SET is_active = ? WHERE id = ?').run(isActive, userId);
   res.json({ ok: true });
 });
@@ -695,6 +723,11 @@ app.post('/api/admin/users/:id/status', requireAdmin, (req, res) => {
 app.post('/api/admin/users/:id/role', requireAdmin, (req, res) => {
   const userId = Number(req.params.id);
   const role = req.body.role === 'admin' ? 'admin' : 'user';
+
+  if (req.session.user && req.session.user.id === userId && role !== 'admin') {
+    return res.status(400).json({ ok: false, error: 'You cannot remove admin access from the account currently logged in' });
+  }
+
   db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, userId);
   res.json({ ok: true });
 });

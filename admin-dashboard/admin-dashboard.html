@@ -41,7 +41,7 @@
     .nav-item-custom.active, .nav-item-custom:hover { background: rgba(255,255,255,.12); color: #fff; }
     .sidebar-note { margin-top: 1.2rem; background: rgba(255,255,255,.08); border-radius: 20px; padding: 1rem; border: 1px solid rgba(255,255,255,.09); }
     .main { margin-left: 282px; padding: 1.3rem; }
-    .topbar { position: sticky; top: 1rem; z-index: 20; display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1rem 1.2rem; background: rgba(255,255,255,.92); border-radius: 22px; border: 1px solid var(--must-border); box-shadow: var(--must-shadow); backdrop-filter: blur(12px); margin-bottom: 1.2rem; }
+    .topbar { position: static; z-index: 5; display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1rem 1.2rem; background: rgba(255,255,255,.92); border-radius: 22px; border: 1px solid var(--must-border); box-shadow: var(--must-shadow); backdrop-filter: blur(12px); margin-bottom: 1.2rem; }
     .panel { background: var(--must-card); border: 1px solid var(--must-border); border-radius: 18px; box-shadow: var(--must-shadow); padding: 1.2rem; height: 100%; }
     .hero-panel { background: linear-gradient(135deg, rgba(26,54,104,1) 0%, rgba(26,54,104,.93) 60%, rgba(0,140,69,.9) 100%); color: #fff; position: relative; overflow: hidden; }
     .hero-panel::after { content: ''; position: absolute; right: -72px; top: -92px; width: 260px; height: 260px; border-radius: 50%; background: rgba(255,255,255,.08); }
@@ -59,6 +59,7 @@
     .btn-soft { background: var(--must-soft); color: var(--must-primary); border: 1px solid var(--must-border); border-radius: 14px; padding: .8rem 1rem; font-weight: 600; }
     .grid-two { display: grid; grid-template-columns: minmax(330px, 430px) minmax(0, 1fr); gap: 1.2rem; align-items: start; }
     .grid-two > * { min-width: 0; }
+    .manager-stack { display: grid; grid-template-columns: 1fr; gap: 1rem; }
     .editor-card { position: relative; isolation: isolate; border: 1px solid var(--must-border); border-radius: 18px; background: linear-gradient(180deg, #fff, #fbfdff); overflow: hidden; }
     .editor-header { position: relative; z-index: 1; padding: 1rem 1.1rem; border-bottom: 1px solid #eef3f8; }
     .editor-body { position: relative; z-index: 2; padding: 1.1rem; overflow-x: hidden; }
@@ -92,7 +93,7 @@
     .section-block textarea.form-control { min-height: 108px; }
     .section-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
     @media (max-width: 1199.98px) { .grid-two { grid-template-columns: 1fr; } .sticky-box { position: static; } }
-    @media (max-width: 991.98px) { .sidebar { position: static; width: 100%; border-radius: 0 0 24px 24px; } .main { margin-left: 0; padding: 1rem .85rem 1.4rem; } .topbar { position: static; padding: 1rem; } .stats-row, .item-grid, .editor-grid { grid-template-columns: 1fr; } .content-card .card-foot .btn { flex: 1 1 calc(50% - .35rem); } }
+    @media (max-width: 991.98px) { .sidebar { position: static; width: 100%; border-radius: 0 0 24px 24px; } .main { margin-left: 0; padding: 1rem .85rem 1.4rem; } .topbar { padding: 1rem; } .stats-row, .item-grid, .editor-grid { grid-template-columns: 1fr; } .content-card .card-foot .btn { flex: 1 1 calc(50% - .35rem); } }
     @media (max-width: 575.98px) { .panel { padding: 1rem; } .editor-header, .editor-body { padding: 1rem; } .content-card { padding: .95rem; } .content-card .summary { font-size: .9rem; } .content-card .card-foot .btn, .section-actions .btn { flex: 1 1 100%; } .image-input-row { flex-direction: column; } }
   </style>
 </head>
@@ -132,6 +133,9 @@
       <a class="nav-item-custom active" href="#overview"><i class="bi bi-grid-1x2-fill"></i> Overview</a>
       <a class="nav-item-custom" href="#newsManager"><i class="bi bi-newspaper"></i> News manager</a>
       <a class="nav-item-custom" href="#eventsManager"><i class="bi bi-calendar2-event-fill"></i> Events manager</a>
+      <a class="nav-item-custom" href="#galleryManager"><i class="bi bi-images"></i> Memories manager</a>
+      <a class="nav-item-custom" href="#alumniManager"><i class="bi bi-person-badge-fill"></i> Alumni manager</a>
+      <a class="nav-item-custom" href="#awardsManager"><i class="bi bi-award-fill"></i> Awards manager</a>
       <a class="nav-item-custom" href="#siteContentManager"><i class="bi bi-window-stack"></i> Website content</a>
       <a class="nav-item-custom" href="#usersManager"><i class="bi bi-people-fill"></i> Users manager</a>
       <a class="nav-item-custom" href="#messagesManager"><i class="bi bi-envelope-paper-fill"></i> Contact messages</a>
@@ -215,54 +219,50 @@
               <div class="mini-stat"><span class="muted small">Card style</span><strong>Date badge</strong><span class="muted small">matches the current homepage design</span></div>
               <div class="mini-stat"><span class="muted small">Save target</span><strong>SQLite</strong><span class="muted small">saved to the backend database</span></div>
             </div>
-            <div class="grid-two">
-              <div class="sticky-box">
-                <div class="editor-card">
-                  <div class="editor-header"><h3 class="h5 mb-1">Manage news item</h3><div class="muted small">Create a new card for the Related News section.</div></div>
-                  <div class="editor-body">
-                    <form id="newsForm" class="manager-form">
-                      <input id="newsEditingId" type="hidden">
-                      <div class="mb-3">
-                          <label class="form-label fw-semibold">Badge text</label>
-                          <input id="newsBadge" class="form-control" placeholder="Example: 9 March 2026" required>
-                      </div>
-                      <div class="mb-3">
-                          <label class="form-label fw-semibold">News title</label>
-                          <input id="newsTitle" class="form-control" placeholder="Enter the news title" required>
-                      </div>
-                      <div class="mb-3">
-                          <label class="form-label fw-semibold">Image URL / Path</label>
-                          <div class="image-input-row">
-                            <input id="newsImageUrl" class="form-control" placeholder="images/awards2.jpg">
-                            <button class="btn btn-soft upload-btn" id="newsUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
-                          </div>
-                          <div id="newsImagePreview" class="thumbnail-preview">No image selected</div>
-                      </div>
-                      <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Link text</label>
-                            <input id="newsLinkText" class="form-control" value="Read more">
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage news item</h3><div class="muted small">Create or edit a card for the Related News section.</div></div>
+                <div class="editor-body">
+                  <div id="newsCardForm" class="manager-form">
+                    <input id="newsCardEditingIndex" type="hidden">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Badge text</label>
+                        <input id="newsCardBadge" class="form-control" placeholder="Example: 9 March 2026" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">News title</label>
+                        <input id="newsCardTitle" class="form-control" placeholder="Enter the news title" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Image URL / Path</label>
+                        <div class="image-input-row">
+                          <input id="newsCardImageUrl" class="form-control" placeholder="images/awards2.jpg" autocomplete="off">
+                          <button class="btn btn-soft upload-btn" id="newsCardUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Link URL</label>
-                            <input id="newsLinkUrl" class="form-control" value="#">
-                        </div>
+                        <div id="newsCardImagePreview" class="thumbnail-preview">No image selected</div>
+                    </div>
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                          <label class="form-label fw-semibold">Link text</label>
+                          <input id="newsCardLinkText" class="form-control" value="Read more" autocomplete="off">
                       </div>
-                      <div class="d-flex gap-2 flex-wrap mt-4">
-                        <button class="btn btn-must flex-grow-1" id="newsSubmitBtn" type="submit">Add news item</button>
-                        <button class="btn btn-outline-secondary" id="newsCancelEditBtn" type="button" hidden>Cancel edit</button>
-                        <button class="btn btn-soft" type="reset">Clear</button>
+                      <div class="col-md-6">
+                          <label class="form-label fw-semibold">Link URL</label>
+                          <input id="newsCardLinkUrl" class="form-control" value="#" autocomplete="off">
                       </div>
-                      <div class="editor-note">News items are saved directly to the database after add, edit, or delete.</div>
-                    </form>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="newsCardSubmitBtn" type="button">Add news item</button>
+                      <button class="btn btn-outline-secondary" id="newsCardCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" id="newsCardClearBtn" type="button">Clear</button>
+                    </div>
+                    <div class="editor-note">News items are saved directly to the database after add, edit, or delete.</div>
                   </div>
                 </div>
               </div>
-              <div>
-                <div class="editor-card">
-                  <div class="editor-header"><div class="toolbar mb-0"><div><h3 class="h5 mb-1">Current news cards</h3><div class="muted small">Remove any item you no longer want to show on the homepage.</div></div><button class="btn btn-soft btn-sm" id="reloadNewsBtn" type="button">Reload from file</button></div></div>
-                  <div class="editor-body"><div id="newsList" class="item-grid"></div></div>
-                </div>
+              <div class="editor-card">
+                <div class="editor-header"><div class="toolbar mb-0"><div><h3 class="h5 mb-1">Current news cards</h3><div class="muted small">Edit or remove any news card shown on the homepage.</div></div><button class="btn btn-soft btn-sm" id="reloadNewsBtn" type="button">Reload from file</button></div></div>
+                <div class="editor-body"><div id="newsCardsManagerList" class="item-grid"></div></div>
               </div>
             </div>
           </section>
@@ -282,54 +282,48 @@
               <div class="mini-stat"><span class="muted small">Layout style</span><strong>Date panel</strong><span class="muted small">same style as current event cards</span></div>
               <div class="mini-stat"><span class="muted small">Saving</span><strong>Manual save</strong><span class="muted small">click Save changes when finished</span></div>
             </div>
-            <div class="grid-two">
-              <div class="sticky-box">
-                <div class="editor-card">
-                  <div class="editor-header"><h3 class="h5 mb-1">Manage events</h3><div class="muted small">Create a new Upcoming Events card.</div></div>
-                  <div class="editor-body">
-                    <form id="eventForm" class="manager-form">
-                      <input id="eventEditingId" type="hidden">
-                      <div class="row g-3 mb-3">
-                        <div class="col-md-4"><label class="form-label fw-semibold">Day</label><input id="eventDay" class="form-control" placeholder="15" required></div>
-                        <div class="col-md-8"><label class="form-label fw-semibold">Month / year</label><input id="eventMonthYear" class="form-control" placeholder="Mar 2026" required></div>
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage events</h3><div class="muted small">Create or edit an Upcoming Events card.</div></div>
+                <div class="editor-body">
+                  <div id="eventCardForm" class="manager-form">
+                    <input id="eventCardEditingIndex" type="hidden">
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-4"><label class="form-label fw-semibold">Day</label><input id="eventCardDay" class="form-control" placeholder="15" autocomplete="off"></div>
+                      <div class="col-md-8"><label class="form-label fw-semibold">Month / year</label><input id="eventCardMonthYear" class="form-control" placeholder="Mar 2026" autocomplete="off"></div>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Event title</label><input id="eventCardTitle" class="form-control" placeholder="Enter the event title" autocomplete="off"></div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Image URL / Path</label>
+                      <div class="image-input-row">
+                        <input id="eventCardImageUrl" class="form-control" placeholder="images/photo.jpg" autocomplete="off">
+                        <button class="btn btn-soft upload-btn" id="eventCardUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
                       </div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Event title</label><input id="eventTitle" class="form-control" placeholder="Enter the event title" required></div>
-                      <div class="mb-3">
-                        <label class="form-label fw-semibold">Image URL / Path</label>
-                        <div class="image-input-row">
-                          <input id="eventImageUrl" class="form-control" placeholder="images/photo.jpg">
-                          <button class="btn btn-soft upload-btn" id="eventUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
-                        </div>
-                        <div id="eventImagePreview" class="thumbnail-preview">No image selected</div>
+                      <div id="eventCardImagePreview" class="thumbnail-preview">No image selected</div>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Summary</label><textarea id="eventCardSummary" class="form-control" rows="5" placeholder="Short event description"></textarea></div>
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-6">
+                          <label class="form-label fw-semibold">Link text</label>
+                          <input id="eventCardLinkText" class="form-control" value="Register Now" autocomplete="off">
                       </div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Summary</label><textarea id="eventSummary" class="form-control" rows="5" placeholder="Short event description" required></textarea></div>
-                      
-                      <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Link text</label>
-                            <input id="eventLinkText" class="form-control" value="Register Now">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Link URL</label>
-                            <input id="eventLinkUrl" class="form-control" value="#">
-                        </div>
+                      <div class="col-md-6">
+                          <label class="form-label fw-semibold">Link URL</label>
+                          <input id="eventCardLinkUrl" class="form-control" value="#" autocomplete="off">
                       </div>
-
-                      <div class="d-flex gap-2 flex-wrap mt-4">
-                        <button class="btn btn-must flex-grow-1" id="eventSubmitBtn" type="submit">Add event</button>
-                        <button class="btn btn-outline-secondary" id="eventCancelEditBtn" type="button" hidden>Cancel edit</button>
-                        <button class="btn btn-soft" type="reset">Clear</button>
-                      </div>
-                      <div class="editor-note">Events are saved directly to the database after add, edit, or delete.</div>
-                    </form>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="eventCardSubmitBtn" type="button">Add event</button>
+                      <button class="btn btn-outline-secondary" id="eventCardCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" id="eventCardClearBtn" type="button">Clear</button>
+                    </div>
+                    <div class="editor-note">Events are saved directly to the database after add, edit, or delete.</div>
                   </div>
                 </div>
               </div>
-              <div>
-                <div class="editor-card">
-                  <div class="editor-header"><div class="toolbar mb-0"><div><h3 class="h5 mb-1">Current event cards</h3><div class="muted small">Remove any event you no longer want on the homepage.</div></div><button class="btn btn-soft btn-sm" id="reloadEventsBtn" type="button">Reload from file</button></div></div>
-                  <div class="editor-body"><div id="eventsList" class="item-grid"></div></div>
-                </div>
+              <div class="editor-card">
+                <div class="editor-header"><div class="toolbar mb-0"><div><h3 class="h5 mb-1">Current event cards</h3><div class="muted small">Edit or remove any event shown on the homepage.</div></div><button class="btn btn-soft btn-sm" id="reloadEventsBtn" type="button">Reload from file</button></div></div>
+                <div class="editor-body"><div id="eventsCardsManagerList" class="item-grid"></div></div>
               </div>
             </div>
           </section>
@@ -512,6 +506,126 @@
           </section>
         </div>
 
+        <div class="col-12" id="galleryManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Alumni Memories Manager</div>
+                <div class="muted small">Add, edit, or delete slides in the Alumni Memories gallery.</div>
+              </div>
+            </div>
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage memory slide</h3></div>
+                <div class="editor-body">
+                  <form id="galleryForm" class="manager-form">
+                    <input id="galleryEditingId" type="hidden">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Image URL / Path</label>
+                      <div class="image-input-row">
+                        <input id="galleryImageUrl" class="form-control" placeholder="images/photo-slider1.jpeg" required>
+                        <button class="btn btn-soft upload-btn" id="galleryUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
+                      </div>
+                      <div id="galleryImagePreview" class="thumbnail-preview">No image selected</div>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Alt text</label><input id="galleryAlt" class="form-control" placeholder="Gallery 1"></div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="gallerySubmitBtn" type="submit">Add memory slide</button>
+                      <button class="btn btn-outline-secondary" id="galleryCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" type="reset">Clear</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Current memory slides</h3></div>
+                <div class="editor-body"><div id="galleryList" class="item-grid"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-12" id="alumniManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Notable Alumni Manager</div>
+                <div class="muted small">Manage cards shown in Notable Alumni / What Our Alumni Say.</div>
+              </div>
+            </div>
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage alumni card</h3></div>
+                <div class="editor-body">
+                  <form id="alumniForm" class="manager-form">
+                    <input id="alumniEditingId" type="hidden">
+                    <div class="mb-3"><label class="form-label fw-semibold">Name</label><input id="alumniName" class="form-control" required></div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Image URL / Path</label>
+                      <div class="image-input-row">
+                        <input id="alumniImageUrl" class="form-control" placeholder="images/Ahmed-Hatem.png" required>
+                        <button class="btn btn-soft upload-btn" id="alumniUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
+                      </div>
+                      <div id="alumniImagePreview" class="thumbnail-preview">No image selected</div>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Description</label><textarea id="alumniText" class="form-control" rows="5" required></textarea></div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="alumniSubmitBtn" type="submit">Add alumni card</button>
+                      <button class="btn btn-outline-secondary" id="alumniCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" type="reset">Clear</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Current alumni cards</h3></div>
+                <div class="editor-body"><div id="alumniList" class="item-grid"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-12" id="awardsManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Awards Manager</div>
+                <div class="muted small">Manage slides shown in Awards &amp; Certificates.</div>
+              </div>
+            </div>
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage award slide</h3></div>
+                <div class="editor-body">
+                  <form id="awardForm" class="manager-form">
+                    <input id="awardEditingId" type="hidden">
+                    <div class="mb-3"><label class="form-label fw-semibold">Title</label><input id="awardTitle" class="form-control" required></div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Image URL / Path</label>
+                      <div class="image-input-row">
+                        <input id="awardImageUrl" class="form-control" placeholder="images/Awards.png" required>
+                        <button class="btn btn-soft upload-btn" id="awardUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
+                      </div>
+                      <div id="awardImagePreview" class="thumbnail-preview">No image selected</div>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Description 1</label><textarea id="awardDescription1" class="form-control" rows="4" required></textarea></div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Description 2</label><textarea id="awardDescription2" class="form-control" rows="4"></textarea></div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="awardSubmitBtn" type="submit">Add award slide</button>
+                      <button class="btn btn-outline-secondary" id="awardCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" type="reset">Clear</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Current awards slides</h3></div>
+                <div class="editor-body"><div id="awardList" class="item-grid"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
         <div class="col-12" id="usersManager">
           <section class="panel">
             <div class="toolbar">
@@ -549,6 +663,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- legacy dashboard script removed -->
-  <script src="dashboard.js?v=20260407b"></script>
+  <script src="dashboard.js?v=20260407g"></script>
 </body>
 </html>

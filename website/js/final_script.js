@@ -459,8 +459,8 @@ document.addEventListener('DOMContentLoaded', function () {
         })
       }).then(function (data) {
         registerAuthForm.reset();
-        showAuthFeedback(data.message + (data.activationPreviewUrl ? ' Activation preview: ' + data.activationPreviewUrl : ''), 'success');
         toggleAuthTab('login');
+        showAuthFeedback(data.message + (data.activationPreviewUrl ? ' Activation preview: ' + data.activationPreviewUrl : ''), 'success');
       }).catch(function (error) {
         showAuthFeedback(error.message, 'error');
       });

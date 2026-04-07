@@ -1,1 +1,7 @@
 node_modules
+.env
+data/*.db-shm
+data/*.db-wal
+data/sessions.db
+data/mail-log.txt
+website/images/uploads/

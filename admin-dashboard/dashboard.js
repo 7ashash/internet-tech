@@ -145,37 +145,71 @@
   const usersList = document.getElementById('usersList');
   const messagesList = document.getElementById('messagesList');
 
-  const newsForm = document.getElementById('newsForm');
-  const newsEditingIdInput = document.getElementById('newsEditingId');
-  const newsBadgeInput = document.getElementById('newsBadge');
-  const newsTitleInput = document.getElementById('newsTitle');
-  const newsImageInput = document.getElementById('newsImageUrl');
-  const newsLinkTextInput = document.getElementById('newsLinkText');
-  const newsLinkUrlInput = document.getElementById('newsLinkUrl');
-  const newsSubmitBtn = document.getElementById('newsSubmitBtn');
-  const newsCancelEditBtn = document.getElementById('newsCancelEditBtn');
-  const newsUploadBtn = document.getElementById('newsUploadBtn');
-  const newsImagePreview = document.getElementById('newsImagePreview');
+  const newsForm = document.getElementById('newsCardForm');
+  const newsEditingIdInput = document.getElementById('newsCardEditingIndex');
+  const newsBadgeInput = document.getElementById('newsCardBadge');
+  const newsTitleInput = document.getElementById('newsCardTitle');
+  const newsImageInput = document.getElementById('newsCardImageUrl');
+  const newsLinkTextInput = document.getElementById('newsCardLinkText');
+  const newsLinkUrlInput = document.getElementById('newsCardLinkUrl');
+  const newsSubmitBtn = document.getElementById('newsCardSubmitBtn');
+  const newsCancelEditBtn = document.getElementById('newsCardCancelEditBtn');
+  const newsClearBtn = document.getElementById('newsCardClearBtn');
+  const newsUploadBtn = document.getElementById('newsCardUploadBtn');
+  const newsImagePreview = document.getElementById('newsCardImagePreview');
+  const newsList = document.getElementById('newsCardsManagerList');
 
-  const eventForm = document.getElementById('eventForm');
-  const eventEditingIdInput = document.getElementById('eventEditingId');
-  const eventDayInput = document.getElementById('eventDay');
-  const eventMonthYearInput = document.getElementById('eventMonthYear');
-  const eventTitleInput = document.getElementById('eventTitle');
-  const eventImageInput = document.getElementById('eventImageUrl');
-  const eventSummaryInput = document.getElementById('eventSummary');
-  const eventLinkTextInput = document.getElementById('eventLinkText');
-  const eventLinkUrlInput = document.getElementById('eventLinkUrl');
-  const eventSubmitBtn = document.getElementById('eventSubmitBtn');
-  const eventCancelEditBtn = document.getElementById('eventCancelEditBtn');
-  const eventUploadBtn = document.getElementById('eventUploadBtn');
-  const eventImagePreview = document.getElementById('eventImagePreview');
+  const eventForm = document.getElementById('eventCardForm');
+  const eventEditingIdInput = document.getElementById('eventCardEditingIndex');
+  const eventDayInput = document.getElementById('eventCardDay');
+  const eventMonthYearInput = document.getElementById('eventCardMonthYear');
+  const eventTitleInput = document.getElementById('eventCardTitle');
+  const eventImageInput = document.getElementById('eventCardImageUrl');
+  const eventSummaryInput = document.getElementById('eventCardSummary');
+  const eventLinkTextInput = document.getElementById('eventCardLinkText');
+  const eventLinkUrlInput = document.getElementById('eventCardLinkUrl');
+  const eventSubmitBtn = document.getElementById('eventCardSubmitBtn');
+  const eventCancelEditBtn = document.getElementById('eventCardCancelEditBtn');
+  const eventClearBtn = document.getElementById('eventCardClearBtn');
+  const eventUploadBtn = document.getElementById('eventCardUploadBtn');
+  const eventImagePreview = document.getElementById('eventCardImagePreview');
+  const eventsList = document.getElementById('eventsCardsManagerList');
 
   const siteContentForm = document.getElementById('siteContentForm');
   const resetSiteContentBtn = document.getElementById('resetSiteContentBtn');
   const viceDeanUploadBtn = document.getElementById('viceDeanUploadBtn');
   const viceDeanImagePreview = document.getElementById('viceDeanImagePreview');
   const viceDeanImageInput = document.getElementById('contentViceDeanImageUrl');
+  const galleryForm = document.getElementById('galleryForm');
+  const galleryEditingIdInput = document.getElementById('galleryEditingId');
+  const galleryImageInput = document.getElementById('galleryImageUrl');
+  const galleryAltInput = document.getElementById('galleryAlt');
+  const gallerySubmitBtn = document.getElementById('gallerySubmitBtn');
+  const galleryCancelEditBtn = document.getElementById('galleryCancelEditBtn');
+  const galleryUploadBtn = document.getElementById('galleryUploadBtn');
+  const galleryImagePreview = document.getElementById('galleryImagePreview');
+  const galleryList = document.getElementById('galleryList');
+  const alumniForm = document.getElementById('alumniForm');
+  const alumniEditingIdInput = document.getElementById('alumniEditingId');
+  const alumniNameInput = document.getElementById('alumniName');
+  const alumniImageInput = document.getElementById('alumniImageUrl');
+  const alumniTextInput = document.getElementById('alumniText');
+  const alumniSubmitBtn = document.getElementById('alumniSubmitBtn');
+  const alumniCancelEditBtn = document.getElementById('alumniCancelEditBtn');
+  const alumniUploadBtn = document.getElementById('alumniUploadBtn');
+  const alumniImagePreview = document.getElementById('alumniImagePreview');
+  const alumniList = document.getElementById('alumniList');
+  const awardForm = document.getElementById('awardForm');
+  const awardEditingIdInput = document.getElementById('awardEditingId');
+  const awardTitleInput = document.getElementById('awardTitle');
+  const awardImageInput = document.getElementById('awardImageUrl');
+  const awardDescription1Input = document.getElementById('awardDescription1');
+  const awardDescription2Input = document.getElementById('awardDescription2');
+  const awardSubmitBtn = document.getElementById('awardSubmitBtn');
+  const awardCancelEditBtn = document.getElementById('awardCancelEditBtn');
+  const awardUploadBtn = document.getElementById('awardUploadBtn');
+  const awardImagePreview = document.getElementById('awardImagePreview');
+  const awardList = document.getElementById('awardList');
 
   const state = {
     news: [],
@@ -184,7 +218,9 @@
     messages: [],
     sections: { ...DEFAULT_SITE_CONTENT },
     dirty: 0,
-    connected: false
+    connected: false,
+    newsDraftDirty: false,
+    eventDraftDirty: false
   };
 
   function showDashboard() {
@@ -456,8 +492,11 @@
   }
 
   function resetNewsFormState() {
+    state.newsDraftDirty = false;
     newsEditingIdInput.value = '';
-    newsForm.reset();
+    newsBadgeInput.value = '';
+    newsTitleInput.value = '';
+    newsImageInput.value = '';
     newsLinkTextInput.value = 'Read more';
     newsLinkUrlInput.value = '#';
     newsSubmitBtn.textContent = 'Add news item';
@@ -466,8 +505,13 @@
   }
 
   function resetEventFormState() {
+    state.eventDraftDirty = false;
     eventEditingIdInput.value = '';
-    eventForm.reset();
+    eventDayInput.value = '';
+    eventMonthYearInput.value = '';
+    eventTitleInput.value = '';
+    eventImageInput.value = '';
+    eventSummaryInput.value = '';
     eventLinkTextInput.value = 'Register Now';
     eventLinkUrlInput.value = '#';
     eventSubmitBtn.textContent = 'Add event';
@@ -475,8 +519,32 @@
     updateImagePreview(eventImagePreview, '');
   }
 
-  function populateNewsForm(item) {
-    newsEditingIdInput.value = String(item.id);
+  function resetGalleryFormState() {
+    galleryEditingIdInput.value = '';
+    galleryForm.reset();
+    gallerySubmitBtn.textContent = 'Add memory slide';
+    galleryCancelEditBtn.hidden = true;
+    updateImagePreview(galleryImagePreview, '');
+  }
+
+  function resetAlumniFormState() {
+    alumniEditingIdInput.value = '';
+    alumniForm.reset();
+    alumniSubmitBtn.textContent = 'Add alumni card';
+    alumniCancelEditBtn.hidden = true;
+    updateImagePreview(alumniImagePreview, '');
+  }
+
+  function resetAwardFormState() {
+    awardEditingIdInput.value = '';
+    awardForm.reset();
+    awardSubmitBtn.textContent = 'Add award slide';
+    awardCancelEditBtn.hidden = true;
+    updateImagePreview(awardImagePreview, '');
+  }
+
+  function populateNewsForm(item, index) {
+    newsEditingIdInput.value = String(index);
     newsBadgeInput.value = item.badge || '';
     newsTitleInput.value = item.title || '';
     newsImageInput.value = item.imageUrl || '';
@@ -488,8 +556,8 @@
     document.getElementById('newsManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function populateEventForm(item) {
-    eventEditingIdInput.value = String(item.id);
+  function populateEventForm(item, index) {
+    eventEditingIdInput.value = String(index);
     eventDayInput.value = item.day || '';
     eventMonthYearInput.value = item.monthYear || '';
     eventTitleInput.value = item.title || '';
@@ -503,15 +571,47 @@
     document.getElementById('eventsManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  function populateGalleryForm(item, index) {
+    galleryEditingIdInput.value = String(index);
+    galleryImageInput.value = item.imageUrl || '';
+    galleryAltInput.value = item.alt || '';
+    gallerySubmitBtn.textContent = 'Update memory slide';
+    galleryCancelEditBtn.hidden = false;
+    updateImagePreview(galleryImagePreview, item.imageUrl || '');
+    document.getElementById('galleryManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function populateAlumniForm(item, index) {
+    alumniEditingIdInput.value = String(index);
+    alumniNameInput.value = item.name || '';
+    alumniImageInput.value = item.imageUrl || '';
+    alumniTextInput.value = item.text || '';
+    alumniSubmitBtn.textContent = 'Update alumni card';
+    alumniCancelEditBtn.hidden = false;
+    updateImagePreview(alumniImagePreview, item.imageUrl || '');
+    document.getElementById('alumniManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function populateAwardForm(item, index) {
+    awardEditingIdInput.value = String(index);
+    awardTitleInput.value = item.title || '';
+    awardImageInput.value = item.imageUrl || '';
+    awardDescription1Input.value = item.description1 || '';
+    awardDescription2Input.value = item.description2 || '';
+    awardSubmitBtn.textContent = 'Update award slide';
+    awardCancelEditBtn.hidden = false;
+    updateImagePreview(awardImagePreview, item.imageUrl || '');
+    document.getElementById('awardsManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   function renderNews() {
     document.getElementById('newsCount').textContent = String(state.news.length);
     document.getElementById('newsMiniCount').textContent = String(state.news.length);
-    const list = document.getElementById('newsList');
     if (!state.news.length) {
-      list.innerHTML = '<div class="empty-state"><i class="bi bi-newspaper fs-3 d-block mb-2"></i>No news items yet.</div>';
+      newsList.innerHTML = '<div class="empty-state"><i class="bi bi-newspaper fs-3 d-block mb-2"></i>No news items yet.</div>';
       return;
     }
-    list.innerHTML = state.news.map(function (item) {
+    newsList.innerHTML = state.news.map(function (item, index) {
       const imageMarkup = item.imageUrl
         ? '<img class="admin-thumb" src="' + escapeHtml(resolveAssetUrl(item.imageUrl)) + '" alt="News preview">'
         : '<div class="admin-thumb placeholder">No image</div>';
@@ -525,8 +625,8 @@
             '<div><strong>Link URL:</strong> ' + escapeHtml(item.linkUrl || '#') + '</div>' +
           '</div>' +
           '<div class="card-foot">' +
-            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editNewsItem(' + item.id + ')">Edit</button>' +
-            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteNewsItem(' + item.id + ')">Delete</button>' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editNewsItem(' + index + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteNewsItem(' + index + ')">Delete</button>' +
           '</div>' +
         '</article>'
       );
@@ -536,12 +636,11 @@
   function renderEvents() {
     document.getElementById('eventsCount').textContent = String(state.events.length);
     document.getElementById('eventsMiniCount').textContent = String(state.events.length);
-    const list = document.getElementById('eventsList');
     if (!state.events.length) {
-      list.innerHTML = '<div class="empty-state"><i class="bi bi-calendar2-event fs-3 d-block mb-2"></i>No upcoming events yet.</div>';
+      eventsList.innerHTML = '<div class="empty-state"><i class="bi bi-calendar2-event fs-3 d-block mb-2"></i>No upcoming events yet.</div>';
       return;
     }
-    list.innerHTML = state.events.map(function (item) {
+    eventsList.innerHTML = state.events.map(function (item, index) {
       const imageMarkup = item.imageUrl
         ? '<img class="admin-thumb" src="' + escapeHtml(resolveAssetUrl(item.imageUrl)) + '" alt="Event preview">'
         : '<div class="admin-thumb placeholder">No image</div>';
@@ -557,8 +656,77 @@
             '</div>' +
           '</div>' +
           '<div class="card-foot">' +
-            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editEventItem(' + item.id + ')">Edit</button>' +
-            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteEventItem(' + item.id + ')">Delete</button>' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editEventItem(' + index + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteEventItem(' + index + ')">Delete</button>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function renderGallery() {
+    const items = Array.isArray(state.sections.galleryItems) ? state.sections.galleryItems : [];
+    if (!galleryList) return;
+    if (!items.length) {
+      galleryList.innerHTML = '<div class="empty-state"><i class="bi bi-images fs-3 d-block mb-2"></i>No memory slides yet.</div>';
+      return;
+    }
+    galleryList.innerHTML = items.map(function (item, index) {
+      return (
+        '<article class="content-card">' +
+          '<img class="admin-thumb" src="' + escapeHtml(resolveAssetUrl(item.imageUrl || '')) + '" alt="Memory preview">' +
+          '<h4 class="h6 mb-2">' + escapeHtml(item.alt || ('Gallery ' + (index + 1))) + '</h4>' +
+          '<div class="summary"><div><strong>Image:</strong> ' + escapeHtml(item.imageUrl || '') + '</div></div>' +
+          '<div class="card-foot">' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editGalleryItem(' + index + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteGalleryItem(' + index + ')">Delete</button>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function renderAlumni() {
+    const items = Array.isArray(state.sections.notableAlumniItems) ? state.sections.notableAlumniItems : [];
+    if (!alumniList) return;
+    if (!items.length) {
+      alumniList.innerHTML = '<div class="empty-state"><i class="bi bi-person-badge fs-3 d-block mb-2"></i>No alumni cards yet.</div>';
+      return;
+    }
+    alumniList.innerHTML = items.map(function (item, index) {
+      return (
+        '<article class="content-card">' +
+          '<img class="admin-thumb" src="' + escapeHtml(resolveAssetUrl(item.imageUrl || '')) + '" alt="Alumni preview">' +
+          '<h4 class="h6 mb-2">' + escapeHtml(item.name || 'Alumni') + '</h4>' +
+          '<div class="summary">' + escapeHtml(item.text || '') + '</div>' +
+          '<div class="card-foot">' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editAlumniItem(' + index + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteAlumniItem(' + index + ')">Delete</button>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function renderAwards() {
+    const items = Array.isArray(state.sections.awardItems) ? state.sections.awardItems : [];
+    if (!awardList) return;
+    if (!items.length) {
+      awardList.innerHTML = '<div class="empty-state"><i class="bi bi-award fs-3 d-block mb-2"></i>No awards slides yet.</div>';
+      return;
+    }
+    awardList.innerHTML = items.map(function (item, index) {
+      return (
+        '<article class="content-card">' +
+          '<img class="admin-thumb" src="' + escapeHtml(resolveAssetUrl(item.imageUrl || '')) + '" alt="Award preview">' +
+          '<h4 class="h6 mb-2">' + escapeHtml(item.title || 'Award') + '</h4>' +
+          '<div class="summary">' +
+            '<div>' + escapeHtml(item.description1 || '') + '</div>' +
+            (item.description2 ? '<div class="mt-2">' + escapeHtml(item.description2) + '</div>' : '') +
+          '</div>' +
+          '<div class="card-foot">' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editAwardItem(' + index + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteAwardItem(' + index + ')">Delete</button>' +
           '</div>' +
         '</article>'
       );
@@ -643,6 +811,9 @@
   function renderAll() {
     renderNews();
     renderEvents();
+    renderGallery();
+    renderAlumni();
+    renderAwards();
     renderUsers();
     renderMessages();
     fillSiteContentForm();
@@ -710,8 +881,12 @@
       state.users = Array.isArray(results[1].users) ? results[1].users : [];
       state.messages = Array.isArray(results[2].messages) ? results[2].messages : [];
       renderAll();
-      resetNewsFormState();
-      resetEventFormState();
+      if (!state.newsDraftDirty && !(newsForm && newsForm.matches(':focus-within'))) {
+        resetNewsFormState();
+      }
+      if (!state.eventDraftDirty && !(eventForm && eventForm.matches(':focus-within'))) {
+        resetEventFormState();
+      }
       setConnection(true);
       resetDirty();
     }).catch(function (error) {
@@ -724,30 +899,72 @@
     });
   }
 
-  window.editNewsItem = function (id) {
-    const item = state.news.find(function (entry) { return entry.id === id; });
-    if (item) populateNewsForm(item);
+  window.editNewsItem = function (index) {
+    const item = state.news[index];
+    if (item) populateNewsForm(item, index);
   };
 
-  window.deleteNewsItem = function (id) {
+  window.deleteNewsItem = function (index) {
     const confirmed = window.confirm('Delete this news item from the website?');
     if (!confirmed) return;
-    state.news = state.news.filter(function (item) { return item.id !== id; });
+    state.news = state.news.filter(function (_, itemIndex) { return itemIndex !== index; });
     renderNews();
     persistManagedCollections('News list saved');
   };
 
-  window.editEventItem = function (id) {
-    const item = state.events.find(function (entry) { return entry.id === id; });
-    if (item) populateEventForm(item);
+  window.editEventItem = function (index) {
+    const item = state.events[index];
+    if (item) populateEventForm(item, index);
   };
 
-  window.deleteEventItem = function (id) {
+  window.deleteEventItem = function (index) {
     const confirmed = window.confirm('Delete this event from the website?');
     if (!confirmed) return;
-    state.events = state.events.filter(function (item) { return item.id !== id; });
+    state.events = state.events.filter(function (_, itemIndex) { return itemIndex !== index; });
     renderEvents();
     persistManagedCollections('Events list saved');
+  };
+
+  window.editGalleryItem = function (index) {
+    const items = Array.isArray(state.sections.galleryItems) ? state.sections.galleryItems : [];
+    if (items[index]) populateGalleryForm(items[index], index);
+  };
+
+  window.deleteGalleryItem = function (index) {
+    const confirmed = window.confirm('Delete this memory slide?');
+    if (!confirmed) return;
+    state.sections.galleryItems = (state.sections.galleryItems || []).filter(function (_, itemIndex) { return itemIndex !== index; });
+    renderGallery();
+    fillSiteContentForm();
+    savePublishedContent();
+  };
+
+  window.editAlumniItem = function (index) {
+    const items = Array.isArray(state.sections.notableAlumniItems) ? state.sections.notableAlumniItems : [];
+    if (items[index]) populateAlumniForm(items[index], index);
+  };
+
+  window.deleteAlumniItem = function (index) {
+    const confirmed = window.confirm('Delete this alumni card?');
+    if (!confirmed) return;
+    state.sections.notableAlumniItems = (state.sections.notableAlumniItems || []).filter(function (_, itemIndex) { return itemIndex !== index; });
+    renderAlumni();
+    fillSiteContentForm();
+    savePublishedContent();
+  };
+
+  window.editAwardItem = function (index) {
+    const items = Array.isArray(state.sections.awardItems) ? state.sections.awardItems : [];
+    if (items[index]) populateAwardForm(items[index], index);
+  };
+
+  window.deleteAwardItem = function (index) {
+    const confirmed = window.confirm('Delete this award slide?');
+    if (!confirmed) return;
+    state.sections.awardItems = (state.sections.awardItems || []).filter(function (_, itemIndex) { return itemIndex !== index; });
+    renderAwards();
+    fillSiteContentForm();
+    savePublishedContent();
   };
 
   window.toggleUserStatus = function (id, nextState) {
@@ -807,11 +1024,10 @@
     });
   };
 
-  newsForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    const editingId = Number(newsEditingIdInput.value || 0);
+  newsSubmitBtn.addEventListener('click', function () {
+    const editingIndex = Number(newsEditingIdInput.value || -1);
     const item = {
-      id: editingId || Date.now(),
+      id: editingIndex >= 0 && state.news[editingIndex] ? state.news[editingIndex].id : Date.now(),
       badge: newsBadgeInput.value.trim(),
       title: newsTitleInput.value.trim(),
       imageUrl: newsImageInput.value.trim(),
@@ -822,20 +1038,19 @@
       alert('Please complete the badge and title for the news item.');
       return;
     }
-    if (editingId) {
-      state.news = state.news.map(function (entry) { return entry.id === editingId ? item : entry; });
+    if (editingIndex >= 0) {
+      state.news = state.news.map(function (entry, index) { return index === editingIndex ? item : entry; });
     } else {
       state.news.unshift(item);
     }
     renderNews();
-    persistManagedCollections(editingId ? 'News item updated' : 'News item added').then(resetNewsFormState);
+    persistManagedCollections(editingIndex >= 0 ? 'News item updated' : 'News item added').then(resetNewsFormState);
   });
 
-  eventForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    const editingId = Number(eventEditingIdInput.value || 0);
+  eventSubmitBtn.addEventListener('click', function () {
+    const editingIndex = Number(eventEditingIdInput.value || -1);
     const item = {
-      id: editingId || Date.now(),
+      id: editingIndex >= 0 && state.events[editingIndex] ? state.events[editingIndex].id : Date.now(),
       day: eventDayInput.value.trim(),
       monthYear: eventMonthYearInput.value.trim(),
       title: eventTitleInput.value.trim(),
@@ -848,19 +1063,109 @@
       alert('Please complete the event date, title, and summary.');
       return;
     }
-    if (editingId) {
-      state.events = state.events.map(function (entry) { return entry.id === editingId ? item : entry; });
+    if (editingIndex >= 0) {
+      state.events = state.events.map(function (entry, index) { return index === editingIndex ? item : entry; });
     } else {
       state.events.unshift(item);
     }
     renderEvents();
-    persistManagedCollections(editingId ? 'Event updated' : 'Event added').then(resetEventFormState);
+    persistManagedCollections(editingIndex >= 0 ? 'Event updated' : 'Event added').then(resetEventFormState);
   });
 
-  newsForm.addEventListener('reset', function () { window.setTimeout(resetNewsFormState, 0); });
-  eventForm.addEventListener('reset', function () { window.setTimeout(resetEventFormState, 0); });
+  newsForm.addEventListener('input', function () {
+    state.newsDraftDirty = true;
+  });
+  eventForm.addEventListener('input', function () {
+    state.eventDraftDirty = true;
+  });
+  newsClearBtn.addEventListener('click', resetNewsFormState);
+  eventClearBtn.addEventListener('click', resetEventFormState);
   newsCancelEditBtn.addEventListener('click', resetNewsFormState);
   eventCancelEditBtn.addEventListener('click', resetEventFormState);
+
+  if (galleryForm) {
+    galleryForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const editingIndex = Number(galleryEditingIdInput.value || -1);
+      const item = {
+        imageUrl: galleryImageInput.value.trim(),
+        alt: galleryAltInput.value.trim() || 'Gallery'
+      };
+      if (!item.imageUrl) {
+        alert('Please choose a gallery image.');
+        return;
+      }
+      const items = Array.isArray(state.sections.galleryItems) ? state.sections.galleryItems.slice() : [];
+      if (editingIndex >= 0) {
+        items[editingIndex] = item;
+      } else {
+        items.push(item);
+      }
+      state.sections.galleryItems = items;
+      renderGallery();
+      fillSiteContentForm();
+      savePublishedContent().then(resetGalleryFormState);
+    });
+    galleryForm.addEventListener('reset', function () { window.setTimeout(resetGalleryFormState, 0); });
+    galleryCancelEditBtn.addEventListener('click', resetGalleryFormState);
+  }
+
+  if (alumniForm) {
+    alumniForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const editingIndex = Number(alumniEditingIdInput.value || -1);
+      const item = {
+        name: alumniNameInput.value.trim(),
+        imageUrl: alumniImageInput.value.trim(),
+        text: alumniTextInput.value.trim()
+      };
+      if (!item.name || !item.imageUrl || !item.text) {
+        alert('Please complete the alumni card fields.');
+        return;
+      }
+      const items = Array.isArray(state.sections.notableAlumniItems) ? state.sections.notableAlumniItems.slice() : [];
+      if (editingIndex >= 0) {
+        items[editingIndex] = item;
+      } else {
+        items.push(item);
+      }
+      state.sections.notableAlumniItems = items;
+      renderAlumni();
+      fillSiteContentForm();
+      savePublishedContent().then(resetAlumniFormState);
+    });
+    alumniForm.addEventListener('reset', function () { window.setTimeout(resetAlumniFormState, 0); });
+    alumniCancelEditBtn.addEventListener('click', resetAlumniFormState);
+  }
+
+  if (awardForm) {
+    awardForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const editingIndex = Number(awardEditingIdInput.value || -1);
+      const item = {
+        title: awardTitleInput.value.trim(),
+        imageUrl: awardImageInput.value.trim(),
+        description1: awardDescription1Input.value.trim(),
+        description2: awardDescription2Input.value.trim()
+      };
+      if (!item.title || !item.imageUrl || !item.description1) {
+        alert('Please complete the award title, image, and first description.');
+        return;
+      }
+      const items = Array.isArray(state.sections.awardItems) ? state.sections.awardItems.slice() : [];
+      if (editingIndex >= 0) {
+        items[editingIndex] = item;
+      } else {
+        items.push(item);
+      }
+      state.sections.awardItems = items;
+      renderAwards();
+      fillSiteContentForm();
+      savePublishedContent().then(resetAwardFormState);
+    });
+    awardForm.addEventListener('reset', function () { window.setTimeout(resetAwardFormState, 0); });
+    awardCancelEditBtn.addEventListener('click', resetAwardFormState);
+  }
 
   if (siteContentForm) {
     siteContentForm.addEventListener('submit', function (event) {
@@ -889,9 +1194,15 @@
   bindUploadButton(newsUploadBtn, newsImageInput, newsImagePreview);
   bindUploadButton(eventUploadBtn, eventImageInput, eventImagePreview);
   bindUploadButton(viceDeanUploadBtn, viceDeanImageInput, viceDeanImagePreview);
+  bindUploadButton(galleryUploadBtn, galleryImageInput, galleryImagePreview);
+  bindUploadButton(alumniUploadBtn, alumniImageInput, alumniImagePreview);
+  bindUploadButton(awardUploadBtn, awardImageInput, awardImagePreview);
   bindPreviewOnInput(newsImageInput, newsImagePreview);
   bindPreviewOnInput(eventImageInput, eventImagePreview);
   bindPreviewOnInput(viceDeanImageInput, viceDeanImagePreview);
+  bindPreviewOnInput(galleryImageInput, galleryImagePreview);
+  bindPreviewOnInput(alumniImageInput, alumniImagePreview);
+  bindPreviewOnInput(awardImageInput, awardImagePreview);
 
   loginForm.addEventListener('submit', function (event) {
     event.preventDefault();
