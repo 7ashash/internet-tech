@@ -176,27 +176,39 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  var gallerySlides = document.querySelectorAll('.gallery-slide');
   var galleryDotsContainer = document.querySelector('.gallery-dots');
   var galleryPrevBtn = document.querySelector('.gallery-prev');
   var galleryNextBtn = document.querySelector('.gallery-next');
   var currentGallerySlide = 0;
   var galleryTimer = null;
+  var awardsTrack = document.querySelector('.awards-track');
+  var awardsDotsContainer = document.querySelector('.awards-dots');
+  var awardsPrevBtn = document.querySelector('.awards-prev');
+  var awardsNextBtn = document.querySelector('.awards-next');
+  var currentAwardSlide = 0;
+  var awardsTimer = null;
 
-  if (gallerySlides.length && galleryDotsContainer) {
+  function initGallerySlider() {
+    var gallerySlides = document.querySelectorAll('.gallery-slide');
+    if (!gallerySlides.length || !galleryDotsContainer) return;
+
+    currentGallerySlide = 0;
+    galleryDotsContainer.innerHTML = '';
     gallerySlides.forEach(function (_, index) {
       var dot = document.createElement('div');
       dot.className = 'gallery-dot' + (index === 0 ? ' active' : '');
-      dot.addEventListener('click', function () {
+      dot.onclick = function () {
         goToGallerySlide(index);
         resetGalleryTimer();
-      });
+      };
       galleryDotsContainer.appendChild(dot);
     });
 
-    var galleryDots = galleryDotsContainer.querySelectorAll('.gallery-dot');
-
     function goToGallerySlide(index) {
+      var galleryDots = galleryDotsContainer.querySelectorAll('.gallery-dot');
+      if (!gallerySlides.length || !galleryDots.length) return;
+      if (index >= gallerySlides.length) index = 0;
+      if (index < 0) index = gallerySlides.length - 1;
       gallerySlides[currentGallerySlide].classList.remove('active');
       galleryDots[currentGallerySlide].classList.remove('active');
       currentGallerySlide = index;
@@ -205,11 +217,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function nextGallerySlide() {
-      goToGallerySlide((currentGallerySlide + 1) % gallerySlides.length);
+      goToGallerySlide(currentGallerySlide + 1);
     }
 
     function previousGallerySlide() {
-      goToGallerySlide((currentGallerySlide - 1 + gallerySlides.length) % gallerySlides.length);
+      goToGallerySlide(currentGallerySlide - 1);
     }
 
     function resetGalleryTimer() {
@@ -218,44 +230,42 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (galleryPrevBtn) {
-      galleryPrevBtn.addEventListener('click', function () {
+      galleryPrevBtn.onclick = function () {
         previousGallerySlide();
         resetGalleryTimer();
-      });
+      };
     }
 
     if (galleryNextBtn) {
-      galleryNextBtn.addEventListener('click', function () {
+      galleryNextBtn.onclick = function () {
         nextGallerySlide();
         resetGalleryTimer();
-      });
+      };
     }
 
     resetGalleryTimer();
   }
 
-  var awardsTrack = document.querySelector('.awards-track');
-  var awardsSlides = document.querySelectorAll('.awards-slide');
-  var awardsDotsContainer = document.querySelector('.awards-dots');
-  var awardsPrevBtn = document.querySelector('.awards-prev');
-  var awardsNextBtn = document.querySelector('.awards-next');
-  var currentAwardSlide = 0;
-  var awardsTimer = null;
+  function initAwardsSlider() {
+    var awardsSlides = document.querySelectorAll('.awards-slide');
+    if (!awardsTrack || !awardsSlides.length || !awardsDotsContainer) return;
 
-  if (awardsTrack && awardsSlides.length && awardsDotsContainer) {
+    currentAwardSlide = 0;
+    awardsTrack.style.transform = 'translateX(0)';
+    awardsDotsContainer.innerHTML = '';
     awardsSlides.forEach(function (_, index) {
       var dot = document.createElement('div');
       dot.className = 'award-dot' + (index === 0 ? ' active' : '');
-      dot.addEventListener('click', function () {
+      dot.onclick = function () {
         goToAwardSlide(index);
         resetAwardsTimer();
-      });
+      };
       awardsDotsContainer.appendChild(dot);
     });
 
-    var awardsDots = awardsDotsContainer.querySelectorAll('.award-dot');
-
     function goToAwardSlide(index) {
+      var awardsDots = awardsDotsContainer.querySelectorAll('.award-dot');
+      if (!awardsSlides.length || !awardsDots.length) return;
       if (index >= awardsSlides.length) index = 0;
       if (index < 0) index = awardsSlides.length - 1;
       awardsDots[currentAwardSlide].classList.remove('active');
@@ -278,21 +288,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (awardsPrevBtn) {
-      awardsPrevBtn.addEventListener('click', function () {
+      awardsPrevBtn.onclick = function () {
         previousAwardSlide();
         resetAwardsTimer();
-      });
+      };
     }
 
     if (awardsNextBtn) {
-      awardsNextBtn.addEventListener('click', function () {
+      awardsNextBtn.onclick = function () {
         nextAwardSlide();
         resetAwardsTimer();
-      });
+      };
     }
 
     resetAwardsTimer();
   }
+
+  initGallerySlider();
+  initAwardsSlider();
 
   function showAuthFeedback(message, type) {
     if (!authFeedback) return;
@@ -515,6 +528,52 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof text === 'string') node.textContent = text;
   }
 
+  function renderGalleryItems(items) {
+    var target = document.getElementById('managedGallerySlides');
+    if (!target || !Array.isArray(items) || !items.length) return;
+    target.innerHTML = items.map(function (item, index) {
+      var imgSrc = escapeHtml(item.imageUrl || 'images/photo-slider1.jpeg');
+      var altText = escapeHtml(item.alt || ('Gallery ' + (index + 1)));
+      return '<div class="gallery-slide' + (index === 0 ? ' active' : '') + '"><img src="' + imgSrc + '" alt="' + altText + '"></div>';
+    }).join('');
+    initGallerySlider();
+  }
+
+  function renderNotableAlumni(items) {
+    var target = document.getElementById('managedAlumniCards');
+    if (!target || !Array.isArray(items) || !items.length) return;
+    target.innerHTML = items.map(function (item, index) {
+      return (
+        '<div class="alumni-card fade-in-up visible">' +
+          '<img src="' + escapeHtml(item.imageUrl || 'images/must-logo.png') + '" alt="' + escapeHtml(item.name || 'Alumni') + '">' +
+          '<h4 class="green-text-bold">' + escapeHtml(item.name || 'Alumni') + '</h4>' +
+          '<p>' + escapeHtml(item.text || '') + '</p>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderAwardItems(items) {
+    var target = document.getElementById('managedAwardsSlides');
+    if (!target || !Array.isArray(items) || !items.length) return;
+    target.innerHTML = items.map(function (item) {
+      return (
+        '<div class="awards-slide">' +
+          '<div class="award-slide-card">' +
+            '<img src="' + escapeHtml(item.imageUrl || 'images/Awards.png') + '" alt="' + escapeHtml(item.title || 'Award') + '">' +
+            '<div class="award-slide-content">' +
+              '<h4 class="navy-title">' + escapeHtml(item.title || 'Award') + '</h4>' +
+              '<p>' + escapeHtml(item.description1 || '') + '</p>' +
+              (item.description2 ? '<p class="mt-20">' + escapeHtml(item.description2) + '</p>' : '') +
+              '<span class="go-to-event mt-20 static-card-link">Static item</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+    initAwardsSlider();
+  }
+
   function applyManagedSections(sections) {
     if (!sections || typeof sections !== 'object') return;
 
@@ -589,18 +648,13 @@ document.addEventListener('DOMContentLoaded', function () {
     setTextContent('serviceFeature2Text', sections.serviceFeature2);
     setTextContent('serviceFeature3Text', sections.serviceFeature3);
     setTextContent('galleryTitleText', sections.galleryTitle);
+    renderGalleryItems(sections.galleryItems);
     setTextContent('notableAlumniEyebrowText', sections.notableAlumniEyebrow);
     setTextContent('notableAlumniTitleText', sections.notableAlumniTitle);
-    setTextContent('alumni1NameText', sections.alumni1Name);
-    setTextContent('alumni1Text', sections.alumni1Text);
-    setTextContent('alumni2NameText', sections.alumni2Name);
-    setTextContent('alumni2Text', sections.alumni2Text);
-    setTextContent('alumni3NameText', sections.alumni3Name);
-    setTextContent('alumni3Text', sections.alumni3Text);
-    setTextContent('alumni4NameText', sections.alumni4Name);
-    setTextContent('alumni4Text', sections.alumni4Text);
+    renderNotableAlumni(sections.notableAlumniItems);
     setTextContent('awardsTitleText', sections.awardsTitle);
     setTextContent('awardsSubtitleText', sections.awardsSubtitle);
+    renderAwardItems(sections.awardItems);
     setTextContent('eventsSectionTitleText', sections.eventsSectionTitle);
     setTextContent('newsSectionTitleText', sections.newsSectionTitle);
     setTextContent('contactTitleText', sections.contactTitle);

@@ -324,17 +324,19 @@
                     <button class="gallery-nav gallery-next" type="button" aria-label="Next memory">
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                    <div class="gallery-slide active"><img src="images/photo-slider1.jpeg" alt="Gallery 1"></div>
-                    <div class="gallery-slide"><img src="images/photo-slider2.jpeg" alt="Gallery 2"></div>
-                    <div class="gallery-slide"><img src="images/photo-slider3.jpeg" alt="Gallery 3"></div>
-                    <div class="gallery-slide"><img src="images/photo-slider4.jpeg" alt="Gallery 4"></div>
-                    <div class="gallery-slide"><img src="images/photo-slider5.jpeg" alt="Gallery 5"></div>
-                    <div class="gallery-slide"><img src="images/photo-slider6.jpeg" alt="Gallery 6"></div>
-                    <div class="gallery-slide"><img src="images/photo-slider7.jpeg" alt="Gallery 7"></div>
-                    <div class="gallery-slide"><img src="images/photo-slider8.jpeg" alt="Gallery 8"></div>
-                    <div class="gallery-slide"><img src="images/photo-slider9.jpeg" alt="Gallery 9"></div>
-                    <div class="gallery-slide"><img src="images/photo-slider10.jpeg" alt="Gallery 10"></div>
-                    <div class="gallery-slide"><img src="images/memory-slide-11.jpg" alt="Gallery 11"></div>
+                    <div id="managedGallerySlides">
+                        <div class="gallery-slide active"><img src="images/photo-slider1.jpeg" alt="Gallery 1"></div>
+                        <div class="gallery-slide"><img src="images/photo-slider2.jpeg" alt="Gallery 2"></div>
+                        <div class="gallery-slide"><img src="images/photo-slider3.jpeg" alt="Gallery 3"></div>
+                        <div class="gallery-slide"><img src="images/photo-slider4.jpeg" alt="Gallery 4"></div>
+                        <div class="gallery-slide"><img src="images/photo-slider5.jpeg" alt="Gallery 5"></div>
+                        <div class="gallery-slide"><img src="images/photo-slider6.jpeg" alt="Gallery 6"></div>
+                        <div class="gallery-slide"><img src="images/photo-slider7.jpeg" alt="Gallery 7"></div>
+                        <div class="gallery-slide"><img src="images/photo-slider8.jpeg" alt="Gallery 8"></div>
+                        <div class="gallery-slide"><img src="images/photo-slider9.jpeg" alt="Gallery 9"></div>
+                        <div class="gallery-slide"><img src="images/photo-slider10.jpeg" alt="Gallery 10"></div>
+                        <div class="gallery-slide"><img src="images/memory-slide-11.jpg" alt="Gallery 11"></div>
+                    </div>
                     <div class="gallery-dots"></div>
                 </div>
             </div>
@@ -345,7 +347,7 @@
                 <p class="white-text" id="notableAlumniEyebrowText">Notable Alumni</p>
                 <h2 class="title-green text-left mb-40" id="notableAlumniTitleText">What Our Alumni Say</h2>
 
-                <div class="alumni-grid">
+                <div class="alumni-grid" id="managedAlumniCards">
                     <div class="alumni-card fade-in-up">
                         <img src="images/Dr.-Rania-Alwani.png" alt="Dr Rania">
                         <h4 class="green-text-bold" id="alumni1NameText">Dr. Rania Alwani</h4>
@@ -382,7 +384,7 @@
                     <button class="gallery-nav awards-next" type="button" aria-label="Next award">
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                    <div class="awards-track">
+                    <div class="awards-track" id="managedAwardsSlides">
                         <div class="awards-slide">
                             <div class="award-slide-card">
                                 <img src="images/Awards.png" alt="Kerolos Mousa">
