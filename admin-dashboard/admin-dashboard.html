@@ -76,9 +76,22 @@
     .sticky-box { position: sticky; top: 6.3rem; }
     .toolbar { display: flex; justify-content: space-between; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: .9rem; }
     .helper { background: #f8fbff; border: 1px dashed var(--must-border); color: var(--must-muted); border-radius: 18px; padding: .95rem 1rem; }
+    .editor-note { color: var(--must-muted); font-size: .9rem; margin-top: .45rem; }
+    .image-input-row { display: flex; gap: .7rem; align-items: stretch; }
+    .image-input-row .form-control { flex: 1 1 auto; }
+    .upload-btn { white-space: nowrap; }
+    .thumbnail-preview { margin-top: .8rem; min-height: 120px; border: 1px dashed var(--must-border); border-radius: 18px; background: #f8fbff; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--must-muted); padding: .8rem; text-align: center; }
+    .thumbnail-preview img { width: 100%; height: 100%; max-height: 220px; object-fit: cover; border-radius: 12px; }
+    .content-card .admin-thumb { width: 100%; height: 170px; object-fit: cover; border-radius: 16px; margin-bottom: .9rem; background: #eef4fb; }
+    .content-card .admin-thumb.placeholder { display: flex; align-items: center; justify-content: center; color: var(--must-muted); font-weight: 600; }
+    .editor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .section-block { border: 1px solid var(--must-border); border-radius: 18px; padding: 1rem; background: linear-gradient(180deg, #fff, #fbfdff); }
+    .section-block h4 { margin-bottom: .85rem; color: var(--must-primary); font-size: 1rem; }
+    .section-block textarea.form-control { min-height: 108px; }
+    .section-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
     @media (max-width: 1199.98px) { .grid-two { grid-template-columns: 1fr; } .sticky-box { position: static; } }
-    @media (max-width: 991.98px) { .sidebar { position: static; width: 100%; border-radius: 0 0 24px 24px; } .main { margin-left: 0; padding: 1rem .85rem 1.4rem; } .topbar { position: static; padding: 1rem; } .stats-row, .item-grid { grid-template-columns: 1fr; } .content-card .card-foot .btn { flex: 1 1 calc(50% - .35rem); } }
-    @media (max-width: 575.98px) { .panel { padding: 1rem; } .editor-header, .editor-body { padding: 1rem; } .content-card { padding: .95rem; } .content-card .summary { font-size: .9rem; } .content-card .card-foot .btn { flex: 1 1 100%; } }
+    @media (max-width: 991.98px) { .sidebar { position: static; width: 100%; border-radius: 0 0 24px 24px; } .main { margin-left: 0; padding: 1rem .85rem 1.4rem; } .topbar { position: static; padding: 1rem; } .stats-row, .item-grid, .editor-grid { grid-template-columns: 1fr; } .content-card .card-foot .btn { flex: 1 1 calc(50% - .35rem); } }
+    @media (max-width: 575.98px) { .panel { padding: 1rem; } .editor-header, .editor-body { padding: 1rem; } .content-card { padding: .95rem; } .content-card .summary { font-size: .9rem; } .content-card .card-foot .btn, .section-actions .btn { flex: 1 1 100%; } .image-input-row { flex-direction: column; } }
   </style>
 </head>
 <body>
@@ -117,6 +130,7 @@
       <a class="nav-item-custom active" href="#overview"><i class="bi bi-grid-1x2-fill"></i> Overview</a>
       <a class="nav-item-custom" href="#newsManager"><i class="bi bi-newspaper"></i> News manager</a>
       <a class="nav-item-custom" href="#eventsManager"><i class="bi bi-calendar2-event-fill"></i> Events manager</a>
+      <a class="nav-item-custom" href="#siteContentManager"><i class="bi bi-window-stack"></i> Website content</a>
       <a class="nav-item-custom" href="#usersManager"><i class="bi bi-people-fill"></i> Users manager</a>
       <a class="nav-item-custom" href="#messagesManager"><i class="bi bi-envelope-paper-fill"></i> Contact messages</a>
       <a class="nav-item-custom" href="/website/index.html" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Open website</a>
@@ -205,6 +219,7 @@
                   <div class="editor-header"><h3 class="h5 mb-1">Manage news item</h3><div class="muted small">Create a new card for the Related News section.</div></div>
                   <div class="editor-body">
                     <form id="newsForm" class="manager-form">
+                      <input id="newsEditingId" type="hidden">
                       <div class="mb-3">
                           <label class="form-label fw-semibold">Badge text</label>
                           <input id="newsBadge" class="form-control" placeholder="Example: 9 March 2026" required>
@@ -215,7 +230,11 @@
                       </div>
                       <div class="mb-3">
                           <label class="form-label fw-semibold">Image URL / Path</label>
-                          <input id="newsImageUrl" class="form-control" placeholder="images/awards2.jpg">
+                          <div class="image-input-row">
+                            <input id="newsImageUrl" class="form-control" placeholder="images/awards2.jpg">
+                            <button class="btn btn-soft upload-btn" id="newsUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
+                          </div>
+                          <div id="newsImagePreview" class="thumbnail-preview">No image selected</div>
                       </div>
                       <div class="row g-3">
                         <div class="col-md-6">
@@ -228,9 +247,11 @@
                         </div>
                       </div>
                       <div class="d-flex gap-2 flex-wrap mt-4">
-                        <button class="btn btn-must flex-grow-1" type="submit">Manage news</button>
+                        <button class="btn btn-must flex-grow-1" id="newsSubmitBtn" type="submit">Add news item</button>
+                        <button class="btn btn-outline-secondary" id="newsCancelEditBtn" type="button" hidden>Cancel edit</button>
                         <button class="btn btn-soft" type="reset">Clear</button>
                       </div>
+                      <div class="editor-note">News items are saved directly to the database after add, edit, or delete.</div>
                     </form>
                   </div>
                 </div>
@@ -265,12 +286,20 @@
                   <div class="editor-header"><h3 class="h5 mb-1">Manage events</h3><div class="muted small">Create a new Upcoming Events card.</div></div>
                   <div class="editor-body">
                     <form id="eventForm" class="manager-form">
+                      <input id="eventEditingId" type="hidden">
                       <div class="row g-3 mb-3">
                         <div class="col-md-4"><label class="form-label fw-semibold">Day</label><input id="eventDay" class="form-control" placeholder="15" required></div>
                         <div class="col-md-8"><label class="form-label fw-semibold">Month / year</label><input id="eventMonthYear" class="form-control" placeholder="Mar 2026" required></div>
                       </div>
                       <div class="mb-3"><label class="form-label fw-semibold">Event title</label><input id="eventTitle" class="form-control" placeholder="Enter the event title" required></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Image URL / Path</label><input id="eventImageUrl" class="form-control" placeholder="images/photo.jpg"></div>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Image URL / Path</label>
+                        <div class="image-input-row">
+                          <input id="eventImageUrl" class="form-control" placeholder="images/photo.jpg">
+                          <button class="btn btn-soft upload-btn" id="eventUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
+                        </div>
+                        <div id="eventImagePreview" class="thumbnail-preview">No image selected</div>
+                      </div>
                       <div class="mb-3"><label class="form-label fw-semibold">Summary</label><textarea id="eventSummary" class="form-control" rows="5" placeholder="Short event description" required></textarea></div>
                       
                       <div class="row g-3 mb-3">
@@ -285,9 +314,11 @@
                       </div>
 
                       <div class="d-flex gap-2 flex-wrap mt-4">
-                        <button class="btn btn-must flex-grow-1" type="submit">Manage events</button>
+                        <button class="btn btn-must flex-grow-1" id="eventSubmitBtn" type="submit">Add event</button>
+                        <button class="btn btn-outline-secondary" id="eventCancelEditBtn" type="button" hidden>Cancel edit</button>
                         <button class="btn btn-soft" type="reset">Clear</button>
                       </div>
+                      <div class="editor-note">Events are saved directly to the database after add, edit, or delete.</div>
                     </form>
                   </div>
                 </div>
@@ -297,6 +328,176 @@
                   <div class="editor-header"><div class="toolbar mb-0"><div><h3 class="h5 mb-1">Current event cards</h3><div class="muted small">Remove any event you no longer want on the homepage.</div></div><button class="btn btn-soft btn-sm" id="reloadEventsBtn" type="button">Reload from file</button></div></div>
                   <div class="editor-body"><div id="eventsList" class="item-grid"></div></div>
                 </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-12" id="siteContentManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Website Content Manager</div>
+                <div class="muted small">Update the main published text, highlights, contact details, and homepage sections beyond news and events.</div>
+              </div>
+              <span class="status-pill good"><i class="bi bi-layout-text-window-reverse"></i> Published homepage content</span>
+            </div>
+            <div class="editor-card">
+              <div class="editor-header">
+                <h3 class="h5 mb-1">Homepage sections</h3>
+                <div class="muted small">Use this form to control the visible text of the main sections on the website.</div>
+              </div>
+              <div class="editor-body">
+                <form id="siteContentForm" class="manager-form">
+                  <div class="editor-grid">
+                    <div class="section-block">
+                      <h4>Hero and Brief</h4>
+                      <div class="mb-3"><label class="form-label fw-semibold">Hero title</label><input id="contentHeroTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Brief title</label><input id="contentBriefTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Brief paragraph 1</label><textarea id="contentBriefParagraph1" class="form-control"></textarea></div>
+                      <div><label class="form-label fw-semibold">Brief paragraph 2</label><textarea id="contentBriefParagraph2" class="form-control"></textarea></div>
+                    </div>
+
+                    <div class="section-block">
+                      <h4>Vice Dean</h4>
+                      <div class="mb-3"><label class="form-label fw-semibold">Section title</label><input id="contentViceDeanSectionTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Heading</label><input id="contentViceDeanHeading" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Paragraph 1</label><textarea id="contentViceDeanParagraph1" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Paragraph 2</label><textarea id="contentViceDeanParagraph2" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Paragraph 3</label><textarea id="contentViceDeanParagraph3" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Closing line</label><input id="contentViceDeanClosing" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Signature role</label><input id="contentViceDeanSignatureRole" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Signature name</label><input id="contentViceDeanSignatureName" class="form-control"></div>
+                      <div>
+                        <label class="form-label fw-semibold">Vice Dean image</label>
+                        <div class="image-input-row">
+                          <input id="contentViceDeanImageUrl" class="form-control" placeholder="images/Dr-Khaled.jpeg">
+                          <button class="btn btn-soft upload-btn" id="viceDeanUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
+                        </div>
+                        <div id="viceDeanImagePreview" class="thumbnail-preview">No image selected</div>
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <h4>Vision, Mission, Objectives</h4>
+                      <div class="mb-3"><label class="form-label fw-semibold">Vision text</label><textarea id="contentVisionText" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Mission text</label><textarea id="contentMissionText" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Objective 1</label><input id="contentObjective1" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Objective 2</label><input id="contentObjective2" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Objective 3</label><input id="contentObjective3" class="form-control"></div>
+                      <div><label class="form-label fw-semibold">Objective 4</label><input id="contentObjective4" class="form-control"></div>
+                    </div>
+
+                    <div class="section-block">
+                      <h4>Annual Plan and Activities</h4>
+                      <div class="mb-3"><label class="form-label fw-semibold">Annual plan section title</label><input id="contentPlanSectionTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Annual plan intro</label><textarea id="contentPlanIntro" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Activities section title</label><input id="contentActivitiesSectionTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Plan file title</label><input id="contentPlanFileTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Plan file meta</label><input id="contentPlanFileMeta" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Plan button text</label><input id="contentPlanButtonText" class="form-control"></div>
+                      <div class="row g-3">
+                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 1 month</label><input id="contentActivity1Month" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 1 day</label><input id="contentActivity1Day" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 1 title</label><input id="contentActivity1Title" class="form-control"></div>
+                        <div class="col-12 mb-3"><label class="form-label fw-semibold">Activity 1 description</label><input id="contentActivity1Description" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 2 month</label><input id="contentActivity2Month" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 2 day</label><input id="contentActivity2Day" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 2 title</label><input id="contentActivity2Title" class="form-control"></div>
+                        <div class="col-12 mb-3"><label class="form-label fw-semibold">Activity 2 description</label><input id="contentActivity2Description" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 3 month</label><input id="contentActivity3Month" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 3 day</label><input id="contentActivity3Day" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 3 title</label><input id="contentActivity3Title" class="form-control"></div>
+                        <div class="col-12"><label class="form-label fw-semibold">Activity 3 description</label><input id="contentActivity3Description" class="form-control"></div>
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <h4>Committees</h4>
+                      <div class="mb-3"><label class="form-label fw-semibold">Section title</label><input id="contentCommitteesTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Intro text</label><textarea id="contentCommitteesIntro" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni follow-up title</label><input id="contentAlumniCommitteeTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni follow-up description</label><textarea id="contentAlumniCommitteeDescription" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Crisis management title</label><input id="contentCrisisCommitteeTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Crisis management description</label><textarea id="contentCrisisCommitteeDescription" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Community service title</label><input id="contentCommunityCommitteeTitle" class="form-control"></div>
+                      <div><label class="form-label fw-semibold">Community service description</label><textarea id="contentCommunityCommitteeDescription" class="form-control"></textarea></div>
+                    </div>
+
+                    <div class="section-block">
+                      <h4>Protocols</h4>
+                      <div class="mb-3"><label class="form-label fw-semibold">Section title</label><input id="contentProtocolsTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Protocols intro</label><textarea id="contentProtocolsIntro" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Administrative protocol description</label><textarea id="contentAdminProtocolDescription" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Administrative item 1</label><input id="contentAdminProtocolItem1" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Administrative item 2</label><input id="contentAdminProtocolItem2" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Administrative item 3</label><input id="contentAdminProtocolItem3" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Notification protocol description</label><textarea id="contentNotificationProtocolDescription" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Notification item 1</label><input id="contentNotificationProtocolItem1" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Notification item 2</label><input id="contentNotificationProtocolItem2" class="form-control"></div>
+                      <div><label class="form-label fw-semibold">Notification item 3</label><input id="contentNotificationProtocolItem3" class="form-control"></div>
+                    </div>
+
+                    <div class="section-block">
+                      <h4>Services</h4>
+                      <div class="mb-3"><label class="form-label fw-semibold">Section title</label><input id="contentServicesTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card title</label><input id="contentAlumniCardTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card description</label><textarea id="contentAlumniCardDescription" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Benefits heading</label><input id="contentAlumniBenefitsTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Benefit 1</label><input id="contentAlumniBenefit1" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Benefit 2</label><input id="contentAlumniBenefit2" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Benefit 3</label><input id="contentAlumniBenefit3" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Benefit 4</label><input id="contentAlumniBenefit4" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Notice box text</label><textarea id="contentAlumniCardNotice" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Email service title</label><input id="contentEmailServiceTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Email service description</label><textarea id="contentEmailServiceDescription" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Features heading</label><input id="contentServiceFeaturesTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Feature 1</label><input id="contentServiceFeature1" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Feature 2</label><input id="contentServiceFeature2" class="form-control"></div>
+                      <div><label class="form-label fw-semibold">Feature 3</label><input id="contentServiceFeature3" class="form-control"></div>
+                    </div>
+
+                    <div class="section-block">
+                      <h4>Alumni and Awards</h4>
+                      <div class="mb-3"><label class="form-label fw-semibold">Gallery title</label><input id="contentGalleryTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Notable alumni label</label><input id="contentNotableAlumniEyebrow" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Notable alumni title</label><input id="contentNotableAlumniTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card 1 name</label><input id="contentAlumni1Name" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card 1 text</label><textarea id="contentAlumni1Text" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card 2 name</label><input id="contentAlumni2Name" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card 2 text</label><textarea id="contentAlumni2Text" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card 3 name</label><input id="contentAlumni3Name" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card 3 text</label><textarea id="contentAlumni3Text" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card 4 name</label><input id="contentAlumni4Name" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card 4 text</label><textarea id="contentAlumni4Text" class="form-control"></textarea></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Awards section title</label><input id="contentAwardsTitle" class="form-control"></div>
+                      <div><label class="form-label fw-semibold">Awards subtitle</label><textarea id="contentAwardsSubtitle" class="form-control"></textarea></div>
+                    </div>
+
+                    <div class="section-block">
+                      <h4>Contact and Footer</h4>
+                      <div class="mb-3"><label class="form-label fw-semibold">Events section title</label><input id="contentEventsSectionTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">News section title</label><input id="contentNewsSectionTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Contact title</label><input id="contentContactTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Contact subtitle</label><input id="contentContactSubtitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Contact email</label><input id="contentContactEmail" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Contact form title</label><input id="contentContactFormTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Events button text</label><input id="contentEventsCtaText" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Events button URL</label><input id="contentEventsCtaUrl" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">News button text</label><input id="contentNewsCtaText" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">News button URL</label><input id="contentNewsCtaUrl" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Footer phone</label><input id="contentFooterPhone" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Footer email</label><input id="contentFooterEmail" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Footer address</label><input id="contentFooterAddress" class="form-control"></div>
+                      <div><label class="form-label fw-semibold">Footer copyright</label><input id="contentFooterCopyright" class="form-control"></div>
+                    </div>
+                  </div>
+
+                  <div class="section-actions">
+                    <button class="btn btn-must" id="saveSiteContentBtn" type="submit"><i class="bi bi-save me-1"></i>Save published content</button>
+                    <button class="btn btn-soft" id="resetSiteContentBtn" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset form</button>
+                  </div>
+                </form>
               </div>
             </div>
           </section>
@@ -338,7 +539,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+  <script type="text/plain" data-disabled="legacy-dashboard-script">
     const AUTH_API = '/api/auth/login';
     const LOGOUT_API = '/api/auth/logout';
     const SESSION_API = '/api/session';
@@ -744,5 +945,6 @@
         showLogin();
       });
   </script>
+  <script src="dashboard.js"></script>
 </body>
 </html>

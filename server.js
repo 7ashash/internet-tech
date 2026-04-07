@@ -12,6 +12,8 @@ const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
 const DB_PATH = path.join(DATA_DIR, 'app.db');
 const MAIL_LOG_PATH = path.join(DATA_DIR, 'mail-log.txt');
+const UPLOADS_DIR = path.join(ROOT, 'website', 'images', 'uploads');
+const SITE_CONTENT_KEY = 'homepage';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'must-dev-session-secret';
 const PORT = Number(process.env.PORT || 3000);
 const BASE_URL = process.env.BASE_URL || `http://127.0.0.1:${PORT}`;
@@ -20,9 +22,110 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MustAdmin2026!';
 const SQLiteStore = SQLiteStoreFactory(session);
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
+
+const DEFAULT_SITE_CONTENT = {
+  heroTitle: 'Environmental and Community Service Sector',
+  briefTitle: 'Brief',
+  briefParagraph1: 'Our goal is to prepare a distinguished graduate with the competitive ability and morals to meet the challenges of his time.',
+  briefParagraph2: 'Let us all work together in harmony and remain united with the vision of a better tomorrow for all.',
+  viceDeanSectionTitle: "Vice Dean's Message",
+  viceDeanHeading: 'Welcome to the Environmental and Community Service Sector',
+  viceDeanParagraph1: 'I am delighted to welcome you to the website of the Faculty of Applied Arts. We believe in our vital role in serving the community and developing the environment, which stems from our academic and research mission.',
+  viceDeanParagraph2: 'In the Community Service and Environmental Development Sector, we strive to establish sustainable communication with various segments of society and foster effective partnerships between the faculty and community institutions to achieve sustainable development. We are also dedicated to offering training programs, awareness events, and environmental initiatives that contribute to raising awareness and improving the quality of life.',
+  viceDeanParagraph3: "We consistently aspire to innovate and advance all the activities and services we provide, aligning with the state's vision for comprehensive development.",
+  viceDeanClosing: 'With best wishes for your success,',
+  viceDeanSignatureRole: '- Vice Dean of Community Service and Environmental Development',
+  viceDeanSignatureName: 'Dr. Khaled Abdel Salam',
+  viceDeanImageUrl: 'images/Dr-Khaled.jpeg',
+  visionText: 'To be a leading sector in achieving sustainable environmental and community development locally and regionally, while maintaining an unbreakable bond with our esteemed alumni.',
+  missionText: 'Providing exceptional community services, managing environmental crises effectively, and continuously upgrading the skills of our alumni to meet the dynamic demands of the labor market.',
+  objective1: 'Supporting sustainable development through projects that contribute to environmental conservation and promote environmental awareness.',
+  objective2: 'Qualifying graduates for the labor market through specialized training programs and partnerships with various institutions.',
+  objective3: 'Enhance crisis management protocols.',
+  objective4: 'Foster community partnerships.',
+  planSectionTitle: "Sector's Annual Plan",
+  planIntro: 'Our annual plan outlines strategic initiatives aimed at community engagement, environmental preservation, and alumni support for the current academic year.',
+  activitiesSectionTitle: "Sector's Activities",
+  planFileTitle: 'Annual Plan 2025/2026',
+  planFileMeta: 'PDF Document (2.4 MB)',
+  planButtonText: 'Download',
+  activity1Month: 'OCT',
+  activity1Day: '15',
+  activity1Title: 'Annual Alumni Employment Fair',
+  activity1Description: 'Connecting graduates with top-tier companies.',
+  activity2Month: 'NOV',
+  activity2Day: '22',
+  activity2Title: 'Environmental Awareness Workshop',
+  activity2Description: 'Promoting green initiatives on campus.',
+  activity3Month: 'MAR',
+  activity3Day: '10',
+  activity3Title: 'Community Health Caravan',
+  activity3Description: 'Providing medical services to surrounding districts.',
+  committeesTitle: "Sector's Committees",
+  committeesIntro: 'The sector operates through specialized committees dedicated to ensuring the safety, success, and continuous development of our university community and alumni.',
+  alumniCommitteeTitle: 'Alumni Follow-up',
+  alumniCommitteeDescription: 'Dedicated to tracking graduate success, facilitating communication between the university and its alumni, and gathering feedback to improve academic programs.',
+  crisisCommitteeTitle: 'Crisis Management',
+  crisisCommitteeDescription: 'Responsible for developing proactive safety plans, assessing campus risks, and ensuring the rapid and safe response to any environmental or structural emergencies.',
+  communityCommitteeTitle: 'Community Service',
+  communityCommitteeDescription: 'Focuses on organizing outreach programs, charity drives, and educational initiatives that benefit the local communities surrounding the university campus.',
+  protocolsTitle: 'Protocols',
+  protocolsIntro: 'A dedicated section for the protocols requested in the paper. The visible note clearly points to administrative protocols and a notification protocol, so both are included below in a clean English version.',
+  adminProtocolDescription: 'Administrative protocols organize approvals, documentation flow, internal coordination, and follow-up responsibilities for the sector.',
+  adminProtocolItem1: 'Internal approvals and official documentation',
+  adminProtocolItem2: 'Sector coordination and workflow management',
+  adminProtocolItem3: 'Follow-up on implementation and reporting',
+  notificationProtocolDescription: 'This protocol covers how announcements, notices, and formal notifications are communicated clearly to the relevant audience.',
+  notificationProtocolItem1: 'Official notices and alert handling',
+  notificationProtocolItem2: 'Communication to staff, students, and graduates',
+  notificationProtocolItem3: 'Clear delivery channels and response tracking',
+  servicesTitle: 'Alumni Services',
+  alumniCardTitle: 'Alumni excellence card',
+  alumniCardDescription: "University graduates can receive it for a sum in Egyptian pounds and expires every two years. Payment is made in cash or at one of the university's banks.",
+  alumniBenefitsTitle: 'Graduates will enjoy some benefits such as:',
+  alumniBenefit1: 'Using the university library and free stadiums',
+  alumniBenefit2: 'Get a discount on university training courses',
+  alumniBenefit3: 'Participating in events organized by the university',
+  alumniBenefit4: 'A range of discounts and concessions are being contracted',
+  alumniCardNotice: 'Note the Card activation is currently on hold. It will be announced to all alumni once it is finalised.',
+  emailServiceTitle: 'Email Service',
+  emailServiceDescription: 'In cooperation with the Education Technology Department, the free Microsoft Office 365 will be launched to all alumni as a new service.',
+  serviceFeaturesTitle: 'It has many features such as:',
+  serviceFeature1: 'Download the latest Office 365 versions (Word, Excel, PowerPoint).',
+  serviceFeature2: '1 TB of OneDrive storage.',
+  serviceFeature3: 'Install Office on up to 5 PCs or Macs.',
+  galleryTitle: 'Alumni Memories',
+  notableAlumniEyebrow: 'Notable Alumni',
+  notableAlumniTitle: 'What Our Alumni Say',
+  alumni1Name: 'Dr. Rania Alwani',
+  alumni1Text: 'She obtained a Bachelor of Medicine and Surgery from Misr University...',
+  alumni2Name: 'Ahmed Hatem',
+  alumni2Text: 'An Egyptian actor who studied media in the faculty of mass communication...',
+  alumni3Name: 'Asmaa Galal',
+  alumni3Text: 'An Egyptian actress, started her artistic career in 2017...',
+  alumni4Name: 'Nehal Nabil',
+  alumni4Text: 'Graduated from the Faculty of Mass Communication, Misr University...',
+  awardsTitle: 'Awards & Certificates',
+  awardsSubtitle: 'MUST is a pioneer in getting awards in all fields thanks to its precious leading authority and success-seeking students.',
+  eventsSectionTitle: 'Related Events',
+  newsSectionTitle: 'News',
+  contactTitle: 'Reach us any time.',
+  contactSubtitle: 'Or contact us by email',
+  contactEmail: 'info.alumni@must.edu.eg',
+  contactFormTitle: 'Leave a message',
+  eventsCtaText: 'See All Events',
+  eventsCtaUrl: 'https://must.edu.eg/event/',
+  newsCtaText: 'See All News',
+  newsCtaUrl: 'https://must.edu.eg/news/',
+  footerPhone: '16878',
+  footerEmail: 'Info@Must.Edu.Eg',
+  footerAddress: 'Al Motamayez District - 6th of October, Egypt',
+  footerCopyright: 'Copyright All Right Reserved @ MUST UNIVERSITY 2025'
+};
 
 function runMigrations() {
   db.exec(`
@@ -73,6 +176,12 @@ function runMigrations() {
       sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS site_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `);
 
   const userColumns = db.prepare(`PRAGMA table_info(users)`).all();
@@ -117,6 +226,14 @@ function seedDefaultContent() {
     seedEvents.forEach((item, index) => {
       insertEvent.run(item[0], item[1], item[2], item[3], item[4], item[5], item[6], index, new Date().toISOString());
     });
+  }
+
+  const siteContentRow = db.prepare('SELECT key FROM site_settings WHERE key = ?').get(SITE_CONTENT_KEY);
+  if (!siteContentRow) {
+    db.prepare(`
+      INSERT INTO site_settings (key, value, updated_at)
+      VALUES (?, ?, ?)
+    `).run(SITE_CONTENT_KEY, JSON.stringify(DEFAULT_SITE_CONTENT), new Date().toISOString());
   }
 }
 
@@ -203,6 +320,31 @@ function now() {
   return new Date().toISOString();
 }
 
+function getSiteContent() {
+  const row = db.prepare('SELECT value FROM site_settings WHERE key = ?').get(SITE_CONTENT_KEY);
+  if (!row) {
+    return { ...DEFAULT_SITE_CONTENT };
+  }
+
+  try {
+    const parsed = JSON.parse(row.value);
+    return { ...DEFAULT_SITE_CONTENT, ...(parsed && typeof parsed === 'object' ? parsed : {}) };
+  } catch (error) {
+    console.error('Could not parse site content JSON', error);
+    return { ...DEFAULT_SITE_CONTENT };
+  }
+}
+
+function saveSiteContent(content) {
+  const merged = { ...DEFAULT_SITE_CONTENT, ...(content && typeof content === 'object' ? content : {}) };
+  db.prepare(`
+    INSERT INTO site_settings (key, value, updated_at)
+    VALUES (?, ?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+  `).run(SITE_CONTENT_KEY, JSON.stringify(merged), now());
+  return merged;
+}
+
 function mustEmail(email) {
   return /^[^@\s]+@must\.edu\.eg$/i.test(String(email || '').trim());
 }
@@ -230,8 +372,8 @@ function requireAdmin(req, res, next) {
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(session({
   store: new SQLiteStore({
     db: 'sessions.db',
@@ -387,6 +529,54 @@ app.post('/api/contact', (req, res) => {
   res.status(201).json({ ok: true, message: 'Your message has been sent successfully' });
 });
 
+app.post('/api/admin/assets', requireAdmin, (req, res) => {
+  const fileName = String(req.body.fileName || 'image').trim();
+  const dataUrl = String(req.body.dataUrl || '').trim();
+  const match = dataUrl.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/);
+
+  if (!match) {
+    return res.status(400).json({ ok: false, error: 'Please upload a valid image file' });
+  }
+
+  const extensionMap = {
+    jpeg: 'jpg',
+    jpg: 'jpg',
+    png: 'png',
+    webp: 'webp',
+    gif: 'gif'
+  };
+  const extension = extensionMap[String(match[1] || '').toLowerCase()];
+  if (!extension) {
+    return res.status(400).json({ ok: false, error: 'Only JPG, PNG, WEBP, and GIF files are supported' });
+  }
+
+  let buffer;
+  try {
+    buffer = Buffer.from(match[2], 'base64');
+  } catch (error) {
+    return res.status(400).json({ ok: false, error: 'The uploaded image could not be decoded' });
+  }
+
+  if (!buffer.length || buffer.length > 8 * 1024 * 1024) {
+    return res.status(400).json({ ok: false, error: 'Image size must be between 1 byte and 8 MB' });
+  }
+
+  const originalBaseName = path.basename(fileName, path.extname(fileName)) || 'image';
+  const safeBaseName = originalBaseName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'image';
+
+  const storedFileName = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}-${safeBaseName}.${extension}`;
+  fs.writeFileSync(path.join(UPLOADS_DIR, storedFileName), buffer);
+
+  res.status(201).json({
+    ok: true,
+    imageUrl: `images/uploads/${storedFileName}`
+  });
+});
+
 function listNews() {
   return db.prepare('SELECT id, badge, title, image_url AS imageUrl, link_text AS linkText, link_url AS linkUrl FROM news ORDER BY sort_order ASC, id DESC').all();
 }
@@ -396,16 +586,17 @@ function listEvents() {
 }
 
 app.get('/api/content/public', (req, res) => {
-  res.json({ ok: true, news: listNews(), events: listEvents() });
+  res.json({ ok: true, news: listNews(), events: listEvents(), sections: getSiteContent() });
 });
 
 app.get('/api/admin/content', requireAdmin, (req, res) => {
-  res.json({ ok: true, news: listNews(), events: listEvents() });
+  res.json({ ok: true, news: listNews(), events: listEvents(), sections: getSiteContent() });
 });
 
 app.post('/api/admin/content', requireAdmin, (req, res) => {
   const news = Array.isArray(req.body.news) ? req.body.news : null;
   const events = Array.isArray(req.body.events) ? req.body.events : null;
+  const sections = req.body.sections && typeof req.body.sections === 'object' ? req.body.sections : null;
 
   if (!news || !events) {
     return res.status(400).json({ ok: false, error: 'news and events must both be arrays' });
@@ -452,7 +643,8 @@ app.post('/api/admin/content', requireAdmin, (req, res) => {
   });
 
   transaction();
-  res.json({ ok: true, message: 'Content updated successfully' });
+  const savedSections = saveSiteContent(sections || getSiteContent());
+  res.json({ ok: true, message: 'Content updated successfully', sections: savedSections });
 });
 
 app.get('/api/admin/users', requireAdmin, (req, res) => {

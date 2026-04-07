@@ -496,9 +496,131 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  function setTextContent(id, value) {
+    var node = document.getElementById(id);
+    if (!node || typeof value !== 'string') return;
+    node.textContent = value;
+  }
+
+  function setImageSource(id, value) {
+    var node = document.getElementById(id);
+    if (!node || !value) return;
+    node.setAttribute('src', value);
+  }
+
+  function setLinkContent(id, href, text) {
+    var node = document.getElementById(id);
+    if (!node) return;
+    if (href) node.setAttribute('href', href);
+    if (typeof text === 'string') node.textContent = text;
+  }
+
+  function applyManagedSections(sections) {
+    if (!sections || typeof sections !== 'object') return;
+
+    setTextContent('heroTitleText', sections.heroTitle);
+    setTextContent('briefTitleText', sections.briefTitle);
+    setTextContent('briefParagraph1Text', sections.briefParagraph1);
+    setTextContent('briefParagraph2Text', sections.briefParagraph2);
+    setTextContent('viceDeanSectionTitleText', sections.viceDeanSectionTitle);
+    setTextContent('viceDeanHeadingText', sections.viceDeanHeading);
+    setTextContent('viceDeanParagraph1Text', sections.viceDeanParagraph1);
+    setTextContent('viceDeanParagraph2Text', sections.viceDeanParagraph2);
+    setTextContent('viceDeanParagraph3Text', sections.viceDeanParagraph3);
+    setTextContent('viceDeanClosingText', sections.viceDeanClosing);
+    setTextContent('viceDeanSignatureRoleText', sections.viceDeanSignatureRole);
+    setTextContent('viceDeanSignatureNameText', sections.viceDeanSignatureName);
+    setImageSource('viceDeanImage', sections.viceDeanImageUrl);
+    setTextContent('visionText', sections.visionText);
+    setTextContent('missionText', sections.missionText);
+    setTextContent('objective1Text', sections.objective1);
+    setTextContent('objective2Text', sections.objective2);
+    setTextContent('objective3Text', sections.objective3);
+    setTextContent('objective4Text', sections.objective4);
+    setTextContent('planSectionTitleText', sections.planSectionTitle);
+    setTextContent('planIntroText', sections.planIntro);
+    setTextContent('activitiesSectionTitleText', sections.activitiesSectionTitle);
+    setTextContent('planFileTitleText', sections.planFileTitle);
+    setTextContent('planFileMetaText', sections.planFileMeta);
+    setTextContent('planButtonText', sections.planButtonText);
+    setTextContent('activity1MonthText', sections.activity1Month);
+    setTextContent('activity1DayText', sections.activity1Day);
+    setTextContent('activity1TitleText', sections.activity1Title);
+    setTextContent('activity1DescriptionText', sections.activity1Description);
+    setTextContent('activity2MonthText', sections.activity2Month);
+    setTextContent('activity2DayText', sections.activity2Day);
+    setTextContent('activity2TitleText', sections.activity2Title);
+    setTextContent('activity2DescriptionText', sections.activity2Description);
+    setTextContent('activity3MonthText', sections.activity3Month);
+    setTextContent('activity3DayText', sections.activity3Day);
+    setTextContent('activity3TitleText', sections.activity3Title);
+    setTextContent('activity3DescriptionText', sections.activity3Description);
+    setTextContent('committeesTitleText', sections.committeesTitle);
+    setTextContent('committeesIntroText', sections.committeesIntro);
+    setTextContent('alumniCommitteeTitleText', sections.alumniCommitteeTitle);
+    setTextContent('alumniCommitteeDescriptionText', sections.alumniCommitteeDescription);
+    setTextContent('crisisCommitteeTitleText', sections.crisisCommitteeTitle);
+    setTextContent('crisisCommitteeDescriptionText', sections.crisisCommitteeDescription);
+    setTextContent('communityCommitteeTitleText', sections.communityCommitteeTitle);
+    setTextContent('communityCommitteeDescriptionText', sections.communityCommitteeDescription);
+    setTextContent('protocolsTitleText', sections.protocolsTitle);
+    setTextContent('protocolsIntroText', sections.protocolsIntro);
+    setTextContent('adminProtocolDescriptionText', sections.adminProtocolDescription);
+    setTextContent('adminProtocolItem1Text', sections.adminProtocolItem1);
+    setTextContent('adminProtocolItem2Text', sections.adminProtocolItem2);
+    setTextContent('adminProtocolItem3Text', sections.adminProtocolItem3);
+    setTextContent('notificationProtocolDescriptionText', sections.notificationProtocolDescription);
+    setTextContent('notificationProtocolItem1Text', sections.notificationProtocolItem1);
+    setTextContent('notificationProtocolItem2Text', sections.notificationProtocolItem2);
+    setTextContent('notificationProtocolItem3Text', sections.notificationProtocolItem3);
+    setTextContent('servicesTitleText', sections.servicesTitle);
+    setTextContent('alumniCardTitleText', sections.alumniCardTitle);
+    setTextContent('alumniCardDescriptionText', sections.alumniCardDescription);
+    setTextContent('alumniBenefitsTitleText', sections.alumniBenefitsTitle);
+    setTextContent('alumniBenefit1Text', sections.alumniBenefit1);
+    setTextContent('alumniBenefit2Text', sections.alumniBenefit2);
+    setTextContent('alumniBenefit3Text', sections.alumniBenefit3);
+    setTextContent('alumniBenefit4Text', sections.alumniBenefit4);
+    setTextContent('alumniCardNoticeText', sections.alumniCardNotice);
+    setTextContent('emailServiceTitleText', sections.emailServiceTitle);
+    setTextContent('emailServiceDescriptionText', sections.emailServiceDescription);
+    setTextContent('serviceFeaturesTitleText', sections.serviceFeaturesTitle);
+    setTextContent('serviceFeature1Text', sections.serviceFeature1);
+    setTextContent('serviceFeature2Text', sections.serviceFeature2);
+    setTextContent('serviceFeature3Text', sections.serviceFeature3);
+    setTextContent('galleryTitleText', sections.galleryTitle);
+    setTextContent('notableAlumniEyebrowText', sections.notableAlumniEyebrow);
+    setTextContent('notableAlumniTitleText', sections.notableAlumniTitle);
+    setTextContent('alumni1NameText', sections.alumni1Name);
+    setTextContent('alumni1Text', sections.alumni1Text);
+    setTextContent('alumni2NameText', sections.alumni2Name);
+    setTextContent('alumni2Text', sections.alumni2Text);
+    setTextContent('alumni3NameText', sections.alumni3Name);
+    setTextContent('alumni3Text', sections.alumni3Text);
+    setTextContent('alumni4NameText', sections.alumni4Name);
+    setTextContent('alumni4Text', sections.alumni4Text);
+    setTextContent('awardsTitleText', sections.awardsTitle);
+    setTextContent('awardsSubtitleText', sections.awardsSubtitle);
+    setTextContent('eventsSectionTitleText', sections.eventsSectionTitle);
+    setTextContent('newsSectionTitleText', sections.newsSectionTitle);
+    setTextContent('contactTitleText', sections.contactTitle);
+    setTextContent('contactSubtitleText', sections.contactSubtitle);
+    setTextContent('contactFormTitleText', sections.contactFormTitle);
+    if (sections.contactEmail) {
+      setLinkContent('contactEmailLink', 'mailto:' + sections.contactEmail, sections.contactEmail);
+    }
+    setLinkContent('eventsCtaLink', sections.eventsCtaUrl, sections.eventsCtaText);
+    setLinkContent('newsCtaLink', sections.newsCtaUrl, sections.newsCtaText);
+    setTextContent('footerPhoneText', sections.footerPhone);
+    setTextContent('footerEmailText', sections.footerEmail);
+    setTextContent('footerAddressText', sections.footerAddress);
+    setTextContent('footerCopyrightText', sections.footerCopyright);
+  }
+
   function loadManagedContent() {
     return apiRequest('/api/content/public', { method: 'GET' })
       .then(function (data) {
+        applyManagedSections(data.sections);
         renderNews(Array.isArray(data.news) ? data.news : []);
         renderEvents(Array.isArray(data.events) ? data.events : []);
       })
