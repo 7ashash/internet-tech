@@ -512,19 +512,46 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Password must be at least 6 characters' });
     }
 
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existing) {
-      return res.status(409).json({ ok: false, error: 'This email is already registered' });
+    const existing = db.prepare(`
+      SELECT id, role, is_active
+      FROM users
+      WHERE email = ?
+    `).get(email);
+
+    if (existing && (existing.role === 'admin' || Number(existing.is_active) === 1)) {
+      return res.status(409).json({ ok: false, error: 'This email is already registered. Please log in instead.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const token = crypto.randomBytes(24).toString('hex');
-    const created = db.prepare(`
-      INSERT INTO users (name, university_id, email, password_hash, role, is_active, activation_token, created_at)
-      VALUES (?, ?, ?, ?, 'user', 0, ?, ?)
-    `).run(name, universityId, email, passwordHash, token, now());
+    const createdAt = now();
+    let userId;
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(created.lastInsertRowid);
+    if (existing) {
+      db.prepare(`
+        UPDATE users
+        SET
+          name = ?,
+          university_id = ?,
+          password_hash = ?,
+          role = 'user',
+          is_active = 0,
+          activation_token = ?,
+          created_at = ?,
+          activated_at = NULL,
+          last_login_at = NULL
+        WHERE id = ?
+      `).run(name, universityId, passwordHash, token, createdAt, existing.id);
+      userId = existing.id;
+    } else {
+      const created = db.prepare(`
+        INSERT INTO users (name, university_id, email, password_hash, role, is_active, activation_token, created_at)
+        VALUES (?, ?, ?, ?, 'user', 0, ?, ?)
+      `).run(name, universityId, email, passwordHash, token, createdAt);
+      userId = created.lastInsertRowid;
+    }
+
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
     const activationUrl = await sendActivationEmail(user, token, getBaseUrl(req));
 
     res.status(201).json({
