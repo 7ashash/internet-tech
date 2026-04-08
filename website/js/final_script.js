@@ -22,6 +22,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  function parsePreferredManagedJson(primaryId, fallbackId) {
+    var preferredNode = document.getElementById(primaryId);
+    if (preferredNode) {
+      return parseManagedJson(primaryId);
+    }
+    return parseManagedJson(fallbackId);
+  }
+
   function escapeHtml(value) {
     return String(value || '')
       .replace(/&/g, '&amp;')
@@ -67,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var siteLogoutBtn = document.getElementById('siteLogoutBtn');
   var contactForm = document.getElementById('contactForm');
   var contactFeedback = document.getElementById('contactFeedback');
+  var heroQuickDropdowns = document.querySelectorAll('.hero-quick-dropdown');
   var currentUser = null;
 
   function openMenu() {
@@ -137,6 +146,35 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  if (heroQuickDropdowns.length) {
+    heroQuickDropdowns.forEach(function (dropdown) {
+      dropdown.addEventListener('toggle', function () {
+        if (!dropdown.open) return;
+        heroQuickDropdowns.forEach(function (otherDropdown) {
+          if (otherDropdown !== dropdown) {
+            otherDropdown.open = false;
+          }
+        });
+      });
+    });
+
+    document.addEventListener('click', function (event) {
+      heroQuickDropdowns.forEach(function (dropdown) {
+        if (!dropdown.contains(event.target)) {
+          dropdown.open = false;
+        }
+      });
+    });
+
+    document.querySelectorAll('.hero-submenu a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        heroQuickDropdowns.forEach(function (dropdown) {
+          dropdown.open = false;
+        });
+      });
+    });
+  }
+
   function applyTheme(theme) {
     body.classList.toggle('dark-mode', theme === 'dark');
     if (themeToggle) {
@@ -190,57 +228,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function initGallerySlider() {
     var gallerySlides = document.querySelectorAll('.gallery-slide');
-    if (!gallerySlides.length || !galleryDotsContainer) return;
+    if (!gallerySlides.length) return;
 
     currentGallerySlide = 0;
-    galleryDotsContainer.innerHTML = '';
-    gallerySlides.forEach(function (_, index) {
-      var dot = document.createElement('div');
-      dot.className = 'gallery-dot' + (index === 0 ? ' active' : '');
-      dot.onclick = function () {
-        goToGallerySlide(index);
-        resetGalleryTimer();
-      };
-      galleryDotsContainer.appendChild(dot);
-    });
+    if (galleryDotsContainer) {
+      galleryDotsContainer.innerHTML = '';
+      gallerySlides.forEach(function (_, index) {
+        var dot = document.createElement('div');
+        dot.className = 'gallery-dot' + (index === 0 ? ' active' : '');
+        dot.onclick = function () {
+          goToGallerySlide(index);
+          resetGalleryTimer();
+        };
+        galleryDotsContainer.appendChild(dot);
+      });
+    }
 
     function goToGallerySlide(index) {
-      var galleryDots = galleryDotsContainer.querySelectorAll('.gallery-dot');
-      if (!gallerySlides.length || !galleryDots.length) return;
+      var galleryDots = galleryDotsContainer ? galleryDotsContainer.querySelectorAll('.gallery-dot') : [];
+      if (!gallerySlides.length) return;
       if (index >= gallerySlides.length) index = 0;
       if (index < 0) index = gallerySlides.length - 1;
       gallerySlides[currentGallerySlide].classList.remove('active');
-      galleryDots[currentGallerySlide].classList.remove('active');
+      if (galleryDots.length) {
+        galleryDots[currentGallerySlide].classList.remove('active');
+      }
       currentGallerySlide = index;
       gallerySlides[currentGallerySlide].classList.add('active');
-      galleryDots[currentGallerySlide].classList.add('active');
-    }
-
-    function nextGallerySlide() {
-      goToGallerySlide(currentGallerySlide + 1);
-    }
-
-    function previousGallerySlide() {
-      goToGallerySlide(currentGallerySlide - 1);
+      if (galleryDots.length) {
+        galleryDots[currentGallerySlide].classList.add('active');
+      }
     }
 
     function resetGalleryTimer() {
       window.clearInterval(galleryTimer);
-      galleryTimer = window.setInterval(nextGallerySlide, 7000);
-    }
-
-    if (galleryPrevBtn) {
-      galleryPrevBtn.onclick = function () {
-        previousGallerySlide();
-        resetGalleryTimer();
-      };
-    }
-
-    if (galleryNextBtn) {
-      galleryNextBtn.onclick = function () {
-        nextGallerySlide();
-        resetGalleryTimer();
-      };
+      galleryTimer = window.setInterval(function () {
+        goToGallerySlide(currentGallerySlide + 1);
+      }, 7000);
     }
 
     resetGalleryTimer();
@@ -346,6 +370,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function updateAuthUI(user) {
     currentUser = user || null;
+    body.classList.toggle('user-logged-in', !!currentUser);
     if (!openAuthModalBtn || !authUserChip || !authUserName || !adminDashboardLink) return;
 
     if (!currentUser) {
@@ -528,6 +553,178 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof text === 'string') node.textContent = text;
   }
 
+  function setPlanDownloadLink(fileUrl) {
+    var node = document.getElementById('planDownloadLink');
+    if (!node) return;
+    var cleanUrl = normalizeUrl(fileUrl || '');
+    if (!cleanUrl || cleanUrl === '#') {
+      node.removeAttribute('href');
+      node.setAttribute('aria-disabled', 'true');
+      node.classList.add('is-disabled');
+      return;
+    }
+    node.setAttribute('href', cleanUrl);
+    node.setAttribute('download', '');
+    node.removeAttribute('aria-disabled');
+    node.classList.remove('is-disabled');
+  }
+
+  function renderObjectiveItems(items) {
+    var target = document.getElementById('objectivesList');
+    if (!target || !Array.isArray(items) || !items.length) return;
+    target.innerHTML = items.map(function (item) {
+      return '<li><i class="fas fa-check"></i> <span>' + escapeHtml(item) + '</span></li>';
+    }).join('');
+  }
+
+  function renderCommitteeItems(items) {
+    var target = document.getElementById('committeeCards');
+    if (!target || !Array.isArray(items) || !items.length) return;
+    target.classList.add('committees-grid-rich');
+    target.innerHTML = items.map(function (item, index) {
+      var responsibilities = Array.isArray(item.responsibilities) ? item.responsibilities : [];
+      var delay = index ? ' style="transition-delay: ' + (index * 0.08).toFixed(2) + 's;"' : '';
+      return (
+        '<article id="' + escapeHtml(item.id || ('committee-' + index)) + '" class="committee-box fade-in-up visible committee-box-rich"' + delay + '>' +
+          '<div class="committee-header">' +
+            '<i class="' + escapeHtml(item.icon || 'fas fa-users') + '"></i>' +
+            '<h3 class="navy-title">' + escapeHtml(item.title || 'Committee') + '</h3>' +
+          '</div>' +
+          '<p class="committee-summary">' + escapeHtml(item.summary || '') + '</p>' +
+          (responsibilities.length
+            ? '<ul class="custom-list committee-responsibilities">' + responsibilities.map(function (responsibility) {
+                return '<li><i class="fas fa-check"></i> <span>' + escapeHtml(responsibility) + '</span></li>';
+              }).join('') + '</ul>'
+            : '') +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function renderProtocolItems(items) {
+    var target = document.getElementById('protocolCards');
+    if (!target || !Array.isArray(items) || !items.length) return;
+    target.innerHTML = items.map(function (item, index) {
+      var delay = index ? ' style="transition-delay: ' + (index * 0.08).toFixed(2) + 's;"' : '';
+      var media = item.imageUrl
+        ? '<div class="protocol-media"><img src="' + escapeHtml(item.imageUrl) + '" alt="' + escapeHtml(item.title || 'Protocol') + '"></div>'
+        : '<div class="protocol-icon"><i class="fas fa-handshake"></i></div>';
+      return (
+        '<article id="' + escapeHtml(item.id || ('protocol-' + index)) + '" class="protocol-card fade-in-up visible protocol-card-rich"' + delay + '>' +
+          media +
+          '<div class="protocol-content">' +
+            (item.partner ? '<span class="protocol-partner">' + escapeHtml(item.partner) + '</span>' : '') +
+            '<h3 class="navy-title">' + escapeHtml(item.title || 'Protocol') + '</h3>' +
+            '<p class="protocol-objective">' + escapeHtml(item.objective || '') + '</p>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function renderActivityGroups(groups) {
+    var target = document.getElementById('activityGroups');
+    if (!target || !Array.isArray(groups) || !groups.length) return;
+    target.innerHTML = groups.map(function (group, groupIndex) {
+      var items = Array.isArray(group.items) ? group.items : [];
+      var cards = items.map(function (item) {
+        var images = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
+        var mainImage = images[0] || 'images/logo-png.png';
+        var media = images.length > 1
+          ? '<div class="activity-item-media activity-media-slider" data-activity-slider>' +
+              images.map(function (image, imageIndex) {
+                return '<div class="activity-media-slide' + (imageIndex === 0 ? ' active' : '') + '">' +
+                  '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml((item.title || 'Activity') + ' image ' + (imageIndex + 1)) + '">' +
+                '</div>';
+              }).join('') +
+              '<button class="activity-slider-btn activity-slider-prev" type="button" aria-label="Previous image"><i class="fas fa-chevron-left"></i></button>' +
+              '<button class="activity-slider-btn activity-slider-next" type="button" aria-label="Next image"><i class="fas fa-chevron-right"></i></button>' +
+              '<span class="activity-date-chip">' + escapeHtml(item.dateLabel || '') + '</span>' +
+            '</div>'
+          : '<div class="activity-item-media">' +
+              '<img src="' + escapeHtml(mainImage) + '" alt="' + escapeHtml(item.title || 'Activity') + '">' +
+              '<span class="activity-date-chip">' + escapeHtml(item.dateLabel || '') + '</span>' +
+            '</div>';
+        return (
+          '<article class="activity-item-card">' +
+            media +
+            '<div class="activity-item-body">' +
+              '<h4 class="navy-title">' + escapeHtml(item.title || 'Activity') + '</h4>' +
+              (item.summary ? '<p>' + escapeHtml(item.summary) + '</p>' : '') +
+            '</div>' +
+          '</article>'
+        );
+      }).join('');
+      return (
+        '<section id="' + escapeHtml(group.id || ('activity-group-' + groupIndex)) + '" class="activity-group-block fade-in-up visible">' +
+          '<div class="activity-group-header">' +
+            '<div>' +
+              '<h3 class="navy-title">' + escapeHtml(group.title || 'Activities') + '</h3>' +
+              (group.intro ? '<p>' + escapeHtml(group.intro) + '</p>' : '') +
+            '</div>' +
+            '<span class="activity-count-pill">' + items.length + ' item' + (items.length === 1 ? '' : 's') + '</span>' +
+          '</div>' +
+          '<div class="activity-items-grid">' + cards + '</div>' +
+        '</section>'
+      );
+    }).join('');
+    initActivityMediaSliders();
+  }
+
+  function initActivityMediaSliders() {
+    var sliders = document.querySelectorAll('[data-activity-slider]');
+    Array.prototype.forEach.call(sliders, function (slider) {
+      var slides = slider.querySelectorAll('.activity-media-slide');
+      if (!slides.length) return;
+      var currentIndex = 0;
+      var prevBtn = slider.querySelector('.activity-slider-prev');
+      var nextBtn = slider.querySelector('.activity-slider-next');
+
+      function showSlide(nextIndex) {
+        currentIndex = (nextIndex + slides.length) % slides.length;
+        Array.prototype.forEach.call(slides, function (slide, slideIndex) {
+          slide.classList.toggle('active', slideIndex === currentIndex);
+        });
+      }
+
+      function restartAutoPlay() {
+        if (slider._activityTimerId) {
+          window.clearInterval(slider._activityTimerId);
+        }
+        slider._activityTimerId = window.setInterval(function () {
+          showSlide(currentIndex + 1);
+        }, 4200);
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+          showSlide(currentIndex - 1);
+          restartAutoPlay();
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+          showSlide(currentIndex + 1);
+          restartAutoPlay();
+        });
+      }
+
+      slider.addEventListener('mouseenter', function () {
+        if (slider._activityTimerId) {
+          window.clearInterval(slider._activityTimerId);
+        }
+      });
+
+      slider.addEventListener('mouseleave', function () {
+        restartAutoPlay();
+      });
+
+      showSlide(0);
+      restartAutoPlay();
+    });
+  }
+
   function renderGalleryItems(items) {
     var target = document.getElementById('managedGallerySlides');
     if (!target || !Array.isArray(items) || !items.length) return;
@@ -577,6 +774,19 @@ document.addEventListener('DOMContentLoaded', function () {
   function applyManagedSections(sections) {
     if (!sections || typeof sections !== 'object') return;
 
+    var planCard = document.querySelector('.plan-card');
+    var activitiesCard = document.getElementById('sector-activities');
+    var annualPlanSection = document.getElementById('annual-plan');
+    if (annualPlanSection) {
+      annualPlanSection.classList.add('visible');
+    }
+    if (planCard) {
+      planCard.classList.add('visible');
+    }
+    if (activitiesCard) {
+      activitiesCard.classList.add('visible');
+    }
+
     setTextContent('heroTitleText', sections.heroTitle);
     setTextContent('briefTitleText', sections.briefTitle);
     setTextContent('briefParagraph1Text', sections.briefParagraph1);
@@ -596,12 +806,15 @@ document.addEventListener('DOMContentLoaded', function () {
     setTextContent('objective2Text', sections.objective2);
     setTextContent('objective3Text', sections.objective3);
     setTextContent('objective4Text', sections.objective4);
+    renderObjectiveItems(sections.objectiveItems);
     setTextContent('planSectionTitleText', sections.planSectionTitle);
     setTextContent('planIntroText', sections.planIntro);
     setTextContent('activitiesSectionTitleText', sections.activitiesSectionTitle);
+    setTextContent('activitiesIntroText', sections.activitiesIntro);
     setTextContent('planFileTitleText', sections.planFileTitle);
     setTextContent('planFileMetaText', sections.planFileMeta);
     setTextContent('planButtonText', sections.planButtonText);
+    setPlanDownloadLink(sections.planFileUrl);
     setTextContent('activity1MonthText', sections.activity1Month);
     setTextContent('activity1DayText', sections.activity1Day);
     setTextContent('activity1TitleText', sections.activity1Title);
@@ -616,6 +829,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setTextContent('activity3DescriptionText', sections.activity3Description);
     setTextContent('committeesTitleText', sections.committeesTitle);
     setTextContent('committeesIntroText', sections.committeesIntro);
+    renderCommitteeItems(sections.committeeItems);
     setTextContent('alumniCommitteeTitleText', sections.alumniCommitteeTitle);
     setTextContent('alumniCommitteeDescriptionText', sections.alumniCommitteeDescription);
     setTextContent('crisisCommitteeTitleText', sections.crisisCommitteeTitle);
@@ -624,6 +838,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setTextContent('communityCommitteeDescriptionText', sections.communityCommitteeDescription);
     setTextContent('protocolsTitleText', sections.protocolsTitle);
     setTextContent('protocolsIntroText', sections.protocolsIntro);
+    renderProtocolItems(sections.protocolItems);
     setTextContent('adminProtocolDescriptionText', sections.adminProtocolDescription);
     setTextContent('adminProtocolItem1Text', sections.adminProtocolItem1);
     setTextContent('adminProtocolItem2Text', sections.adminProtocolItem2);
@@ -632,6 +847,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setTextContent('notificationProtocolItem1Text', sections.notificationProtocolItem1);
     setTextContent('notificationProtocolItem2Text', sections.notificationProtocolItem2);
     setTextContent('notificationProtocolItem3Text', sections.notificationProtocolItem3);
+    renderActivityGroups(sections.activityGroups);
     setTextContent('servicesTitleText', sections.servicesTitle);
     setTextContent('alumniCardTitleText', sections.alumniCardTitle);
     setTextContent('alumniCardDescriptionText', sections.alumniCardDescription);
@@ -680,8 +896,8 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .catch(function (error) {
         console.error('Could not load managed content', error);
-        renderNews(parseManagedJson('managed-news-data'));
-        renderEvents(parseManagedJson('managed-events-data'));
+        renderNews(parsePreferredManagedJson('official-managed-news-data', 'managed-news-data'));
+        renderEvents(parsePreferredManagedJson('official-managed-events-data', 'managed-events-data'));
       });
   }
 

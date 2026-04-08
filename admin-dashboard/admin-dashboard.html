@@ -133,10 +133,11 @@
       <a class="nav-item-custom active" href="#overview"><i class="bi bi-grid-1x2-fill"></i> Overview</a>
       <a class="nav-item-custom" href="#newsManager"><i class="bi bi-newspaper"></i> News manager</a>
       <a class="nav-item-custom" href="#eventsManager"><i class="bi bi-calendar2-event-fill"></i> Events manager</a>
-      <a class="nav-item-custom" href="#galleryManager"><i class="bi bi-images"></i> Memories manager</a>
-      <a class="nav-item-custom" href="#alumniManager"><i class="bi bi-person-badge-fill"></i> Alumni manager</a>
-      <a class="nav-item-custom" href="#awardsManager"><i class="bi bi-award-fill"></i> Awards manager</a>
-      <a class="nav-item-custom" href="#siteContentManager"><i class="bi bi-window-stack"></i> Website content</a>
+      <a class="nav-item-custom" href="#objectivesManager"><i class="bi bi-list-check"></i> Objectives</a>
+      <a class="nav-item-custom" href="#committeesCrudManager"><i class="bi bi-diagram-3-fill"></i> Committees</a>
+      <a class="nav-item-custom" href="#protocolsCrudManager"><i class="bi bi-diagram-2-fill"></i> Protocols</a>
+      <a class="nav-item-custom" href="#activitiesCrudManager"><i class="bi bi-kanban-fill"></i> Activities</a>
+      <a class="nav-item-custom" href="#siteContentManager"><i class="bi bi-window-stack"></i> Static sections</a>
       <a class="nav-item-custom" href="#usersManager"><i class="bi bi-people-fill"></i> Users manager</a>
       <a class="nav-item-custom" href="#messagesManager"><i class="bi bi-envelope-paper-fill"></i> Contact messages</a>
       <a class="nav-item-custom" href="/website/index.html" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Open website</a>
@@ -329,29 +330,215 @@
           </section>
         </div>
 
+        <div class="col-12" id="objectivesManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Objectives Manager</div>
+                <div class="muted small">Add, edit, and delete the objective points shown in the sector overview.</div>
+              </div>
+              <span class="status-pill good"><i class="bi bi-list-check"></i> Repeatable content</span>
+            </div>
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage objective</h3><div class="muted small">Use one concise objective per card.</div></div>
+                <div class="editor-body">
+                  <form id="objectiveForm" class="manager-form">
+                    <input id="objectiveEditingIndex" type="hidden">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Objective text</label>
+                      <textarea id="objectiveText" class="form-control" rows="5" placeholder="Enter the objective text"></textarea>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="objectiveSubmitBtn" type="submit">Add objective</button>
+                      <button class="btn btn-outline-secondary" id="objectiveCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" id="objectiveClearBtn" type="button">Clear</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Current objectives</h3><div class="muted small">These are the objectives currently visible on the website.</div></div>
+                <div class="editor-body"><div id="objectivesManagerList" class="item-grid"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-12" id="committeesCrudManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Committees Manager</div>
+                <div class="muted small">Control the committee cards, responsibilities, and ordering shown on the website.</div>
+              </div>
+              <span class="status-pill good"><i class="bi bi-diagram-3-fill"></i> Repeatable content</span>
+            </div>
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage committee</h3><div class="muted small">One responsibility per line.</div></div>
+                <div class="editor-body">
+                  <form id="committeeCrudForm" class="manager-form">
+                    <input id="committeeCrudEditingIndex" type="hidden">
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-4"><label class="form-label fw-semibold">Committee ID</label><input id="committeeCrudId" class="form-control" placeholder="community-service-committee"></div>
+                      <div class="col-md-4"><label class="form-label fw-semibold">Icon class</label><input id="committeeCrudIcon" class="form-control" placeholder="fas fa-hands-helping"></div>
+                      <div class="col-md-4"><label class="form-label fw-semibold">Committee title</label><input id="committeeCrudTitle" class="form-control" placeholder="Community Service Committee"></div>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Summary</label><textarea id="committeeCrudSummary" class="form-control" rows="4" placeholder="Short committee summary"></textarea></div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Responsibilities</label><textarea id="committeeCrudResponsibilities" class="form-control" rows="8" placeholder="One responsibility per line"></textarea></div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="committeeCrudSubmitBtn" type="submit">Add committee</button>
+                      <button class="btn btn-outline-secondary" id="committeeCrudCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" id="committeeCrudClearBtn" type="button">Clear</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Current committees</h3><div class="muted small">Edit or remove any committee card shown on the homepage.</div></div>
+                <div class="editor-body"><div id="committeesCrudList" class="item-grid"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-12" id="protocolsCrudManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Protocols Manager</div>
+                <div class="muted small">Manage protocol cards, partner labels, descriptions, and images.</div>
+              </div>
+              <span class="status-pill good"><i class="bi bi-diagram-2-fill"></i> Repeatable content</span>
+            </div>
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage protocol</h3><div class="muted small">Upload or paste the image used for the protocol card.</div></div>
+                <div class="editor-body">
+                  <form id="protocolCrudForm" class="manager-form">
+                    <input id="protocolCrudEditingIndex" type="hidden">
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-4"><label class="form-label fw-semibold">Protocol ID</label><input id="protocolCrudId" class="form-control" placeholder="protocol-huawei"></div>
+                      <div class="col-md-8"><label class="form-label fw-semibold">Protocol title</label><input id="protocolCrudTitle" class="form-control" placeholder="Faculty of Information Technology and Huawei Technologies Egypt"></div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-6"><label class="form-label fw-semibold">Partner label</label><input id="protocolCrudPartner" class="form-control" placeholder="Huawei Academy partnership"></div>
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">Image URL / Path</label>
+                        <div class="image-input-row">
+                          <input id="protocolCrudImageUrl" class="form-control" placeholder="images/protocols/huawei-protocol.jpeg">
+                          <button class="btn btn-soft upload-btn" id="protocolCrudUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="protocolCrudImagePreview" class="thumbnail-preview">No image selected</div>
+                    <div class="mt-3 mb-3"><label class="form-label fw-semibold">Objective / Description</label><textarea id="protocolCrudObjective" class="form-control" rows="5" placeholder="Describe the protocol objective"></textarea></div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="protocolCrudSubmitBtn" type="submit">Add protocol</button>
+                      <button class="btn btn-outline-secondary" id="protocolCrudCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" id="protocolCrudClearBtn" type="button">Clear</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Current protocols</h3><div class="muted small">Edit or remove any protocol shown on the homepage.</div></div>
+                <div class="editor-body"><div id="protocolsCrudList" class="item-grid"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="col-12" id="activitiesCrudManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Activities Manager</div>
+                <div class="muted small">Manage both activity groups and the activity cards inside them.</div>
+              </div>
+              <span class="status-pill good"><i class="bi bi-kanban-fill"></i> Full content control</span>
+            </div>
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage activity group</h3><div class="muted small">Each group becomes a visible block on the website.</div></div>
+                <div class="editor-body">
+                  <form id="activityGroupForm" class="manager-form">
+                    <input id="activityGroupEditingIndex" type="hidden">
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-4"><label class="form-label fw-semibold">Group ID</label><input id="activityGroupId" class="form-control" placeholder="community-activities"></div>
+                      <div class="col-md-8"><label class="form-label fw-semibold">Group title</label><input id="activityGroupTitle" class="form-control" placeholder="Community Activities"></div>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Group intro</label><textarea id="activityGroupIntro" class="form-control" rows="4" placeholder="Short intro shown under the group title"></textarea></div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="activityGroupSubmitBtn" type="submit">Add group</button>
+                      <button class="btn btn-outline-secondary" id="activityGroupCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" id="activityGroupClearBtn" type="button">Clear</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Current activity groups</h3><div class="muted small">Delete a group to remove its activities as well.</div></div>
+                <div class="editor-body"><div id="activityGroupsCrudList" class="item-grid"></div></div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage activity item</h3><div class="muted small">One image URL per line. The first image is the starting slide.</div></div>
+                <div class="editor-body">
+                  <form id="activityItemForm" class="manager-form">
+                    <input id="activityItemEditingGroupIndex" type="hidden">
+                    <input id="activityItemEditingIndex" type="hidden">
+                    <div class="mb-3"><label class="form-label fw-semibold">Activity group</label><select id="activityItemGroupId" class="form-select"></select></div>
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-4"><label class="form-label fw-semibold">Date label</label><input id="activityItemDateLabel" class="form-control" placeholder="26 October 2024"></div>
+                      <div class="col-md-8"><label class="form-label fw-semibold">Activity title</label><input id="activityItemTitle" class="form-control" placeholder="Seminar Celebrating the Victory of 6 October"></div>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Summary</label><textarea id="activityItemSummary" class="form-control" rows="5" placeholder="Short activity summary"></textarea></div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Images</label>
+                      <div class="image-input-row">
+                        <textarea id="activityItemImages" class="form-control" rows="6" placeholder="One image URL or path per line"></textarea>
+                        <button class="btn btn-soft upload-btn" id="activityItemUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
+                      </div>
+                      <div id="activityItemImagePreview" class="thumbnail-preview">No image selected</div>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="activityItemSubmitBtn" type="submit">Add activity item</button>
+                      <button class="btn btn-outline-secondary" id="activityItemCancelEditBtn" type="button" hidden>Cancel edit</button>
+                      <button class="btn btn-soft" id="activityItemClearBtn" type="button">Clear</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Current activity items</h3><div class="muted small">Edit or remove any activity card shown under the groups.</div></div>
+                <div class="editor-body"><div id="activityItemsCrudList" class="item-grid"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
         <div class="col-12" id="siteContentManager">
           <section class="panel">
             <div class="toolbar">
               <div>
-                <div class="section-title mb-1">Website Content Manager</div>
-                <div class="muted small">Update the main published text, highlights, contact details, and homepage sections beyond news and events.</div>
+                <div class="section-title mb-1">Static Sections Manager</div>
+                <div class="muted small">Edit the fixed text sections of the homepage. Repeatable collections are managed in their own managers above.</div>
               </div>
               <span class="status-pill good"><i class="bi bi-layout-text-window-reverse"></i> Published homepage content</span>
             </div>
             <div class="editor-card">
               <div class="editor-header">
-                <h3 class="h5 mb-1">Homepage sections</h3>
-                <div class="muted small">Use this form to control the visible text of the main sections on the website.</div>
+                <h3 class="h5 mb-1">Homepage static content</h3>
+                <div class="muted small">Use this form for hero, vice dean, plan, contact, and footer text. Lists and cards are managed separately.</div>
               </div>
               <div class="editor-body">
                 <form id="siteContentForm" class="manager-form">
                   <div class="editor-grid">
                     <div class="section-block">
-                      <h4>Hero and Brief</h4>
+                      <h4>Hero</h4>
                       <div class="mb-3"><label class="form-label fw-semibold">Hero title</label><input id="contentHeroTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Brief title</label><input id="contentBriefTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Brief paragraph 1</label><textarea id="contentBriefParagraph1" class="form-control"></textarea></div>
-                      <div><label class="form-label fw-semibold">Brief paragraph 2</label><textarea id="contentBriefParagraph2" class="form-control"></textarea></div>
+                      <div class="editor-note">The homepage hero now uses the alumni memories images as a full-screen slider background.</div>
                     </div>
 
                     <div class="section-block">
@@ -378,10 +565,7 @@
                       <h4>Vision, Mission, Objectives</h4>
                       <div class="mb-3"><label class="form-label fw-semibold">Vision text</label><textarea id="contentVisionText" class="form-control"></textarea></div>
                       <div class="mb-3"><label class="form-label fw-semibold">Mission text</label><textarea id="contentMissionText" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Objective 1</label><input id="contentObjective1" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Objective 2</label><input id="contentObjective2" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Objective 3</label><input id="contentObjective3" class="form-control"></div>
-                      <div><label class="form-label fw-semibold">Objective 4</label><input id="contentObjective4" class="form-control"></div>
+                      <div class="editor-note">Objective items are managed from the dedicated Objectives Manager.</div>
                     </div>
 
                     <div class="section-block">
@@ -389,92 +573,34 @@
                       <div class="mb-3"><label class="form-label fw-semibold">Annual plan section title</label><input id="contentPlanSectionTitle" class="form-control"></div>
                       <div class="mb-3"><label class="form-label fw-semibold">Annual plan intro</label><textarea id="contentPlanIntro" class="form-control"></textarea></div>
                       <div class="mb-3"><label class="form-label fw-semibold">Activities section title</label><input id="contentActivitiesSectionTitle" class="form-control"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Activities intro</label><textarea id="contentActivitiesIntro" class="form-control"></textarea></div>
                       <div class="mb-3"><label class="form-label fw-semibold">Plan file title</label><input id="contentPlanFileTitle" class="form-control"></div>
                       <div class="mb-3"><label class="form-label fw-semibold">Plan file meta</label><input id="contentPlanFileMeta" class="form-control"></div>
                       <div class="mb-3"><label class="form-label fw-semibold">Plan button text</label><input id="contentPlanButtonText" class="form-control"></div>
-                      <div class="row g-3">
-                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 1 month</label><input id="contentActivity1Month" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 1 day</label><input id="contentActivity1Day" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 1 title</label><input id="contentActivity1Title" class="form-control"></div>
-                        <div class="col-12 mb-3"><label class="form-label fw-semibold">Activity 1 description</label><input id="contentActivity1Description" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 2 month</label><input id="contentActivity2Month" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 2 day</label><input id="contentActivity2Day" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 2 title</label><input id="contentActivity2Title" class="form-control"></div>
-                        <div class="col-12 mb-3"><label class="form-label fw-semibold">Activity 2 description</label><input id="contentActivity2Description" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 3 month</label><input id="contentActivity3Month" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 3 day</label><input id="contentActivity3Day" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label fw-semibold">Activity 3 title</label><input id="contentActivity3Title" class="form-control"></div>
-                        <div class="col-12"><label class="form-label fw-semibold">Activity 3 description</label><input id="contentActivity3Description" class="form-control"></div>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Plan file URL</label>
+                        <input id="contentPlanFileUrl" class="form-control" placeholder="files/uploads/your-plan.pdf">
                       </div>
+                      <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button class="btn btn-soft" id="planPdfUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload PDF</button>
+                        <button class="btn btn-outline-danger" id="planPdfRemoveBtn" type="button"><i class="bi bi-trash me-1"></i>Delete PDF</button>
+                        <a class="btn btn-outline-secondary" href="#" id="planFileLinkPreview" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1"></i>Open PDF</a>
+                      </div>
+                      <div class="editor-note">Activity groups and activity cards are managed from the Activities Manager.</div>
                     </div>
 
                     <div class="section-block">
                       <h4>Committees</h4>
                       <div class="mb-3"><label class="form-label fw-semibold">Section title</label><input id="contentCommitteesTitle" class="form-control"></div>
                       <div class="mb-3"><label class="form-label fw-semibold">Intro text</label><textarea id="contentCommitteesIntro" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Alumni follow-up title</label><input id="contentAlumniCommitteeTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Alumni follow-up description</label><textarea id="contentAlumniCommitteeDescription" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Crisis management title</label><input id="contentCrisisCommitteeTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Crisis management description</label><textarea id="contentCrisisCommitteeDescription" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Community service title</label><input id="contentCommunityCommitteeTitle" class="form-control"></div>
-                      <div><label class="form-label fw-semibold">Community service description</label><textarea id="contentCommunityCommitteeDescription" class="form-control"></textarea></div>
+                      <div class="editor-note">Committee cards are managed from the Committees Manager.</div>
                     </div>
 
                     <div class="section-block">
                       <h4>Protocols</h4>
                       <div class="mb-3"><label class="form-label fw-semibold">Section title</label><input id="contentProtocolsTitle" class="form-control"></div>
                       <div class="mb-3"><label class="form-label fw-semibold">Protocols intro</label><textarea id="contentProtocolsIntro" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Administrative protocol description</label><textarea id="contentAdminProtocolDescription" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Administrative item 1</label><input id="contentAdminProtocolItem1" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Administrative item 2</label><input id="contentAdminProtocolItem2" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Administrative item 3</label><input id="contentAdminProtocolItem3" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Notification protocol description</label><textarea id="contentNotificationProtocolDescription" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Notification item 1</label><input id="contentNotificationProtocolItem1" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Notification item 2</label><input id="contentNotificationProtocolItem2" class="form-control"></div>
-                      <div><label class="form-label fw-semibold">Notification item 3</label><input id="contentNotificationProtocolItem3" class="form-control"></div>
-                    </div>
-
-                    <div class="section-block">
-                      <h4>Services</h4>
-                      <div class="mb-3"><label class="form-label fw-semibold">Section title</label><input id="contentServicesTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card title</label><input id="contentAlumniCardTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Alumni card description</label><textarea id="contentAlumniCardDescription" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Benefits heading</label><input id="contentAlumniBenefitsTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Benefit 1</label><input id="contentAlumniBenefit1" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Benefit 2</label><input id="contentAlumniBenefit2" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Benefit 3</label><input id="contentAlumniBenefit3" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Benefit 4</label><input id="contentAlumniBenefit4" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Notice box text</label><textarea id="contentAlumniCardNotice" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Email service title</label><input id="contentEmailServiceTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Email service description</label><textarea id="contentEmailServiceDescription" class="form-control"></textarea></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Features heading</label><input id="contentServiceFeaturesTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Feature 1</label><input id="contentServiceFeature1" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Feature 2</label><input id="contentServiceFeature2" class="form-control"></div>
-                      <div><label class="form-label fw-semibold">Feature 3</label><input id="contentServiceFeature3" class="form-control"></div>
-                    </div>
-
-                    <div class="section-block">
-                      <h4>Alumni and Awards</h4>
-                      <div class="mb-3"><label class="form-label fw-semibold">Gallery title</label><input id="contentGalleryTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Notable alumni label</label><input id="contentNotableAlumniEyebrow" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Notable alumni title</label><input id="contentNotableAlumniTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Awards section title</label><input id="contentAwardsTitle" class="form-control"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Awards subtitle</label><textarea id="contentAwardsSubtitle" class="form-control"></textarea></div>
-                      <div class="mb-3">
-                        <label class="form-label fw-semibold">Alumni memories items JSON</label>
-                        <textarea id="contentGalleryItems" class="form-control" rows="9"></textarea>
-                        <div class="editor-note">Use JSON array items like: [{"imageUrl":"images/photo-slider1.jpeg","alt":"Gallery 1"}]</div>
-                      </div>
-                      <div class="mb-3">
-                        <label class="form-label fw-semibold">Notable alumni items JSON</label>
-                        <textarea id="contentNotableAlumniItems" class="form-control" rows="10"></textarea>
-                        <div class="editor-note">Use JSON array items like: [{"imageUrl":"images/Ahmed-Hatem.png","name":"Ahmed Hatem","text":"..."}]</div>
-                      </div>
-                      <div>
-                        <label class="form-label fw-semibold">Awards items JSON</label>
-                        <textarea id="contentAwardItems" class="form-control" rows="12"></textarea>
-                        <div class="editor-note">Use JSON array items like: [{"imageUrl":"images/Awards.png","title":"Kerolos Mousa","description1":"...","description2":"..."}]</div>
-                      </div>
+                      <div class="editor-note">Protocol cards are managed from the Protocols Manager.</div>
                     </div>
 
                     <div class="section-block">
@@ -501,126 +627,6 @@
                     <button class="btn btn-soft" id="resetSiteContentBtn" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset form</button>
                   </div>
                 </form>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <div class="col-12" id="galleryManager">
-          <section class="panel">
-            <div class="toolbar">
-              <div>
-                <div class="section-title mb-1">Alumni Memories Manager</div>
-                <div class="muted small">Add, edit, or delete slides in the Alumni Memories gallery.</div>
-              </div>
-            </div>
-            <div class="manager-stack">
-              <div class="editor-card">
-                <div class="editor-header"><h3 class="h5 mb-1">Manage memory slide</h3></div>
-                <div class="editor-body">
-                  <form id="galleryForm" class="manager-form">
-                    <input id="galleryEditingId" type="hidden">
-                    <div class="mb-3">
-                      <label class="form-label fw-semibold">Image URL / Path</label>
-                      <div class="image-input-row">
-                        <input id="galleryImageUrl" class="form-control" placeholder="images/photo-slider1.jpeg" required>
-                        <button class="btn btn-soft upload-btn" id="galleryUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
-                      </div>
-                      <div id="galleryImagePreview" class="thumbnail-preview">No image selected</div>
-                    </div>
-                    <div class="mb-3"><label class="form-label fw-semibold">Alt text</label><input id="galleryAlt" class="form-control" placeholder="Gallery 1"></div>
-                    <div class="d-flex gap-2 flex-wrap mt-4">
-                      <button class="btn btn-must flex-grow-1" id="gallerySubmitBtn" type="submit">Add memory slide</button>
-                      <button class="btn btn-outline-secondary" id="galleryCancelEditBtn" type="button" hidden>Cancel edit</button>
-                      <button class="btn btn-soft" type="reset">Clear</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-              <div class="editor-card">
-                <div class="editor-header"><h3 class="h5 mb-1">Current memory slides</h3></div>
-                <div class="editor-body"><div id="galleryList" class="item-grid"></div></div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <div class="col-12" id="alumniManager">
-          <section class="panel">
-            <div class="toolbar">
-              <div>
-                <div class="section-title mb-1">Notable Alumni Manager</div>
-                <div class="muted small">Manage cards shown in Notable Alumni / What Our Alumni Say.</div>
-              </div>
-            </div>
-            <div class="manager-stack">
-              <div class="editor-card">
-                <div class="editor-header"><h3 class="h5 mb-1">Manage alumni card</h3></div>
-                <div class="editor-body">
-                  <form id="alumniForm" class="manager-form">
-                    <input id="alumniEditingId" type="hidden">
-                    <div class="mb-3"><label class="form-label fw-semibold">Name</label><input id="alumniName" class="form-control" required></div>
-                    <div class="mb-3">
-                      <label class="form-label fw-semibold">Image URL / Path</label>
-                      <div class="image-input-row">
-                        <input id="alumniImageUrl" class="form-control" placeholder="images/Ahmed-Hatem.png" required>
-                        <button class="btn btn-soft upload-btn" id="alumniUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
-                      </div>
-                      <div id="alumniImagePreview" class="thumbnail-preview">No image selected</div>
-                    </div>
-                    <div class="mb-3"><label class="form-label fw-semibold">Description</label><textarea id="alumniText" class="form-control" rows="5" required></textarea></div>
-                    <div class="d-flex gap-2 flex-wrap mt-4">
-                      <button class="btn btn-must flex-grow-1" id="alumniSubmitBtn" type="submit">Add alumni card</button>
-                      <button class="btn btn-outline-secondary" id="alumniCancelEditBtn" type="button" hidden>Cancel edit</button>
-                      <button class="btn btn-soft" type="reset">Clear</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-              <div class="editor-card">
-                <div class="editor-header"><h3 class="h5 mb-1">Current alumni cards</h3></div>
-                <div class="editor-body"><div id="alumniList" class="item-grid"></div></div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <div class="col-12" id="awardsManager">
-          <section class="panel">
-            <div class="toolbar">
-              <div>
-                <div class="section-title mb-1">Awards Manager</div>
-                <div class="muted small">Manage slides shown in Awards &amp; Certificates.</div>
-              </div>
-            </div>
-            <div class="manager-stack">
-              <div class="editor-card">
-                <div class="editor-header"><h3 class="h5 mb-1">Manage award slide</h3></div>
-                <div class="editor-body">
-                  <form id="awardForm" class="manager-form">
-                    <input id="awardEditingId" type="hidden">
-                    <div class="mb-3"><label class="form-label fw-semibold">Title</label><input id="awardTitle" class="form-control" required></div>
-                    <div class="mb-3">
-                      <label class="form-label fw-semibold">Image URL / Path</label>
-                      <div class="image-input-row">
-                        <input id="awardImageUrl" class="form-control" placeholder="images/Awards.png" required>
-                        <button class="btn btn-soft upload-btn" id="awardUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
-                      </div>
-                      <div id="awardImagePreview" class="thumbnail-preview">No image selected</div>
-                    </div>
-                    <div class="mb-3"><label class="form-label fw-semibold">Description 1</label><textarea id="awardDescription1" class="form-control" rows="4" required></textarea></div>
-                    <div class="mb-3"><label class="form-label fw-semibold">Description 2</label><textarea id="awardDescription2" class="form-control" rows="4"></textarea></div>
-                    <div class="d-flex gap-2 flex-wrap mt-4">
-                      <button class="btn btn-must flex-grow-1" id="awardSubmitBtn" type="submit">Add award slide</button>
-                      <button class="btn btn-outline-secondary" id="awardCancelEditBtn" type="button" hidden>Cancel edit</button>
-                      <button class="btn btn-soft" type="reset">Clear</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-              <div class="editor-card">
-                <div class="editor-header"><h3 class="h5 mb-1">Current awards slides</h3></div>
-                <div class="editor-body"><div id="awardList" class="item-grid"></div></div>
               </div>
             </div>
           </section>
@@ -663,6 +669,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- legacy dashboard script removed -->
-  <script src="dashboard.js?v=20260407g"></script>
+  <script src="dashboard.js?v=20260408c"></script>
 </body>
 </html>

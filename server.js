@@ -17,6 +17,8 @@ const DATA_DIR = path.join(ROOT, 'data');
 const DB_PATH = path.join(DATA_DIR, 'app.db');
 const MAIL_LOG_PATH = path.join(DATA_DIR, 'mail-log.txt');
 const UPLOADS_DIR = path.join(ROOT, 'website', 'images', 'uploads');
+const FILE_UPLOADS_DIR = path.join(ROOT, 'website', 'files', 'uploads');
+const CURATED_SITE_CONTENT = require('./content/sector-content.json');
 const SITE_CONTENT_KEY = 'homepage';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'must-dev-session-secret';
 const PORT = Number(process.env.PORT || 3000);
@@ -24,10 +26,18 @@ const CONFIGURED_BASE_URL = normalizeBaseUrl(process.env.BASE_URL);
 const BASE_URL = CONFIGURED_BASE_URL || `http://127.0.0.1:${PORT}`;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@must.edu.eg';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MustAdmin2026!';
+const MAIL_HOST = process.env.BREVO_SMTP_HOST || process.env.SMTP_HOST || '';
+const MAIL_PORT = Number(process.env.BREVO_SMTP_PORT || process.env.SMTP_PORT || 0);
+const MAIL_USER = process.env.BREVO_SMTP_LOGIN || process.env.SMTP_USER || '';
+const MAIL_PASS = process.env.BREVO_SMTP_PASSWORD || process.env.SMTP_PASS || '';
+const MAIL_FROM_EMAIL = process.env.MAIL_FROM_EMAIL || process.env.SMTP_FROM || MAIL_USER;
+const MAIL_FROM_NAME = process.env.MAIL_FROM_NAME || 'MUST';
+const MAIL_SECURE = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true';
 const SQLiteStore = SQLiteStoreFactory(session);
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+fs.mkdirSync(FILE_UPLOADS_DIR, { recursive: true });
 
 const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
@@ -149,6 +159,8 @@ const DEFAULT_SITE_CONTENT = {
   footerCopyright: 'Copyright All Right Reserved @ MUST UNIVERSITY 2025'
 };
 
+Object.assign(DEFAULT_SITE_CONTENT, CURATED_SITE_CONTENT);
+
 function runMigrations() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -217,11 +229,9 @@ function seedDefaultContent() {
   const newsCount = db.prepare('SELECT COUNT(*) AS count FROM news').get().count;
   if (!newsCount) {
     const seedNews = [
-      ['23 February 2026', 'Participation of Misr University for Science and Technology in the Cairo International Book Fair (57th Edition)', 'images/bookfair-news.jpg', 'Read more', '#https://must.edu.eg/news/participation-of-misr-university-for-science-and-technology-in-the-cairo-international-book-fair-57th-edition/'],
-      ['08 March 2026', 'Seminar: Towards a Confident Generation: Balancing Faith and Community Effectiveness - MUST Reading Club', 'images/seminar-news.jpg', 'Read more', '#https://must.edu.eg/news/seminar-towards-a-confident-generation-balancing-faith-and-community-effectiveness-must-reading-club/'],
-      ['March 23, 2025', 'The Fourth Forum for Students and Graduates of the College', 'images/news-3.jpg', 'Read more', '#'],
-      ['January 23, 2024', 'The First Scientific Day at The British Council Egypt for The Orientation of The Masters of Implantology in collaboration with Huddersfield University', 'images/news-2.jpg', 'Read more', '#'],
-      ['January 23, 2023', 'The Official Signing of a Collaboration Protocol between Ege Universitesi in Turkey and Misr University for Science and Technology', 'images/photo-slider1.jpeg', 'Read more', '#https://www.facebook.com/share/p/1KtP8AfiGE/']
+      ['09 March 2026', 'MUST University Celebrates the International Day of Women and Girls in Science', 'images/official/news-women-girls-science.jpg', 'Read More', 'https://must.edu.eg/news/must-university-celebrates-the-international-day-of-women-and-girls-in-science/'],
+      ['08 March 2026', 'Seminar:Towards a Confident Generation: Balancing Faith and Community Effectiveness-MUST Reading Club', 'images/official/news-reading-club.jpg', 'Read More', 'https://must.edu.eg/news/seminar-towards-a-confident-generation-balancing-faith-and-community-effectiveness-must-reading-club/'],
+      ['23 February 2026', 'Participation of Misr University for Science and Technology in the Cairo International Book Fair (57th Edition)', 'images/official/news-book-fair.jpg', 'Read More', 'https://must.edu.eg/news/participation-of-misr-university-for-science-and-technology-in-the-cairo-international-book-fair-57th-edition/']
     ];
     const insertNews = db.prepare(`
       INSERT INTO news (badge, title, image_url, link_text, link_url, sort_order, created_at)
@@ -235,11 +245,9 @@ function seedDefaultContent() {
   const eventsCount = db.prepare('SELECT COUNT(*) AS count FROM events').get().count;
   if (!eventsCount) {
     const seedEvents = [
-      ['4', 'Feb', 'Ferrari: Driving Luxury Beyond the Road', 'MUST proudly hosts Rome Business School for a featured event.', 'images/ferrari-event.jpeg', 'Register Now', '#https://must.edu.eg/event/ferrari-driving-luxury-beyond-the-road/'],
-      ['23', 'Feb', 'MUST Cultural Day', 'Meet us on Sunday, 23rd of February 2025, for a vibrant cultural day.', 'images/event-4.jpg', 'Register Now', 'https://must.edu.eg/event/must-cultural-day/'],
-      ['11', 'Dec', 'MUST Winter Festival', 'A seasonal celebration with activities, music, and campus gatherings.', 'images/event-3.jpg', 'Register Now', 'https://must.edu.eg/event/must-winter-festival/'],
-      ['11', 'Feb', 'International Day for Women and Girls in Science Celebration', 'The College of Medicine celebrates science leadership and achievement.', 'images/event-2.jpeg', 'Register Now', '#https://must.edu.eg/event/international-day-for-women-and-girls-in-science-celebration/'],
-      ['6', 'Nov', 'College of Information Technology conference entitled Artificial Intelligence for Environmental Sustainability', 'A conference highlighting AI applications for environmental sustainability.', '', 'Register Now', 'https://must.edu.eg/event/college-of-information-technology-conference-entitle-artificial-intelligence-for-environmental-sustainability-2/']
+      ['04', 'Feb', 'Ferrari: Driving Luxury Beyond the Road', 'MUST proudly hosts Rome Business School for a global case study on innovation, AI, and strategic thinking behind Ferrari.', 'images/official/event-ferrari.jpeg', 'Read More', 'https://must.edu.eg/event/ferrari-driving-luxury-beyond-the-road/'],
+      ['09', 'Dec', 'Annual Scientific Day', 'The College of Biotechnology at Misr University for Science and Technology showcases innovation, student projects, and scientific excellence.', 'images/official/event-annual-scientific-day.png', 'Read More', 'https://must.edu.eg/event/annual-scientific-day/'],
+      ['06', 'Nov', 'College of Information Technology conference entitle "Artificial Intelligence for Environmental Sustainability"', 'The College of Information Technology highlights how AI can support sustainable development, climate action, and natural resource management.', 'images/official/event-ai-sustainability.png', 'Read More', 'https://must.edu.eg/event/college-of-information-technology-conference-entitle-artificial-intelligence-for-environmental-sustainability-2/']
     ];
     const insertEvent = db.prepare(`
       INSERT INTO events (day, month_year, title, summary, image_url, link_text, link_url, sort_order, created_at)
@@ -277,17 +285,17 @@ seedDefaultContent();
 seedAdmin();
 
 function createTransporter() {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_PORT || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  if (!MAIL_HOST || !MAIL_PORT || !MAIL_USER || !MAIL_PASS) {
     return null;
   }
 
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: process.env.SMTP_SECURE === 'true',
+    host: MAIL_HOST,
+    port: MAIL_PORT,
+    secure: MAIL_SECURE,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
+      user: MAIL_USER,
+      pass: MAIL_PASS
     }
   });
 }
@@ -310,13 +318,22 @@ async function sendActivationEmail(user, token, baseUrl) {
   const activationUrl = `${normalizeBaseUrl(baseUrl || BASE_URL)}/activate.html?token=${encodeURIComponent(token)}`;
   const subject = 'Activate your MUST website account';
   const text = `Hello ${user.name},\n\nActivate your account by opening this link:\n${activationUrl}\n\nIf you did not create this account, ignore this email.`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.7;color:#1f2937;">
+      <p>Hello ${user.name},</p>
+      <p>Activate your account by opening this link:</p>
+      <p><a href="${activationUrl}" style="color:#1d4ed8;">${activationUrl}</a></p>
+      <p>If you did not create this account, ignore this email.</p>
+    </div>
+  `;
 
   if (transporter) {
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from: MAIL_FROM_NAME ? `"${MAIL_FROM_NAME}" <${MAIL_FROM_EMAIL}>` : MAIL_FROM_EMAIL,
       to: user.email,
       subject,
-      text
+      text,
+      html
     });
   } else {
     logMail(user.email, subject, text);
@@ -568,52 +585,104 @@ app.post('/api/contact', (req, res) => {
   res.status(201).json({ ok: true, message: 'Your message has been sent successfully' });
 });
 
-app.post('/api/admin/assets', requireAdmin, (req, res) => {
-  const fileName = String(req.body.fileName || 'image').trim();
-  const dataUrl = String(req.body.dataUrl || '').trim();
-  const match = dataUrl.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/);
-
-  if (!match) {
-    return res.status(400).json({ ok: false, error: 'Please upload a valid image file' });
+function deleteManagedAsset(assetUrl) {
+  const normalized = String(assetUrl || '').trim().replace(/^\/+/, '').replace(/\\/g, '/');
+  if (!normalized) {
+    return { deleted: false, error: 'Missing asset path' };
   }
 
-  const extensionMap = {
+  const allowedPrefixes = ['images/uploads/', 'files/uploads/', 'files/plans/'];
+  if (!allowedPrefixes.some((prefix) => normalized.startsWith(prefix))) {
+    return { deleted: false, error: 'Only uploaded assets can be deleted' };
+  }
+
+  const absolutePath = path.join(ROOT, 'website', normalized.split('/').join(path.sep));
+  const imagesRoot = path.join(ROOT, 'website', 'images', 'uploads');
+  const filesRoot = path.join(ROOT, 'website', 'files', 'uploads');
+  const plansRoot = path.join(ROOT, 'website', 'files', 'plans');
+  const isInsideAllowedRoot =
+    absolutePath.startsWith(imagesRoot) ||
+    absolutePath.startsWith(filesRoot) ||
+    absolutePath.startsWith(plansRoot);
+
+  if (!isInsideAllowedRoot) {
+    return { deleted: false, error: 'Invalid asset path' };
+  }
+
+  if (fs.existsSync(absolutePath)) {
+    fs.unlinkSync(absolutePath);
+  }
+
+  return { deleted: true };
+}
+
+app.post('/api/admin/assets', requireAdmin, (req, res) => {
+  const fileName = String(req.body.fileName || 'asset').trim();
+  const dataUrl = String(req.body.dataUrl || '').trim();
+  const match = dataUrl.match(/^data:(image\/([a-zA-Z0-9+.-]+)|application\/pdf);base64,(.+)$/);
+
+  if (!match) {
+    return res.status(400).json({ ok: false, error: 'Please upload a valid image or PDF file' });
+  }
+
+  const mimeType = String(match[1] || '').toLowerCase();
+  const imageExtensionMap = {
     jpeg: 'jpg',
     jpg: 'jpg',
     png: 'png',
     webp: 'webp',
     gif: 'gif'
   };
-  const extension = extensionMap[String(match[1] || '').toLowerCase()];
+
+  const isPdf = mimeType === 'application/pdf';
+  const extensionMap = {
+    pdf: 'pdf'
+  };
+  const extension = isPdf
+    ? extensionMap.pdf
+    : imageExtensionMap[String(match[2] || '').toLowerCase()];
   if (!extension) {
-    return res.status(400).json({ ok: false, error: 'Only JPG, PNG, WEBP, and GIF files are supported' });
+    return res.status(400).json({ ok: false, error: 'Only JPG, PNG, WEBP, GIF, and PDF files are supported' });
   }
 
   let buffer;
   try {
-    buffer = Buffer.from(match[2], 'base64');
+    buffer = Buffer.from(match[3], 'base64');
   } catch (error) {
-    return res.status(400).json({ ok: false, error: 'The uploaded image could not be decoded' });
+    return res.status(400).json({ ok: false, error: 'The uploaded file could not be decoded' });
   }
 
-  if (!buffer.length || buffer.length > 8 * 1024 * 1024) {
-    return res.status(400).json({ ok: false, error: 'Image size must be between 1 byte and 8 MB' });
+  const maxBytes = isPdf ? 20 * 1024 * 1024 : 8 * 1024 * 1024;
+  if (!buffer.length || buffer.length > maxBytes) {
+    return res.status(400).json({ ok: false, error: isPdf ? 'PDF size must be between 1 byte and 20 MB' : 'Image size must be between 1 byte and 8 MB' });
   }
 
-  const originalBaseName = path.basename(fileName, path.extname(fileName)) || 'image';
+  const originalBaseName = path.basename(fileName, path.extname(fileName)) || 'asset';
   const safeBaseName = originalBaseName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-    .slice(0, 40) || 'image';
+    .slice(0, 40) || 'asset';
 
   const storedFileName = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}-${safeBaseName}.${extension}`;
-  fs.writeFileSync(path.join(UPLOADS_DIR, storedFileName), buffer);
+  const targetDir = isPdf ? FILE_UPLOADS_DIR : UPLOADS_DIR;
+  const assetUrl = `${isPdf ? 'files/uploads' : 'images/uploads'}/${storedFileName}`;
+  fs.writeFileSync(path.join(targetDir, storedFileName), buffer);
 
   res.status(201).json({
     ok: true,
-    imageUrl: `images/uploads/${storedFileName}`
+    fileUrl: assetUrl,
+    imageUrl: isPdf ? null : assetUrl,
+    assetType: isPdf ? 'pdf' : 'image'
   });
+});
+
+app.delete('/api/admin/assets', requireAdmin, (req, res) => {
+  const result = deleteManagedAsset(req.body && req.body.assetUrl);
+  if (!result.deleted) {
+    return res.status(400).json({ ok: false, error: result.error || 'Could not delete the selected asset' });
+  }
+  res.json({ ok: true, message: 'Asset deleted successfully' });
 });
 
 function listNews() {

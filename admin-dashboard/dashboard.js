@@ -31,12 +31,15 @@
     objective2: 'Qualifying graduates for the labor market through specialized training programs and partnerships with various institutions.',
     objective3: 'Enhance crisis management protocols.',
     objective4: 'Foster community partnerships.',
+    objectiveItems: [],
     planSectionTitle: "Sector's Annual Plan",
     planIntro: 'Our annual plan outlines strategic initiatives aimed at community engagement, environmental preservation, and alumni support for the current academic year.',
     activitiesSectionTitle: "Sector's Activities",
+    activitiesIntro: '',
     planFileTitle: 'Annual Plan 2025/2026',
     planFileMeta: 'PDF Document (2.4 MB)',
     planButtonText: 'Download',
+    planFileUrl: '',
     activity1Month: 'OCT',
     activity1Day: '15',
     activity1Title: 'Annual Alumni Employment Fair',
@@ -51,6 +54,7 @@
     activity3Description: 'Providing medical services to surrounding districts.',
     committeesTitle: "Sector's Committees",
     committeesIntro: 'The sector operates through specialized committees dedicated to ensuring the safety, success, and continuous development of our university community and alumni.',
+    committeeItems: [],
     alumniCommitteeTitle: 'Alumni Follow-up',
     alumniCommitteeDescription: 'Dedicated to tracking graduate success, facilitating communication between the university and its alumni, and gathering feedback to improve academic programs.',
     crisisCommitteeTitle: 'Crisis Management',
@@ -59,6 +63,7 @@
     communityCommitteeDescription: 'Focuses on organizing outreach programs, charity drives, and educational initiatives that benefit the local communities surrounding the university campus.',
     protocolsTitle: 'Protocols',
     protocolsIntro: 'A dedicated section for the protocols requested in the paper. The visible note clearly points to administrative protocols and a notification protocol, so both are included below in a clean English version.',
+    protocolItems: [],
     adminProtocolDescription: 'Administrative protocols organize approvals, documentation flow, internal coordination, and follow-up responsibilities for the sector.',
     adminProtocolItem1: 'Internal approvals and official documentation',
     adminProtocolItem2: 'Sector coordination and workflow management',
@@ -67,6 +72,7 @@
     notificationProtocolItem1: 'Official notices and alert handling',
     notificationProtocolItem2: 'Communication to staff, students, and graduates',
     notificationProtocolItem3: 'Clear delivery channels and response tracking',
+    activityGroups: [],
     servicesTitle: 'Alumni Services',
     alumniCardTitle: 'Alumni excellence card',
     alumniCardDescription: "University graduates can receive it for a sum in Egyptian pounds and expires every two years. Payment is made in cash or at one of the university's banks.",
@@ -180,6 +186,11 @@
   const viceDeanUploadBtn = document.getElementById('viceDeanUploadBtn');
   const viceDeanImagePreview = document.getElementById('viceDeanImagePreview');
   const viceDeanImageInput = document.getElementById('contentViceDeanImageUrl');
+  const planPdfUploadBtn = document.getElementById('planPdfUploadBtn');
+  const planPdfRemoveBtn = document.getElementById('planPdfRemoveBtn');
+  const planFileUrlInput = document.getElementById('contentPlanFileUrl');
+  const planFileMetaInput = document.getElementById('contentPlanFileMeta');
+  const planFileLinkPreview = document.getElementById('planFileLinkPreview');
   const galleryForm = document.getElementById('galleryForm');
   const galleryEditingIdInput = document.getElementById('galleryEditingId');
   const galleryImageInput = document.getElementById('galleryImageUrl');
@@ -210,6 +221,60 @@
   const awardUploadBtn = document.getElementById('awardUploadBtn');
   const awardImagePreview = document.getElementById('awardImagePreview');
   const awardList = document.getElementById('awardList');
+  const objectiveForm = document.getElementById('objectiveForm');
+  const objectiveEditingIndexInput = document.getElementById('objectiveEditingIndex');
+  const objectiveTextInput = document.getElementById('objectiveText');
+  const objectiveSubmitBtn = document.getElementById('objectiveSubmitBtn');
+  const objectiveCancelEditBtn = document.getElementById('objectiveCancelEditBtn');
+  const objectiveClearBtn = document.getElementById('objectiveClearBtn');
+  const objectivesManagerList = document.getElementById('objectivesManagerList');
+  const committeeCrudForm = document.getElementById('committeeCrudForm');
+  const committeeCrudEditingIndexInput = document.getElementById('committeeCrudEditingIndex');
+  const committeeCrudIdInput = document.getElementById('committeeCrudId');
+  const committeeCrudIconInput = document.getElementById('committeeCrudIcon');
+  const committeeCrudTitleInput = document.getElementById('committeeCrudTitle');
+  const committeeCrudSummaryInput = document.getElementById('committeeCrudSummary');
+  const committeeCrudResponsibilitiesInput = document.getElementById('committeeCrudResponsibilities');
+  const committeeCrudSubmitBtn = document.getElementById('committeeCrudSubmitBtn');
+  const committeeCrudCancelEditBtn = document.getElementById('committeeCrudCancelEditBtn');
+  const committeeCrudClearBtn = document.getElementById('committeeCrudClearBtn');
+  const committeesCrudList = document.getElementById('committeesCrudList');
+  const protocolCrudForm = document.getElementById('protocolCrudForm');
+  const protocolCrudEditingIndexInput = document.getElementById('protocolCrudEditingIndex');
+  const protocolCrudIdInput = document.getElementById('protocolCrudId');
+  const protocolCrudTitleInput = document.getElementById('protocolCrudTitle');
+  const protocolCrudPartnerInput = document.getElementById('protocolCrudPartner');
+  const protocolCrudObjectiveInput = document.getElementById('protocolCrudObjective');
+  const protocolCrudImageInput = document.getElementById('protocolCrudImageUrl');
+  const protocolCrudSubmitBtn = document.getElementById('protocolCrudSubmitBtn');
+  const protocolCrudCancelEditBtn = document.getElementById('protocolCrudCancelEditBtn');
+  const protocolCrudClearBtn = document.getElementById('protocolCrudClearBtn');
+  const protocolCrudUploadBtn = document.getElementById('protocolCrudUploadBtn');
+  const protocolCrudImagePreview = document.getElementById('protocolCrudImagePreview');
+  const protocolsCrudList = document.getElementById('protocolsCrudList');
+  const activityGroupForm = document.getElementById('activityGroupForm');
+  const activityGroupEditingIndexInput = document.getElementById('activityGroupEditingIndex');
+  const activityGroupIdInput = document.getElementById('activityGroupId');
+  const activityGroupTitleInput = document.getElementById('activityGroupTitle');
+  const activityGroupIntroInput = document.getElementById('activityGroupIntro');
+  const activityGroupSubmitBtn = document.getElementById('activityGroupSubmitBtn');
+  const activityGroupCancelEditBtn = document.getElementById('activityGroupCancelEditBtn');
+  const activityGroupClearBtn = document.getElementById('activityGroupClearBtn');
+  const activityGroupsCrudList = document.getElementById('activityGroupsCrudList');
+  const activityItemForm = document.getElementById('activityItemForm');
+  const activityItemEditingGroupIndexInput = document.getElementById('activityItemEditingGroupIndex');
+  const activityItemEditingIndexInput = document.getElementById('activityItemEditingIndex');
+  const activityItemGroupSelect = document.getElementById('activityItemGroupId');
+  const activityItemDateLabelInput = document.getElementById('activityItemDateLabel');
+  const activityItemTitleInput = document.getElementById('activityItemTitle');
+  const activityItemSummaryInput = document.getElementById('activityItemSummary');
+  const activityItemImagesInput = document.getElementById('activityItemImages');
+  const activityItemUploadBtn = document.getElementById('activityItemUploadBtn');
+  const activityItemImagePreview = document.getElementById('activityItemImagePreview');
+  const activityItemSubmitBtn = document.getElementById('activityItemSubmitBtn');
+  const activityItemCancelEditBtn = document.getElementById('activityItemCancelEditBtn');
+  const activityItemClearBtn = document.getElementById('activityItemClearBtn');
+  const activityItemsCrudList = document.getElementById('activityItemsCrudList');
 
   const state = {
     news: [],
@@ -316,12 +381,19 @@
     return new Promise(function (resolve, reject) {
       const reader = new FileReader();
       reader.onload = function () { resolve(reader.result); };
-      reader.onerror = function () { reject(new Error('Could not read the image file')); };
+      reader.onerror = function () { reject(new Error('Could not read the selected file')); };
       reader.readAsDataURL(file);
     });
   }
 
-  function uploadImage(file) {
+  function formatFileSize(size) {
+    if (!size || size < 1024) return 'PDF Document';
+    const kb = size / 1024;
+    if (kb < 1024) return 'PDF Document (' + kb.toFixed(0) + ' KB)';
+    return 'PDF Document (' + (kb / 1024).toFixed(2) + ' MB)';
+  }
+
+  function uploadAsset(file) {
     return fileToDataUrl(file).then(function (dataUrl) {
       return apiRequest(ASSET_UPLOAD_API, {
         method: 'POST',
@@ -329,6 +401,35 @@
         body: JSON.stringify({ fileName: file.name, dataUrl: dataUrl })
       });
     });
+  }
+
+  function uploadImage(file) {
+    return uploadAsset(file);
+  }
+
+  function uploadDocument(file) {
+    return uploadAsset(file);
+  }
+
+  function deleteAsset(assetUrl) {
+    return apiRequest(ASSET_UPLOAD_API, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetUrl: assetUrl })
+    });
+  }
+
+  function updatePlanFilePreview(url) {
+    if (!planFileLinkPreview) return;
+    if (!url) {
+      planFileLinkPreview.setAttribute('href', '#');
+      planFileLinkPreview.setAttribute('aria-disabled', 'true');
+      planFileLinkPreview.classList.add('disabled');
+      return;
+    }
+    planFileLinkPreview.setAttribute('href', resolveAssetUrl(url));
+    planFileLinkPreview.removeAttribute('aria-disabled');
+    planFileLinkPreview.classList.remove('disabled');
   }
 
   function bindUploadButton(button, targetInput, previewNode) {
@@ -380,6 +481,7 @@
       }
     });
     updateImagePreview(viceDeanImagePreview, sections.viceDeanImageUrl);
+    updatePlanFilePreview(sections.planFileUrl);
   }
 
   function parseJsonField(id, fallbackValue) {
@@ -394,12 +496,54 @@
     }
   }
 
+  function slugifyValue(value, fallbackValue) {
+    var slug = String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return slug || fallbackValue || ('item-' + Date.now());
+  }
+
+  function parseLineList(value) {
+    return String(value || '')
+      .split(/\r?\n/)
+      .map(function (line) { return line.trim(); })
+      .filter(Boolean);
+  }
+
+  function joinLineList(items) {
+    return Array.isArray(items) ? items.filter(Boolean).join('\n') : '';
+  }
+
+  function getPrimaryActivityImage(item) {
+    return Array.isArray(item && item.images) && item.images.length ? item.images[0] : '';
+  }
+
+  function updateActivityImagePreview() {
+    updateImagePreview(activityItemImagePreview, getPrimaryActivityImage({ images: parseLineList(activityItemImagesInput ? activityItemImagesInput.value : '') }));
+  }
+
+  function refreshActivityGroupOptions() {
+    if (!activityItemGroupSelect) return;
+    var groups = Array.isArray(state.sections.activityGroups) ? state.sections.activityGroups : [];
+    var currentValue = activityItemGroupSelect.value;
+    if (!groups.length) {
+      activityItemGroupSelect.innerHTML = '<option value="">Create a group first</option>';
+      return;
+    }
+    activityItemGroupSelect.innerHTML = groups.map(function (group) {
+      return '<option value="' + escapeHtml(group.id || '') + '">' + escapeHtml(group.title || group.id || 'Group') + '</option>';
+    }).join('');
+    if (currentValue && groups.some(function (group) { return group.id === currentValue; })) {
+      activityItemGroupSelect.value = currentValue;
+    }
+  }
+
   function readSiteContentForm() {
-    return normalizeSections({
+    var existing = normalizeSections(state.sections);
+    return normalizeSections(Object.assign({}, existing, {
       heroTitle: getInputValue('contentHeroTitle'),
-      briefTitle: getInputValue('contentBriefTitle'),
-      briefParagraph1: getInputValue('contentBriefParagraph1'),
-      briefParagraph2: getInputValue('contentBriefParagraph2'),
       viceDeanSectionTitle: getInputValue('contentViceDeanSectionTitle'),
       viceDeanHeading: getInputValue('contentViceDeanHeading'),
       viceDeanParagraph1: getInputValue('contentViceDeanParagraph1'),
@@ -411,69 +555,52 @@
       viceDeanImageUrl: getInputValue('contentViceDeanImageUrl'),
       visionText: getInputValue('contentVisionText'),
       missionText: getInputValue('contentMissionText'),
-      objective1: getInputValue('contentObjective1'),
-      objective2: getInputValue('contentObjective2'),
-      objective3: getInputValue('contentObjective3'),
-      objective4: getInputValue('contentObjective4'),
+      objective1: getInputValue('contentObjective1') || existing.objective1,
+      objective2: getInputValue('contentObjective2') || existing.objective2,
+      objective3: getInputValue('contentObjective3') || existing.objective3,
+      objective4: getInputValue('contentObjective4') || existing.objective4,
+      objectiveItems: parseJsonField('contentObjectiveItems', Array.isArray(existing.objectiveItems) ? existing.objectiveItems : []),
       planSectionTitle: getInputValue('contentPlanSectionTitle'),
       planIntro: getInputValue('contentPlanIntro'),
       activitiesSectionTitle: getInputValue('contentActivitiesSectionTitle'),
+      activitiesIntro: getInputValue('contentActivitiesIntro'),
       planFileTitle: getInputValue('contentPlanFileTitle'),
       planFileMeta: getInputValue('contentPlanFileMeta'),
       planButtonText: getInputValue('contentPlanButtonText'),
-      activity1Month: getInputValue('contentActivity1Month'),
-      activity1Day: getInputValue('contentActivity1Day'),
-      activity1Title: getInputValue('contentActivity1Title'),
-      activity1Description: getInputValue('contentActivity1Description'),
-      activity2Month: getInputValue('contentActivity2Month'),
-      activity2Day: getInputValue('contentActivity2Day'),
-      activity2Title: getInputValue('contentActivity2Title'),
-      activity2Description: getInputValue('contentActivity2Description'),
-      activity3Month: getInputValue('contentActivity3Month'),
-      activity3Day: getInputValue('contentActivity3Day'),
-      activity3Title: getInputValue('contentActivity3Title'),
-      activity3Description: getInputValue('contentActivity3Description'),
+      planFileUrl: getInputValue('contentPlanFileUrl'),
+      activity1Month: getInputValue('contentActivity1Month') || existing.activity1Month,
+      activity1Day: getInputValue('contentActivity1Day') || existing.activity1Day,
+      activity1Title: getInputValue('contentActivity1Title') || existing.activity1Title,
+      activity1Description: getInputValue('contentActivity1Description') || existing.activity1Description,
+      activity2Month: getInputValue('contentActivity2Month') || existing.activity2Month,
+      activity2Day: getInputValue('contentActivity2Day') || existing.activity2Day,
+      activity2Title: getInputValue('contentActivity2Title') || existing.activity2Title,
+      activity2Description: getInputValue('contentActivity2Description') || existing.activity2Description,
+      activity3Month: getInputValue('contentActivity3Month') || existing.activity3Month,
+      activity3Day: getInputValue('contentActivity3Day') || existing.activity3Day,
+      activity3Title: getInputValue('contentActivity3Title') || existing.activity3Title,
+      activity3Description: getInputValue('contentActivity3Description') || existing.activity3Description,
+      activityGroups: parseJsonField('contentActivityGroups', Array.isArray(existing.activityGroups) ? existing.activityGroups : []),
       committeesTitle: getInputValue('contentCommitteesTitle'),
       committeesIntro: getInputValue('contentCommitteesIntro'),
-      alumniCommitteeTitle: getInputValue('contentAlumniCommitteeTitle'),
-      alumniCommitteeDescription: getInputValue('contentAlumniCommitteeDescription'),
-      crisisCommitteeTitle: getInputValue('contentCrisisCommitteeTitle'),
-      crisisCommitteeDescription: getInputValue('contentCrisisCommitteeDescription'),
-      communityCommitteeTitle: getInputValue('contentCommunityCommitteeTitle'),
-      communityCommitteeDescription: getInputValue('contentCommunityCommitteeDescription'),
+      committeeItems: parseJsonField('contentCommitteeItems', Array.isArray(existing.committeeItems) ? existing.committeeItems : []),
+      alumniCommitteeTitle: getInputValue('contentAlumniCommitteeTitle') || existing.alumniCommitteeTitle,
+      alumniCommitteeDescription: getInputValue('contentAlumniCommitteeDescription') || existing.alumniCommitteeDescription,
+      crisisCommitteeTitle: getInputValue('contentCrisisCommitteeTitle') || existing.crisisCommitteeTitle,
+      crisisCommitteeDescription: getInputValue('contentCrisisCommitteeDescription') || existing.crisisCommitteeDescription,
+      communityCommitteeTitle: getInputValue('contentCommunityCommitteeTitle') || existing.communityCommitteeTitle,
+      communityCommitteeDescription: getInputValue('contentCommunityCommitteeDescription') || existing.communityCommitteeDescription,
       protocolsTitle: getInputValue('contentProtocolsTitle'),
       protocolsIntro: getInputValue('contentProtocolsIntro'),
-      adminProtocolDescription: getInputValue('contentAdminProtocolDescription'),
-      adminProtocolItem1: getInputValue('contentAdminProtocolItem1'),
-      adminProtocolItem2: getInputValue('contentAdminProtocolItem2'),
-      adminProtocolItem3: getInputValue('contentAdminProtocolItem3'),
-      notificationProtocolDescription: getInputValue('contentNotificationProtocolDescription'),
-      notificationProtocolItem1: getInputValue('contentNotificationProtocolItem1'),
-      notificationProtocolItem2: getInputValue('contentNotificationProtocolItem2'),
-      notificationProtocolItem3: getInputValue('contentNotificationProtocolItem3'),
-      servicesTitle: getInputValue('contentServicesTitle'),
-      alumniCardTitle: getInputValue('contentAlumniCardTitle'),
-      alumniCardDescription: getInputValue('contentAlumniCardDescription'),
-      alumniBenefitsTitle: getInputValue('contentAlumniBenefitsTitle'),
-      alumniBenefit1: getInputValue('contentAlumniBenefit1'),
-      alumniBenefit2: getInputValue('contentAlumniBenefit2'),
-      alumniBenefit3: getInputValue('contentAlumniBenefit3'),
-      alumniBenefit4: getInputValue('contentAlumniBenefit4'),
-      alumniCardNotice: getInputValue('contentAlumniCardNotice'),
-      emailServiceTitle: getInputValue('contentEmailServiceTitle'),
-      emailServiceDescription: getInputValue('contentEmailServiceDescription'),
-      serviceFeaturesTitle: getInputValue('contentServiceFeaturesTitle'),
-      serviceFeature1: getInputValue('contentServiceFeature1'),
-      serviceFeature2: getInputValue('contentServiceFeature2'),
-      serviceFeature3: getInputValue('contentServiceFeature3'),
-      galleryTitle: getInputValue('contentGalleryTitle'),
-      galleryItems: parseJsonField('contentGalleryItems', DEFAULT_SITE_CONTENT.galleryItems),
-      notableAlumniEyebrow: getInputValue('contentNotableAlumniEyebrow'),
-      notableAlumniTitle: getInputValue('contentNotableAlumniTitle'),
-      notableAlumniItems: parseJsonField('contentNotableAlumniItems', DEFAULT_SITE_CONTENT.notableAlumniItems),
-      awardsTitle: getInputValue('contentAwardsTitle'),
-      awardsSubtitle: getInputValue('contentAwardsSubtitle'),
-      awardItems: parseJsonField('contentAwardItems', DEFAULT_SITE_CONTENT.awardItems),
+      protocolItems: parseJsonField('contentProtocolItems', Array.isArray(existing.protocolItems) ? existing.protocolItems : []),
+      adminProtocolDescription: getInputValue('contentAdminProtocolDescription') || existing.adminProtocolDescription,
+      adminProtocolItem1: getInputValue('contentAdminProtocolItem1') || existing.adminProtocolItem1,
+      adminProtocolItem2: getInputValue('contentAdminProtocolItem2') || existing.adminProtocolItem2,
+      adminProtocolItem3: getInputValue('contentAdminProtocolItem3') || existing.adminProtocolItem3,
+      notificationProtocolDescription: getInputValue('contentNotificationProtocolDescription') || existing.notificationProtocolDescription,
+      notificationProtocolItem1: getInputValue('contentNotificationProtocolItem1') || existing.notificationProtocolItem1,
+      notificationProtocolItem2: getInputValue('contentNotificationProtocolItem2') || existing.notificationProtocolItem2,
+      notificationProtocolItem3: getInputValue('contentNotificationProtocolItem3') || existing.notificationProtocolItem3,
       eventsSectionTitle: getInputValue('contentEventsSectionTitle'),
       newsSectionTitle: getInputValue('contentNewsSectionTitle'),
       contactTitle: getInputValue('contentContactTitle'),
@@ -488,7 +615,7 @@
       footerEmail: getInputValue('contentFooterEmail'),
       footerAddress: getInputValue('contentFooterAddress'),
       footerCopyright: getInputValue('contentFooterCopyright')
-    });
+    }));
   }
 
   function resetNewsFormState() {
@@ -568,7 +695,15 @@
     eventSubmitBtn.textContent = 'Update event';
     eventCancelEditBtn.hidden = false;
     updateImagePreview(eventImagePreview, item.imageUrl || '');
-    document.getElementById('eventsManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (eventForm) {
+      eventForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    window.setTimeout(function () {
+      if (eventTitleInput) {
+        eventTitleInput.focus();
+        eventTitleInput.select();
+      }
+    }, 250);
   }
 
   function populateGalleryForm(item, index) {
@@ -602,6 +737,112 @@
     awardCancelEditBtn.hidden = false;
     updateImagePreview(awardImagePreview, item.imageUrl || '');
     document.getElementById('awardsManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function resetObjectiveFormState() {
+    if (!objectiveForm) return;
+    objectiveEditingIndexInput.value = '';
+    objectiveForm.reset();
+    objectiveSubmitBtn.textContent = 'Add objective';
+    objectiveCancelEditBtn.hidden = true;
+  }
+
+  function populateObjectiveForm(item, index) {
+    objectiveEditingIndexInput.value = String(index);
+    objectiveTextInput.value = item || '';
+    objectiveSubmitBtn.textContent = 'Update objective';
+    objectiveCancelEditBtn.hidden = false;
+    document.getElementById('objectivesManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function resetCommitteeCrudFormState() {
+    if (!committeeCrudForm) return;
+    committeeCrudEditingIndexInput.value = '';
+    committeeCrudForm.reset();
+    committeeCrudSubmitBtn.textContent = 'Add committee';
+    committeeCrudCancelEditBtn.hidden = true;
+  }
+
+  function populateCommitteeCrudForm(item, index) {
+    committeeCrudEditingIndexInput.value = String(index);
+    committeeCrudIdInput.value = item.id || '';
+    committeeCrudIconInput.value = item.icon || '';
+    committeeCrudTitleInput.value = item.title || '';
+    committeeCrudSummaryInput.value = item.summary || '';
+    committeeCrudResponsibilitiesInput.value = joinLineList(item.responsibilities);
+    committeeCrudSubmitBtn.textContent = 'Update committee';
+    committeeCrudCancelEditBtn.hidden = false;
+    document.getElementById('committeesCrudManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function resetProtocolCrudFormState() {
+    if (!protocolCrudForm) return;
+    protocolCrudEditingIndexInput.value = '';
+    protocolCrudForm.reset();
+    protocolCrudSubmitBtn.textContent = 'Add protocol';
+    protocolCrudCancelEditBtn.hidden = true;
+    updateImagePreview(protocolCrudImagePreview, '');
+  }
+
+  function populateProtocolCrudForm(item, index) {
+    protocolCrudEditingIndexInput.value = String(index);
+    protocolCrudIdInput.value = item.id || '';
+    protocolCrudTitleInput.value = item.title || '';
+    protocolCrudPartnerInput.value = item.partner || '';
+    protocolCrudObjectiveInput.value = item.objective || '';
+    protocolCrudImageInput.value = item.imageUrl || '';
+    protocolCrudSubmitBtn.textContent = 'Update protocol';
+    protocolCrudCancelEditBtn.hidden = false;
+    updateImagePreview(protocolCrudImagePreview, item.imageUrl || '');
+    document.getElementById('protocolsCrudManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function resetActivityGroupFormState() {
+    if (!activityGroupForm) return;
+    activityGroupEditingIndexInput.value = '';
+    activityGroupForm.reset();
+    activityGroupSubmitBtn.textContent = 'Add group';
+    activityGroupCancelEditBtn.hidden = true;
+  }
+
+  function populateActivityGroupForm(item, index) {
+    activityGroupEditingIndexInput.value = String(index);
+    activityGroupIdInput.value = item.id || '';
+    activityGroupTitleInput.value = item.title || '';
+    activityGroupIntroInput.value = item.intro || '';
+    activityGroupSubmitBtn.textContent = 'Update group';
+    activityGroupCancelEditBtn.hidden = false;
+    document.getElementById('activitiesCrudManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function resetActivityItemFormState() {
+    if (!activityItemForm) return;
+    activityItemEditingGroupIndexInput.value = '';
+    activityItemEditingIndexInput.value = '';
+    activityItemForm.reset();
+    refreshActivityGroupOptions();
+    activityItemSubmitBtn.textContent = 'Add activity item';
+    activityItemCancelEditBtn.hidden = true;
+    updateActivityImagePreview();
+  }
+
+  function populateActivityItemForm(groupIndex, itemIndex) {
+    var groups = Array.isArray(state.sections.activityGroups) ? state.sections.activityGroups : [];
+    var group = groups[groupIndex];
+    var item = group && Array.isArray(group.items) ? group.items[itemIndex] : null;
+    if (!group || !item) return;
+    activityItemEditingGroupIndexInput.value = String(groupIndex);
+    activityItemEditingIndexInput.value = String(itemIndex);
+    refreshActivityGroupOptions();
+    activityItemGroupSelect.value = group.id || '';
+    activityItemDateLabelInput.value = item.dateLabel || '';
+    activityItemTitleInput.value = item.title || '';
+    activityItemSummaryInput.value = item.summary || '';
+    activityItemImagesInput.value = joinLineList(item.images);
+    activityItemSubmitBtn.textContent = 'Update activity item';
+    activityItemCancelEditBtn.hidden = false;
+    updateActivityImagePreview();
+    document.getElementById('activitiesCrudManager').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function renderNews() {
@@ -733,6 +974,147 @@
     }).join('');
   }
 
+  function renderObjectivesManager() {
+    var items = Array.isArray(state.sections.objectiveItems) ? state.sections.objectiveItems : [];
+    if (!objectivesManagerList) return;
+    if (!items.length) {
+      objectivesManagerList.innerHTML = '<div class="empty-state"><i class="bi bi-list-check fs-3 d-block mb-2"></i>No objectives yet.</div>';
+      return;
+    }
+    objectivesManagerList.innerHTML = items.map(function (item, index) {
+      return (
+        '<article class="content-card">' +
+          '<h4 class="h6 mb-2">Objective ' + (index + 1) + '</h4>' +
+          '<div class="summary" style="min-height: 110px;">' + escapeHtml(item || '') + '</div>' +
+          '<div class="card-foot">' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editObjectiveItem(' + index + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteObjectiveItem(' + index + ')">Delete</button>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function renderCommitteesCrud() {
+    var items = Array.isArray(state.sections.committeeItems) ? state.sections.committeeItems : [];
+    if (!committeesCrudList) return;
+    if (!items.length) {
+      committeesCrudList.innerHTML = '<div class="empty-state"><i class="bi bi-diagram-3 fs-3 d-block mb-2"></i>No committees yet.</div>';
+      return;
+    }
+    committeesCrudList.innerHTML = items.map(function (item, index) {
+      var responsibilities = Array.isArray(item.responsibilities) ? item.responsibilities : [];
+      return (
+        '<article class="content-card">' +
+          '<h4 class="h6 mb-2">' + escapeHtml(item.title || 'Committee') + '</h4>' +
+          '<div class="summary">' +
+            '<div><strong>ID:</strong> ' + escapeHtml(item.id || '-') + '</div>' +
+            '<div><strong>Icon:</strong> ' + escapeHtml(item.icon || '-') + '</div>' +
+            '<div class="mt-2">' + escapeHtml(item.summary || '') + '</div>' +
+            '<div class="mt-2"><strong>Responsibilities:</strong> ' + responsibilities.length + '</div>' +
+          '</div>' +
+          '<div class="card-foot">' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editCommitteeCrudItem(' + index + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteCommitteeCrudItem(' + index + ')">Delete</button>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function renderProtocolsCrud() {
+    var items = Array.isArray(state.sections.protocolItems) ? state.sections.protocolItems : [];
+    if (!protocolsCrudList) return;
+    if (!items.length) {
+      protocolsCrudList.innerHTML = '<div class="empty-state"><i class="bi bi-diagram-2 fs-3 d-block mb-2"></i>No protocols yet.</div>';
+      return;
+    }
+    protocolsCrudList.innerHTML = items.map(function (item, index) {
+      var imageMarkup = item.imageUrl
+        ? '<img class="admin-thumb" src="' + escapeHtml(resolveAssetUrl(item.imageUrl)) + '" alt="Protocol preview">'
+        : '<div class="admin-thumb placeholder">No image</div>';
+      return (
+        '<article class="content-card">' +
+          imageMarkup +
+          '<h4 class="h6 mb-2">' + escapeHtml(item.title || 'Protocol') + '</h4>' +
+          '<div class="summary">' +
+            '<div><strong>ID:</strong> ' + escapeHtml(item.id || '-') + '</div>' +
+            '<div><strong>Partner:</strong> ' + escapeHtml(item.partner || '-') + '</div>' +
+            '<div class="mt-2">' + escapeHtml(item.objective || '') + '</div>' +
+          '</div>' +
+          '<div class="card-foot">' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editProtocolCrudItem(' + index + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteProtocolCrudItem(' + index + ')">Delete</button>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function renderActivityGroupsCrud() {
+    var groups = Array.isArray(state.sections.activityGroups) ? state.sections.activityGroups : [];
+    if (!activityGroupsCrudList) return;
+    refreshActivityGroupOptions();
+    if (!groups.length) {
+      activityGroupsCrudList.innerHTML = '<div class="empty-state"><i class="bi bi-kanban fs-3 d-block mb-2"></i>No activity groups yet.</div>';
+      return;
+    }
+    activityGroupsCrudList.innerHTML = groups.map(function (group, index) {
+      var itemCount = Array.isArray(group.items) ? group.items.length : 0;
+      return (
+        '<article class="content-card">' +
+          '<h4 class="h6 mb-2">' + escapeHtml(group.title || 'Activity Group') + '</h4>' +
+          '<div class="summary">' +
+            '<div><strong>ID:</strong> ' + escapeHtml(group.id || '-') + '</div>' +
+            '<div><strong>Items:</strong> ' + itemCount + '</div>' +
+            (group.intro ? '<div class="mt-2">' + escapeHtml(group.intro) + '</div>' : '') +
+          '</div>' +
+          '<div class="card-foot">' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editActivityGroupItem(' + index + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteActivityGroupItem(' + index + ')">Delete</button>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  function renderActivityItemsCrud() {
+    var groups = Array.isArray(state.sections.activityGroups) ? state.sections.activityGroups : [];
+    if (!activityItemsCrudList) return;
+    var flatItems = [];
+    groups.forEach(function (group, groupIndex) {
+      (Array.isArray(group.items) ? group.items : []).forEach(function (item, itemIndex) {
+        flatItems.push({ group: group, groupIndex: groupIndex, item: item, itemIndex: itemIndex });
+      });
+    });
+    if (!flatItems.length) {
+      activityItemsCrudList.innerHTML = '<div class="empty-state"><i class="bi bi-card-checklist fs-3 d-block mb-2"></i>No activity items yet.</div>';
+      return;
+    }
+    activityItemsCrudList.innerHTML = flatItems.map(function (entry) {
+      var imageUrl = getPrimaryActivityImage(entry.item);
+      var imageMarkup = imageUrl
+        ? '<img class="admin-thumb" src="' + escapeHtml(resolveAssetUrl(imageUrl)) + '" alt="Activity preview">'
+        : '<div class="admin-thumb placeholder">No image</div>';
+      return (
+        '<article class="content-card">' +
+          imageMarkup +
+          '<h4 class="h6 mb-2">' + escapeHtml(entry.item.title || 'Activity item') + '</h4>' +
+          '<div class="summary">' +
+            '<div><strong>Group:</strong> ' + escapeHtml(entry.group.title || entry.group.id || '-') + '</div>' +
+            '<div><strong>Date:</strong> ' + escapeHtml(entry.item.dateLabel || '-') + '</div>' +
+            '<div><strong>Images:</strong> ' + ((entry.item.images || []).length) + '</div>' +
+            '<div class="mt-2">' + escapeHtml(entry.item.summary || '') + '</div>' +
+          '</div>' +
+          '<div class="card-foot">' +
+            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="editActivityItemCrud(' + entry.groupIndex + ', ' + entry.itemIndex + ')">Edit</button>' +
+            '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteActivityItemCrud(' + entry.groupIndex + ', ' + entry.itemIndex + ')">Delete</button>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
   function getActivationToken(user) {
     const sourceUrl = String((user && user.activationUrl) || '');
     const tokenMatch = sourceUrl.match(/[?&]token=([^&]+)/);
@@ -811,6 +1193,11 @@
   function renderAll() {
     renderNews();
     renderEvents();
+    renderObjectivesManager();
+    renderCommitteesCrud();
+    renderProtocolsCrud();
+    renderActivityGroupsCrud();
+    renderActivityItemsCrud();
     renderGallery();
     renderAlumni();
     renderAwards();
@@ -963,6 +1350,75 @@
     if (!confirmed) return;
     state.sections.awardItems = (state.sections.awardItems || []).filter(function (_, itemIndex) { return itemIndex !== index; });
     renderAwards();
+    fillSiteContentForm();
+    savePublishedContent();
+  };
+
+  window.editObjectiveItem = function (index) {
+    var items = Array.isArray(state.sections.objectiveItems) ? state.sections.objectiveItems : [];
+    if (typeof items[index] === 'string') populateObjectiveForm(items[index], index);
+  };
+
+  window.deleteObjectiveItem = function (index) {
+    if (!window.confirm('Delete this objective?')) return;
+    state.sections.objectiveItems = (state.sections.objectiveItems || []).filter(function (_, itemIndex) { return itemIndex !== index; });
+    renderObjectivesManager();
+    fillSiteContentForm();
+    savePublishedContent();
+  };
+
+  window.editCommitteeCrudItem = function (index) {
+    var items = Array.isArray(state.sections.committeeItems) ? state.sections.committeeItems : [];
+    if (items[index]) populateCommitteeCrudForm(items[index], index);
+  };
+
+  window.deleteCommitteeCrudItem = function (index) {
+    if (!window.confirm('Delete this committee card?')) return;
+    state.sections.committeeItems = (state.sections.committeeItems || []).filter(function (_, itemIndex) { return itemIndex !== index; });
+    renderCommitteesCrud();
+    fillSiteContentForm();
+    savePublishedContent();
+  };
+
+  window.editProtocolCrudItem = function (index) {
+    var items = Array.isArray(state.sections.protocolItems) ? state.sections.protocolItems : [];
+    if (items[index]) populateProtocolCrudForm(items[index], index);
+  };
+
+  window.deleteProtocolCrudItem = function (index) {
+    if (!window.confirm('Delete this protocol card?')) return;
+    state.sections.protocolItems = (state.sections.protocolItems || []).filter(function (_, itemIndex) { return itemIndex !== index; });
+    renderProtocolsCrud();
+    fillSiteContentForm();
+    savePublishedContent();
+  };
+
+  window.editActivityGroupItem = function (index) {
+    var groups = Array.isArray(state.sections.activityGroups) ? state.sections.activityGroups : [];
+    if (groups[index]) populateActivityGroupForm(groups[index], index);
+  };
+
+  window.deleteActivityGroupItem = function (index) {
+    if (!window.confirm('Delete this activity group and all of its activity items?')) return;
+    state.sections.activityGroups = (state.sections.activityGroups || []).filter(function (_, groupIndex) { return groupIndex !== index; });
+    renderActivityGroupsCrud();
+    renderActivityItemsCrud();
+    fillSiteContentForm();
+    savePublishedContent();
+  };
+
+  window.editActivityItemCrud = function (groupIndex, itemIndex) {
+    populateActivityItemForm(groupIndex, itemIndex);
+  };
+
+  window.deleteActivityItemCrud = function (groupIndex, itemIndex) {
+    if (!window.confirm('Delete this activity item?')) return;
+    var groups = Array.isArray(state.sections.activityGroups) ? state.sections.activityGroups.slice() : [];
+    if (!groups[groupIndex] || !Array.isArray(groups[groupIndex].items)) return;
+    groups[groupIndex].items = groups[groupIndex].items.filter(function (_, currentIndex) { return currentIndex !== itemIndex; });
+    state.sections.activityGroups = groups;
+    renderActivityItemsCrud();
+    renderActivityGroupsCrud();
     fillSiteContentForm();
     savePublishedContent();
   };
@@ -1167,6 +1623,162 @@
     awardCancelEditBtn.addEventListener('click', resetAwardFormState);
   }
 
+  if (objectiveForm) {
+    objectiveForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var editingIndex = Number(objectiveEditingIndexInput.value || -1);
+      var item = objectiveTextInput.value.trim();
+      if (!item) {
+        alert('Please enter the objective text.');
+        return;
+      }
+      var items = Array.isArray(state.sections.objectiveItems) ? state.sections.objectiveItems.slice() : [];
+      if (editingIndex >= 0) {
+        items[editingIndex] = item;
+      } else {
+        items.push(item);
+      }
+      state.sections.objectiveItems = items;
+      renderObjectivesManager();
+      fillSiteContentForm();
+      savePublishedContent().then(resetObjectiveFormState);
+    });
+    objectiveClearBtn.addEventListener('click', resetObjectiveFormState);
+    objectiveCancelEditBtn.addEventListener('click', resetObjectiveFormState);
+  }
+
+  if (committeeCrudForm) {
+    committeeCrudForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var editingIndex = Number(committeeCrudEditingIndexInput.value || -1);
+      var item = {
+        id: committeeCrudIdInput.value.trim() || slugifyValue(committeeCrudTitleInput.value, 'committee-' + Date.now()),
+        icon: committeeCrudIconInput.value.trim() || 'fas fa-users',
+        title: committeeCrudTitleInput.value.trim(),
+        summary: committeeCrudSummaryInput.value.trim(),
+        responsibilities: parseLineList(committeeCrudResponsibilitiesInput.value)
+      };
+      if (!item.title || !item.summary) {
+        alert('Please complete the committee title and summary.');
+        return;
+      }
+      var items = Array.isArray(state.sections.committeeItems) ? state.sections.committeeItems.slice() : [];
+      if (editingIndex >= 0) {
+        items[editingIndex] = item;
+      } else {
+        items.push(item);
+      }
+      state.sections.committeeItems = items;
+      renderCommitteesCrud();
+      fillSiteContentForm();
+      savePublishedContent().then(resetCommitteeCrudFormState);
+    });
+    committeeCrudClearBtn.addEventListener('click', resetCommitteeCrudFormState);
+    committeeCrudCancelEditBtn.addEventListener('click', resetCommitteeCrudFormState);
+  }
+
+  if (protocolCrudForm) {
+    protocolCrudForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var editingIndex = Number(protocolCrudEditingIndexInput.value || -1);
+      var item = {
+        id: protocolCrudIdInput.value.trim() || slugifyValue(protocolCrudTitleInput.value, 'protocol-' + Date.now()),
+        title: protocolCrudTitleInput.value.trim(),
+        partner: protocolCrudPartnerInput.value.trim(),
+        objective: protocolCrudObjectiveInput.value.trim(),
+        imageUrl: protocolCrudImageInput.value.trim()
+      };
+      if (!item.title || !item.objective) {
+        alert('Please complete the protocol title and objective.');
+        return;
+      }
+      var items = Array.isArray(state.sections.protocolItems) ? state.sections.protocolItems.slice() : [];
+      if (editingIndex >= 0) {
+        items[editingIndex] = item;
+      } else {
+        items.push(item);
+      }
+      state.sections.protocolItems = items;
+      renderProtocolsCrud();
+      fillSiteContentForm();
+      savePublishedContent().then(resetProtocolCrudFormState);
+    });
+    protocolCrudClearBtn.addEventListener('click', resetProtocolCrudFormState);
+    protocolCrudCancelEditBtn.addEventListener('click', resetProtocolCrudFormState);
+  }
+
+  if (activityGroupForm) {
+    activityGroupForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var editingIndex = Number(activityGroupEditingIndexInput.value || -1);
+      var item = {
+        id: activityGroupIdInput.value.trim() || slugifyValue(activityGroupTitleInput.value, 'activity-group-' + Date.now()),
+        title: activityGroupTitleInput.value.trim(),
+        intro: activityGroupIntroInput.value.trim(),
+        items: editingIndex >= 0 && state.sections.activityGroups && state.sections.activityGroups[editingIndex] && Array.isArray(state.sections.activityGroups[editingIndex].items)
+          ? state.sections.activityGroups[editingIndex].items
+          : []
+      };
+      if (!item.title) {
+        alert('Please complete the activity group title.');
+        return;
+      }
+      var groups = Array.isArray(state.sections.activityGroups) ? state.sections.activityGroups.slice() : [];
+      if (editingIndex >= 0) {
+        groups[editingIndex] = item;
+      } else {
+        groups.push(item);
+      }
+      state.sections.activityGroups = groups;
+      renderActivityGroupsCrud();
+      renderActivityItemsCrud();
+      fillSiteContentForm();
+      savePublishedContent().then(resetActivityGroupFormState);
+    });
+    activityGroupClearBtn.addEventListener('click', resetActivityGroupFormState);
+    activityGroupCancelEditBtn.addEventListener('click', resetActivityGroupFormState);
+  }
+
+  if (activityItemForm) {
+    activityItemForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var targetGroupId = activityItemGroupSelect ? activityItemGroupSelect.value.trim() : '';
+      var groups = Array.isArray(state.sections.activityGroups) ? state.sections.activityGroups.slice() : [];
+      var groupIndex = groups.findIndex(function (group) { return group.id === targetGroupId; });
+      if (groupIndex < 0) {
+        alert('Please choose an activity group first.');
+        return;
+      }
+      var editingGroupIndex = Number(activityItemEditingGroupIndexInput.value || -1);
+      var editingIndex = Number(activityItemEditingIndexInput.value || -1);
+      var item = {
+        dateLabel: activityItemDateLabelInput.value.trim(),
+        title: activityItemTitleInput.value.trim(),
+        summary: activityItemSummaryInput.value.trim(),
+        images: parseLineList(activityItemImagesInput.value)
+      };
+      if (!item.dateLabel || !item.title || !item.summary) {
+        alert('Please complete the activity date, title, and summary.');
+        return;
+      }
+      if (!Array.isArray(groups[groupIndex].items)) {
+        groups[groupIndex].items = [];
+      }
+      if (editingGroupIndex >= 0 && editingIndex >= 0 && groups[editingGroupIndex] && Array.isArray(groups[editingGroupIndex].items)) {
+        groups[editingGroupIndex].items.splice(editingIndex, 1);
+      }
+      groups[groupIndex].items.unshift(item);
+      state.sections.activityGroups = groups;
+      renderActivityGroupsCrud();
+      renderActivityItemsCrud();
+      fillSiteContentForm();
+      savePublishedContent().then(resetActivityItemFormState);
+    });
+    activityItemClearBtn.addEventListener('click', resetActivityItemFormState);
+    activityItemCancelEditBtn.addEventListener('click', resetActivityItemFormState);
+    activityItemImagesInput.addEventListener('input', updateActivityImagePreview);
+  }
+
   if (siteContentForm) {
     siteContentForm.addEventListener('submit', function (event) {
       event.preventDefault();
@@ -1175,6 +1787,7 @@
     siteContentForm.addEventListener('input', function () {
       markDirty();
       updateImagePreview(viceDeanImagePreview, viceDeanImageInput.value.trim());
+      updatePlanFilePreview(planFileUrlInput ? planFileUrlInput.value.trim() : '');
     });
   }
 
@@ -1182,6 +1795,62 @@
     resetSiteContentBtn.addEventListener('click', function () {
       fillSiteContentForm();
       resetDirty();
+    });
+  }
+
+  if (planPdfUploadBtn && planFileUrlInput) {
+    planPdfUploadBtn.addEventListener('click', function () {
+      const picker = document.createElement('input');
+      picker.type = 'file';
+      picker.accept = 'application/pdf,.pdf';
+      picker.addEventListener('change', function () {
+        const file = picker.files && picker.files[0];
+        if (!file) return;
+        planPdfUploadBtn.disabled = true;
+        planPdfUploadBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Uploading...';
+        uploadDocument(file).then(function (data) {
+          planFileUrlInput.value = data.fileUrl || '';
+          if (planFileMetaInput) {
+            planFileMetaInput.value = formatFileSize(file.size);
+          }
+          updatePlanFilePreview(planFileUrlInput.value.trim());
+          markDirty();
+        }).catch(function (error) {
+          alert(error.message || 'Could not upload the selected PDF.');
+        }).finally(function () {
+          planPdfUploadBtn.disabled = false;
+          planPdfUploadBtn.innerHTML = '<i class="bi bi-upload me-1"></i>Upload PDF';
+        });
+      });
+      picker.click();
+    });
+  }
+
+  if (planPdfRemoveBtn && planFileUrlInput) {
+    planPdfRemoveBtn.addEventListener('click', function () {
+      const currentUrl = planFileUrlInput.value.trim();
+      if (!currentUrl) {
+        updatePlanFilePreview('');
+        return;
+      }
+
+      const finishRemoval = function () {
+        planFileUrlInput.value = '';
+        if (planFileMetaInput) {
+          planFileMetaInput.value = '';
+        }
+        updatePlanFilePreview('');
+        markDirty();
+      };
+
+      if (/^(images\/uploads|files\/uploads|files\/plans)\//i.test(currentUrl)) {
+        deleteAsset(currentUrl).then(finishRemoval).catch(function (error) {
+          alert(error.message || 'Could not delete the uploaded PDF.');
+        });
+        return;
+      }
+
+      finishRemoval();
     });
   }
 
@@ -1197,12 +1866,46 @@
   bindUploadButton(galleryUploadBtn, galleryImageInput, galleryImagePreview);
   bindUploadButton(alumniUploadBtn, alumniImageInput, alumniImagePreview);
   bindUploadButton(awardUploadBtn, awardImageInput, awardImagePreview);
+  bindUploadButton(protocolCrudUploadBtn, protocolCrudImageInput, protocolCrudImagePreview);
   bindPreviewOnInput(newsImageInput, newsImagePreview);
   bindPreviewOnInput(eventImageInput, eventImagePreview);
   bindPreviewOnInput(viceDeanImageInput, viceDeanImagePreview);
   bindPreviewOnInput(galleryImageInput, galleryImagePreview);
   bindPreviewOnInput(alumniImageInput, alumniImagePreview);
   bindPreviewOnInput(awardImageInput, awardImagePreview);
+  bindPreviewOnInput(protocolCrudImageInput, protocolCrudImagePreview);
+
+  if (activityItemUploadBtn && activityItemImagesInput) {
+    activityItemUploadBtn.addEventListener('click', function () {
+      var picker = document.createElement('input');
+      picker.type = 'file';
+      picker.accept = 'image/*';
+      picker.addEventListener('change', function () {
+        var file = picker.files && picker.files[0];
+        if (!file) return;
+        var originalLabel = activityItemUploadBtn.innerHTML;
+        activityItemUploadBtn.disabled = true;
+        activityItemUploadBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Uploading...';
+        uploadImage(file)
+          .then(function (data) {
+            var currentLines = parseLineList(activityItemImagesInput.value);
+            if (data.imageUrl) {
+              currentLines.push(data.imageUrl);
+              activityItemImagesInput.value = currentLines.join('\n');
+              updateActivityImagePreview();
+            }
+          })
+          .catch(function (error) {
+            alert(error.message);
+          })
+          .finally(function () {
+            activityItemUploadBtn.disabled = false;
+            activityItemUploadBtn.innerHTML = originalLabel;
+          });
+      });
+      picker.click();
+    });
+  }
 
   loginForm.addEventListener('submit', function (event) {
     event.preventDefault();

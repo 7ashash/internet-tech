@@ -1,0 +1,367 @@
+{
+  "heroTitle": "Environmental and Community Service Sector",
+  "viceDeanSectionTitle": "Vice Dean's Message",
+  "viceDeanHeading": "A Message from the Vice Dean for Community Service and Environmental Development",
+  "viceDeanParagraph1": "Building on the community-centered role of the Faculty of Information Technology, the Community Service and Environmental Development Sector stands as a core pillar in advancing the faculty's mission and strengthening its connection with society.",
+  "viceDeanParagraph2": "The sector is committed to leveraging academic expertise and technological capabilities to deliver impactful community services that enhance digital and environmental awareness and support the state's sustainable development agenda through specialized training programs, innovative initiatives, and productive partnerships with a wide range of community institutions.",
+  "viceDeanParagraph3": "The sector also focuses on empowering students and graduates to participate effectively in community service, reinforcing the values of social responsibility and volunteerism, and continuously refining its plans and working mechanisms in line with the rapid developments of information technology to achieve excellence in community engagement.",
+  "visionText": "The Community Service and Environmental Development Sector at the Faculty of Information Technology aspires to lead in harnessing modern technologies and digital knowledge for community benefit through innovative initiatives, specialized training programs, and impactful partnerships that promote digital and environmental awareness and support sustainable development.",
+  "missionText": "The sector is committed to delivering distinguished community services by employing academic and technical expertise to address community needs, advance technological and environmental awareness, and prepare qualified human capital capable of meeting labor market demands while strengthening partnerships that achieve sustainable and inclusive development.",
+  "objectiveItems": [
+    "Strengthen the faculty's contribution to community service through development initiatives rooted in information technology.",
+    "Promote digital and environmental awareness across different segments of society.",
+    "Develop the technological skills of students and graduates in alignment with labor market needs.",
+    "Provide training programs and technical consultations for institutions and individuals.",
+    "Support innovation and entrepreneurship within the technology domain.",
+    "Build and strengthen effective partnerships with governmental bodies, private-sector institutions, and civil society organizations.",
+    "Apply scientific research and technological solutions to address community and environmental challenges.",
+    "Participate in national and community initiatives that advance sustainable development.",
+    "Promote volunteerism and social responsibility among students.",
+    "Contribute to improving quality of life through smart solutions and emerging technologies."
+  ],
+  "planSectionTitle": "Sector Strategic Plan",
+  "planIntro": "Download the official plan of the Community Service and Environmental Development Sector at the Faculty of Information Technology.",
+  "planFileTitle": "Community Service and Environmental Development Plan",
+  "planFileMeta": "PDF Document (682 KB)",
+  "planButtonText": "Download PDF",
+  "planFileUrl": "files/plans/community-service-environment-plan-2025.pdf",
+  "activitiesSectionTitle": "Community Service and Environmental Development Activities",
+  "activitiesIntro": "The sector's activities document a full year of community engagement, environmental awareness, training, partnerships, and sustainable development initiatives implemented by the Faculty of Information Technology.",
+  "committeesTitle": "Sector Committees",
+  "committeesIntro": "The sector operates through specialized committees that coordinate outreach, graduate support, crisis preparedness, and entrepreneurial development in line with the faculty's social mission.",
+  "committeeItems": [
+    {
+      "id": "community-service-committee",
+      "icon": "fas fa-hands-helping",
+      "title": "Community Service and Environmental Development Committee",
+      "summary": "This committee plans and delivers community initiatives, training activities, and environmental awareness programs that strengthen the faculty's role in public service.",
+      "responsibilities": [
+        "Plan and implement initiatives that serve the community and support environmental development.",
+        "Organize training activities and workshops for students and community members in information technology and environmental awareness.",
+        "Promote volunteerism and social responsibility among students and staff.",
+        "Coordinate with governmental bodies, private institutions, and civil society partners to support community initiatives.",
+        "Encourage students and graduates to develop technology-driven projects that serve society and the environment.",
+        "Evaluate the impact of activities and initiatives on the community and surrounding environment.",
+        "Deliver awareness campaigns on digital literacy and environmental sustainability.",
+        "Provide technical and service-oriented consultations to help institutions solve community challenges.",
+        "Document activities, achievements, and outcomes through regular reports.",
+        "Contribute recommendations that improve programs and initiatives in alignment with the faculty's mission."
+      ]
+    },
+    {
+      "id": "graduate-follow-up-committee",
+      "icon": "fas fa-user-graduate",
+      "title": "Graduate Follow-up Committee",
+      "summary": "This committee maintains lasting engagement with graduates, supports their employability, and channels alumni feedback into academic and professional development.",
+      "responsibilities": [
+        "Build and continuously update a comprehensive database of graduates, including contact details and career paths.",
+        "Monitor graduates' status in the labor market and identify their professional and training needs.",
+        "Maintain continuous communication between the faculty and its graduates through periodic meetings and communication channels.",
+        "Organize employment forums in cooperation with companies and partner institutions.",
+        "Provide training and qualification opportunities that improve graduates' professional readiness.",
+        "Offer career guidance and professional advising to help graduates plan their career paths.",
+        "Reconnect graduates with the faculty to benefit from their expertise in improving the educational process.",
+        "Engage graduates in faculty events, initiatives, and networking activities.",
+        "Measure graduate satisfaction with academic programs and use their feedback for continuous improvement.",
+        "Support entrepreneurial initiatives among graduates and encourage them to launch their own ventures.",
+        "Coordinate with employers to create suitable job opportunities for graduates.",
+        "Prepare regular reports on graduate outcomes and employment status for faculty leadership."
+      ]
+    },
+    {
+      "id": "crisis-and-disaster-committee",
+      "icon": "fas fa-shield-alt",
+      "title": "Crisis and Disaster Committee",
+      "summary": "This committee ensures preparedness, response readiness, and academic continuity by developing crisis scenarios, emergency procedures, and safety awareness measures.",
+      "responsibilities": [
+        "Develop and periodically update a comprehensive crisis and disaster management plan for the faculty.",
+        "Identify potential risks, including fire, power outages, technical failures, and natural hazards, and prepare response scenarios.",
+        "Form emergency teams and define clear roles and responsibilities for each team.",
+        "Coordinate with civil defense, ambulance services, and security authorities to ensure rapid response.",
+        "Promote crisis management awareness among students and staff.",
+        "Organize periodic drills and simulations such as evacuation, first aid, and fire response exercises.",
+        "Monitor the readiness of safety equipment, emergency exits, and alarm systems.",
+        "Establish effective communication mechanisms to ensure fast information flow during emergencies.",
+        "Manage crises in real time and support sound decision-making to reduce losses.",
+        "Evaluate performance after each incident and identify lessons learned for improvement.",
+        "Prepare periodic reports on institutional readiness to handle crises.",
+        "Ensure continuity of teaching and operations through alternatives such as e-learning when necessary."
+      ]
+    },
+    {
+      "id": "entrepreneurship-committee",
+      "icon": "fas fa-lightbulb",
+      "title": "Entrepreneurship Committee",
+      "summary": "This committee nurtures innovation and entrepreneurship by equipping students and graduates with business, technology, and market-oriented skills.",
+      "responsibilities": [
+        "Promote a culture of innovation and entrepreneurship among students and graduates.",
+        "Organize workshops and training programs in project management, financial planning, digital marketing, and technological innovation.",
+        "Support student and graduate start-up projects through mentoring, consultations, and practical guidance.",
+        "Build partnerships with technology companies, investors, and industry stakeholders to support entrepreneurial projects.",
+        "Organize competitions and hackathons that encourage innovation and practical problem-solving.",
+        "Follow up on graduate-led entrepreneurial projects and provide continued guidance for growth and sustainability.",
+        "Contribute recommendations that help the faculty strengthen its entrepreneurship ecosystem.",
+        "Study market needs and emerging technologies to guide students toward relevant entrepreneurial opportunities.",
+        "Encourage teamwork and collaborative project development among student teams.",
+        "Assess the impact of entrepreneurial initiatives on students and the local community."
+      ]
+    }
+  ],
+  "protocolsTitle": "Cooperation Protocols",
+  "protocolsIntro": "The Faculty of Information Technology expands its community and development role through strategic cooperation protocols with national institutions, technology leaders, and public service organizations.",
+  "protocolItems": [
+    {
+      "id": "protocol-narss",
+      "title": "MUST and the National Authority for Remote Sensing and Space Sciences",
+      "partner": "Strategic academic and scientific cooperation",
+      "objective": "To collaborate on specialized training programs in modern technologies, remote sensing, and geographic information systems.",
+      "imageUrl": "images/protocols/narss-protocol.png"
+    },
+    {
+      "id": "protocol-nti",
+      "title": "MUST and the National Telecommunication Institute (NTI)",
+      "partner": "Research, supervision, and student development",
+      "objective": "To cooperate in research activities, academic supervision, and the training of students and graduates.",
+      "imageUrl": "images/protocols/nti-protocol.jpeg"
+    },
+    {
+      "id": "protocol-icthub",
+      "title": "MUST and ICT Hub Egypt",
+      "partner": "Industry-aligned technology training",
+      "objective": "To train students and graduates across the full spectrum of computer science and information technology disciplines.",
+      "imageUrl": "images/protocols/icthub-protocol.jpeg"
+    },
+    {
+      "id": "protocol-huawei",
+      "title": "Faculty of Information Technology and Huawei Technologies Egypt",
+      "partner": "Huawei Academy partnership",
+      "objective": "To establish a Huawei Academy branch within the Faculty of Information Technology and broaden certified technical training opportunities.",
+      "imageUrl": "images/protocols/huawei-protocol.jpeg"
+    },
+    {
+      "id": "protocol-mepal",
+      "title": "MUST and MEPAL, a Ricoh Group Company",
+      "partner": "Project-based professional collaboration",
+      "objective": "To provide project-based practical training, support graduation projects, and collaborate in consultancy, research, and development activities.",
+      "imageUrl": "images/protocols/mepal-protocol.jpeg"
+    },
+    {
+      "id": "protocol-drug-control",
+      "title": "MUST and the Fund for Drug Control and Treatment of Addiction and Abuse",
+      "partner": "Awareness and prevention partnership",
+      "objective": "To implement preventive, awareness, and training programs that target university students and promote healthier communities.",
+      "imageUrl": "images/protocols/drug-control-protocol.jpeg"
+    }
+  ],
+  "activityGroups": [
+    {
+      "id": "community-activities",
+      "title": "Community Activities",
+      "intro": "A broad range of awareness, cultural, social, and student-centered activities that directly support community engagement.",
+      "items": [
+        {
+          "dateLabel": "26 October 2024",
+          "title": "Seminar Celebrating the Victory of 6 October",
+          "summary": "A commemorative seminar that reinforced national awareness and celebrated a landmark moment in Egyptian history.",
+          "images": ["images/activities/image2.jpeg"]
+        },
+        {
+          "dateLabel": "1 November 2024",
+          "title": "Graduate Initiative for Student Training in AI, Security, Flutter, and UI/UX",
+          "summary": "A graduate-led initiative designed to equip students with practical and market-relevant technical skills.",
+          "images": ["images/activities/image3.jpeg", "images/activities/image4.jpeg"]
+        },
+        {
+          "dateLabel": "15 December 2024",
+          "title": "Challenge Day Event Report - Students with Disabilities Support Committee",
+          "summary": "An inclusive activity held in support of students with disabilities and their active participation in university life.",
+          "images": ["images/activities/image5.jpeg", "images/activities/image6.jpeg"]
+        },
+        {
+          "dateLabel": "16 December 2024",
+          "title": "Participation in World Arabic Language Day",
+          "summary": "A cultural contribution celebrating the Arabic language and its role in identity, heritage, and communication.",
+          "images": ["images/activities/image7.jpeg", "images/activities/image8.jpeg"]
+        },
+        {
+          "dateLabel": "5 January 2025",
+          "title": "Participation in Huawei's International Competition with Community-Service AI Projects",
+          "summary": "Students presented artificial intelligence projects designed to address real community needs and challenges.",
+          "images": ["images/activities/image9.jpeg", "images/activities/image10.jpeg"]
+        },
+        {
+          "dateLabel": "22 January 2025",
+          "title": "Participation in the First Joint Educational Seminar Organized by the Popular and Military Defense Forces",
+          "summary": "An awareness-oriented educational seminar that strengthened students' national and civic understanding.",
+          "images": ["images/activities/image11.jpeg", "images/activities/image12.jpeg"]
+        },
+        {
+          "dateLabel": "20 February 2025",
+          "title": "Participation in the Seminar \"Toward Directing Projects and Research to Serve Persons with Disabilities\"",
+          "summary": "The faculty took part in a seminar focused on directing research and projects toward inclusive and accessible solutions.",
+          "images": ["images/activities/image13.jpeg", "images/activities/image14.jpeg"]
+        },
+        {
+          "dateLabel": "23 February 2025",
+          "title": "Participation in the Faculty of Nursing Conference on AI Innovations in Elderly Care and Mental Health",
+          "summary": "The sector engaged in a multidisciplinary event addressing artificial intelligence applications in health and social care.",
+          "images": ["images/activities/image15.jpeg", "images/activities/image16.jpeg"]
+        },
+        {
+          "dateLabel": "23 March 2025",
+          "title": "Egyptian Women Across the Ages in Building Egyptian Society",
+          "summary": "A cultural and educational activity highlighting the historical and contemporary contributions of Egyptian women.",
+          "images": ["images/activities/image17.jpeg", "images/activities/image18.jpeg"]
+        },
+        {
+          "dateLabel": "27 April 2025",
+          "title": "Participation in the Mother's Day Celebration",
+          "summary": "A social participation event that reflected appreciation for mothers and family-centered community values.",
+          "images": ["images/activities/image19.jpeg", "images/activities/image20.jpeg"]
+        },
+        {
+          "dateLabel": "17 May 2025",
+          "title": "Participation in the Seminar \"Egyptian National Security in Africa\"",
+          "summary": "A seminar that linked regional awareness, national security, and students' understanding of strategic issues.",
+          "images": ["images/activities/image21.jpeg", "images/activities/image22.jpeg"]
+        },
+        {
+          "dateLabel": "4 August 2025",
+          "title": "Organization of the Faculty of Information Technology Graduation Ceremony",
+          "summary": "The faculty organized its graduation celebration as a culminating community and student engagement event.",
+          "images": ["images/activities/image23.jpeg", "images/activities/image24.jpeg"]
+        }
+      ]
+    },
+    {
+      "id": "environmental-activities",
+      "title": "Environmental Activities",
+      "intro": "Activities focused on environmental awareness and participation in sustainability-related events.",
+      "items": [
+        {
+          "dateLabel": "7 May 2025",
+          "title": "Participation in Environmental Day Program",
+          "summary": "The faculty contributed to an environmental awareness program that promoted sustainability and responsible environmental practices.",
+          "images": ["images/activities/image25.jpeg", "images/activities/image26.jpeg"]
+        }
+      ]
+    },
+    {
+      "id": "sustainable-development",
+      "title": "Sustainable Development Activities",
+      "intro": "Strategic initiatives and partnerships that support sustainability, societal resilience, and future-oriented development.",
+      "items": [
+        {
+          "dateLabel": "21 October 2024",
+          "title": "Signing a Cooperation Protocol with Engineers for Sustainable Egypt",
+          "summary": "A partnership initiative that supports sustainability-oriented collaboration and practical national development goals.",
+          "images": ["images/activities/image27.jpeg", "images/activities/image28.jpeg"]
+        }
+      ]
+    },
+    {
+      "id": "training-and-capacity-building",
+      "title": "Training and Capacity Building",
+      "intro": "Programs and events dedicated to workforce readiness, entrepreneurship, innovation, and student development.",
+      "items": [
+        {
+          "dateLabel": "22 October 2024",
+          "title": "Future of a Generation Initiative in Cooperation with the Faculty of Pharmacy",
+          "summary": "A training initiative focused on preparing young people for the labor market through interdisciplinary collaboration.",
+          "images": ["images/activities/image29.jpeg", "images/activities/image30.jpeg"]
+        },
+        {
+          "dateLabel": "12 November 2024",
+          "title": "Huawei ICT Competition International Conference",
+          "summary": "Participation in a major international technology event centered on innovation, competition, and digital talent development.",
+          "images": ["images/activities/image31.jpeg", "images/activities/image32.jpeg"]
+        },
+        {
+          "dateLabel": "20 November 2024",
+          "title": "Entrepreneurship: From Idea to Market 2024",
+          "summary": "A professional development event that explored how entrepreneurial ideas can be transformed into viable market solutions.",
+          "images": ["images/activities/image33.jpeg", "images/activities/image34.jpeg"]
+        },
+        {
+          "dateLabel": "8-9 February 2025",
+          "title": "Participation in the Smart Healthcare Hackathon",
+          "summary": "The faculty joined a smart healthcare hackathon with the Faculty of Applied Health Sciences Technology to promote interdisciplinary innovation.",
+          "images": ["images/activities/image35.jpeg", "images/activities/image36.jpeg", "images/activities/image37.jpeg"]
+        },
+        {
+          "dateLabel": "25 February 2025",
+          "title": "Evacuation Drill for Disaster Response",
+          "summary": "A practical safety exercise designed to improve preparedness and response efficiency during emergency situations.",
+          "images": ["images/activities/image38.jpeg", "images/activities/image39.jpeg"]
+        },
+        {
+          "dateLabel": "22 April 2025",
+          "title": "Third Student Conference of the Faculty",
+          "summary": "A student-focused academic event showcasing participation, innovation, and professional presentation skills.",
+          "images": ["images/activities/image40.png", "images/activities/image41.jpeg"]
+        }
+      ]
+    },
+    {
+      "id": "external-cooperation",
+      "title": "External Cooperation",
+      "intro": "Partnerships, protocol signings, and external engagements that extend the faculty's societal and professional reach.",
+      "items": [
+        {
+          "dateLabel": "4 November 2024",
+          "title": "Cybersecurity Conference and Signing of Kaspersky Academy",
+          "summary": "An external cooperation event aimed at strengthening cybersecurity awareness and training for students and the community.",
+          "images": ["images/activities/image42.jpeg", "images/activities/image43.jpeg"]
+        },
+        {
+          "dateLabel": "18 December 2024",
+          "title": "Signing an Agreement with the National Telecommunication Institute (NTI)",
+          "summary": "A strategic agreement designed to deepen technical training and institutional collaboration.",
+          "images": ["images/activities/image44.jpeg", "images/activities/image45.jpeg"]
+        },
+        {
+          "dateLabel": "26 December 2024",
+          "title": "Graduate Follow-up and Attendance at the Huawei Cloud Best Projects Celebration",
+          "summary": "A graduate-focused participation in a regional celebration of outstanding Huawei Cloud projects in the Middle East.",
+          "images": ["images/activities/image46.jpeg", "images/activities/image47.jpeg"]
+        },
+        {
+          "dateLabel": "31 January - 3 February 2025",
+          "title": "Participation in the Third Artificial Intelligence Conference Organized by the Ministry of Youth and Sports",
+          "summary": "A national-level engagement that connected students with broader AI discussions and public-sector initiatives.",
+          "images": ["images/activities/image48.jpeg", "images/activities/image49.jpeg"]
+        },
+        {
+          "dateLabel": "14 April 2025",
+          "title": "Participation in the Annual Employment Forum",
+          "summary": "The faculty took part in the annual employment forum to connect students and graduates with career opportunities.",
+          "images": ["images/activities/image50.png", "images/activities/image51.jpeg"]
+        },
+        {
+          "dateLabel": "29 April 2025",
+          "title": "Cooperation Protocol with the Remote Sensing Authority and Scientific Conference on Remote Sensing and Artificial Intelligence",
+          "summary": "A joint cooperation and conference event under the theme \"Remote Sensing and Artificial Intelligence: An Integrative Vision for the Future.\"",
+          "images": ["images/activities/image52.png", "images/activities/image53.png"]
+        },
+        {
+          "dateLabel": "12 July 2025",
+          "title": "Cooperation Protocol between the Faculty of Information Technology and ICT Hub Egypt",
+          "summary": "A protocol signing that supports practical training and industry collaboration in computing and information technology.",
+          "images": ["images/activities/image54.jpeg", "images/activities/image55.jpeg"]
+        },
+        {
+          "dateLabel": "22 April 2025",
+          "title": "Signing a Protocol with MEPAL",
+          "summary": "A cooperation protocol that supports project-based training, graduation projects, and professional consultation opportunities.",
+          "images": ["images/activities/image56.jpeg", "images/activities/image57.jpeg"]
+        },
+        {
+          "dateLabel": "27-28 August 2025",
+          "title": "9th International Conference on Advanced Machine Learning Technologies and Applications (AMLTA 2025)",
+          "summary": "An international academic participation that highlighted advanced machine learning applications and research exchange.",
+          "images": ["images/activities/image58.jpeg", "images/activities/image59.jpeg"]
+        }
+      ]
+    }
+  ]
+}
