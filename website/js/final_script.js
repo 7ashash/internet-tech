@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var loginAuthForm = document.getElementById('loginAuthForm');
   var registerAuthForm = document.getElementById('registerAuthForm');
   var authFeedback = document.getElementById('authFeedback');
+  var authModalCard = document.querySelector('.auth-modal-card');
   var authUserChip = document.getElementById('authUserChip');
   var authUserName = document.getElementById('authUserName');
   var adminDashboardLink = document.getElementById('adminDashboardLink');
@@ -336,6 +337,12 @@ document.addEventListener('DOMContentLoaded', function () {
     authFeedback.textContent = message;
     authFeedback.className = 'auth-feedback ' + (type || 'error');
     authFeedback.classList.remove('hidden');
+    window.requestAnimationFrame(function () {
+      if (authModalCard) {
+        authModalCard.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      authFeedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
   }
 
   function clearAuthFeedback() {
