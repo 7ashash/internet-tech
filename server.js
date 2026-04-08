@@ -513,21 +513,24 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     const existing = db.prepare(`
-      SELECT id, role, is_active
+      SELECT *
       FROM users
       WHERE email = ?
     `).get(email);
 
-    if (existing && (existing.role === 'admin' || Number(existing.is_active) === 1)) {
-      return res.status(409).json({ ok: false, error: 'This email is already registered. Please log in instead.' });
+    if (existing && Number(existing.is_active) === 1) {
+      return res.status(409).json({ ok: false, error: 'This account has already been activated. Please log in instead.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const token = crypto.randomBytes(24).toString('hex');
     const createdAt = now();
+    const isExistingInactiveUser = Boolean(existing);
     let userId;
+    let activationUrl;
 
-    if (existing) {
+    try {
+      if (existing) {
       db.prepare(`
         UPDATE users
         SET
@@ -543,20 +546,41 @@ app.post('/api/auth/register', async (req, res) => {
         WHERE id = ?
       `).run(name, universityId, passwordHash, token, createdAt, existing.id);
       userId = existing.id;
-    } else {
-      const created = db.prepare(`
-        INSERT INTO users (name, university_id, email, password_hash, role, is_active, activation_token, created_at)
-        VALUES (?, ?, ?, ?, 'user', 0, ?, ?)
-      `).run(name, universityId, email, passwordHash, token, createdAt);
-      userId = created.lastInsertRowid;
+      } else {
+        const created = db.prepare(`
+          INSERT INTO users (name, university_id, email, password_hash, role, is_active, activation_token, created_at)
+          VALUES (?, ?, ?, ?, 'user', 0, ?, ?)
+        `).run(name, universityId, email, passwordHash, token, createdAt);
+        userId = created.lastInsertRowid;
+      }
+
+      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+      activationUrl = await sendActivationEmail(user, token, getBaseUrl(req));
+    } catch (mailError) {
+      console.error(mailError);
+      if (!isExistingInactiveUser && userId) {
+        db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+      }
+      return res.status(502).json({
+        ok: false,
+        error: 'Your account could not be completed because we could not send the activation email. Please try again.'
+      });
     }
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-    const activationUrl = await sendActivationEmail(user, token, getBaseUrl(req));
-
-    res.status(201).json({
+    res.status(isExistingInactiveUser ? 200 : 201).json({
       ok: true,
-      message: transporter ? 'Activation email sent to your MUST mailbox' : 'SMTP is not configured yet, so the activation link was logged locally',
+      status: isExistingInactiveUser ? 'activation-resent' : 'created',
+      message: transporter
+        ? (
+          isExistingInactiveUser
+            ? 'This account is not activated yet. A new activation email has been sent to your MUST mailbox.'
+            : 'Your account has been created. Check your MUST email to activate it.'
+        )
+        : (
+          isExistingInactiveUser
+            ? 'This account is not activated yet. A new activation link has been prepared for you below.'
+            : 'Your account has been created. Use the activation link below to activate it.'
+        ),
       activationPreviewUrl: transporter ? null : activationUrl
     });
   } catch (error) {

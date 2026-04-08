@@ -344,14 +344,17 @@ document.addEventListener('DOMContentLoaded', function () {
     authFeedback.className = 'auth-feedback hidden';
   }
 
-  function toggleAuthTab(tabName) {
+  function toggleAuthTab(tabName, options) {
     if (!loginTabBtn || !registerTabBtn || !loginAuthForm || !registerAuthForm) return;
+    var preserveFeedback = Boolean(options && options.preserveFeedback);
     var loginActive = tabName === 'login';
     loginTabBtn.classList.toggle('active', loginActive);
     registerTabBtn.classList.toggle('active', !loginActive);
     loginAuthForm.classList.toggle('hidden', !loginActive);
     registerAuthForm.classList.toggle('hidden', loginActive);
-    clearAuthFeedback();
+    if (!preserveFeedback) {
+      clearAuthFeedback();
+    }
   }
 
   function openAuthModal(defaultTab) {
@@ -483,9 +486,10 @@ document.addEventListener('DOMContentLoaded', function () {
           password: document.getElementById('registerPassword').value
         })
       }).then(function (data) {
+        var successMessage = data.message + (data.activationPreviewUrl ? ' Activation preview: ' + data.activationPreviewUrl : '');
         registerAuthForm.reset();
-        toggleAuthTab('login');
-        showAuthFeedback(data.message + (data.activationPreviewUrl ? ' Activation preview: ' + data.activationPreviewUrl : ''), 'success');
+        toggleAuthTab('login', { preserveFeedback: true });
+        showAuthFeedback(successMessage, 'success');
       }).catch(function (error) {
         showAuthFeedback(error.message, 'error');
       });
