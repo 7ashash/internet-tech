@@ -6,7 +6,6 @@ const session = require('express-session');
 const SQLiteStoreFactory = require('connect-sqlite3');
 const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer');
 
 function normalizeBaseUrl(url) {
   return String(url || '').trim().replace(/\/+$/, '');
@@ -27,13 +26,10 @@ const CONFIGURED_BASE_URL = normalizeBaseUrl(process.env.BASE_URL);
 const BASE_URL = CONFIGURED_BASE_URL || `http://127.0.0.1:${PORT}`;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@must.edu.eg';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MustAdmin2026!';
-const MAIL_HOST = process.env.BREVO_SMTP_HOST || process.env.SMTP_HOST || '';
-const MAIL_PORT = Number(process.env.BREVO_SMTP_PORT || process.env.SMTP_PORT || 0);
-const MAIL_USER = process.env.BREVO_SMTP_LOGIN || process.env.SMTP_USER || '';
-const MAIL_PASS = process.env.BREVO_SMTP_PASSWORD || process.env.SMTP_PASS || '';
-const MAIL_FROM_EMAIL = process.env.MAIL_FROM_EMAIL || process.env.SMTP_FROM || MAIL_USER;
+const BREVO_API_KEY = String(process.env.BREVO_API_KEY || '').trim();
+const MAIL_FROM_EMAIL = process.env.MAIL_FROM_EMAIL || process.env.SMTP_FROM || process.env.BREVO_SMTP_LOGIN || process.env.SMTP_USER || '';
 const MAIL_FROM_NAME = process.env.MAIL_FROM_NAME || 'MUST';
-const MAIL_SECURE = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true';
+const REAL_EMAILS_ENABLED = Boolean(BREVO_API_KEY);
 const SHOULD_RESET_NON_ADMIN_USERS_ON_BOOT =
   String(process.env.RESET_NON_ADMIN_USERS_ON_BOOT || '').toLowerCase() === 'true' ||
   (
@@ -310,23 +306,37 @@ seedDefaultContent();
 seedAdmin();
 const removedUsersOnBoot = SHOULD_RESET_NON_ADMIN_USERS_ON_BOOT ? resetNonAdminUsersOnBoot() : 0;
 
-function createTransporter() {
-  if (!MAIL_HOST || !MAIL_PORT || !MAIL_USER || !MAIL_PASS) {
-    return null;
+function describeMailError(error) {
+  const rawMessage = String((error && (error.response || error.message)) || '').toLowerCase();
+  const status = Number((error && error.status) || 0);
+  const code = String((error && error.code) || '').toUpperCase();
+
+  if (code === 'EAPIKEY' || code === 'EBREVO_API_KEY_INVALID' || status === 401 || status === 403 || rawMessage.includes('api key') || rawMessage.includes('unauthorized')) {
+    return {
+      publicMessage: 'The Brevo API key is missing or invalid. Please add BREVO_API_KEY from Brevo API Keys, not the SMTP key.',
+      logLabel: 'Brevo API authentication failed'
+    };
   }
 
-  return nodemailer.createTransport({
-    host: MAIL_HOST,
-    port: MAIL_PORT,
-    secure: MAIL_SECURE,
-    auth: {
-      user: MAIL_USER,
-      pass: MAIL_PASS
-    }
-  });
-}
+  if (code === 'ESENDER' || rawMessage.includes('sender') || rawMessage.includes('from address') || rawMessage.includes('not allowed')) {
+    return {
+      publicMessage: 'The sender email is not accepted by Brevo yet. Please verify MAIL_FROM_EMAIL inside Brevo and try again.',
+      logLabel: 'Brevo sender rejected'
+    };
+  }
 
-const transporter = createTransporter();
+  if (code === 'ETIMEDOUT' || code === 'ECONNECTION' || rawMessage.includes('connect') || rawMessage.includes('timeout') || rawMessage.includes('fetch failed')) {
+    return {
+      publicMessage: 'The activation email service could not be reached. Please check the network connection and Brevo availability, then try again.',
+      logLabel: 'Brevo API connection failed'
+    };
+  }
+
+  return {
+    publicMessage: 'Your account could not be completed because we could not send the activation email. Please try again.',
+    logLabel: 'Brevo API send failed'
+  };
+}
 
 function logMail(to, subject, text) {
   const block = [
@@ -353,14 +363,51 @@ async function sendActivationEmail(user, token, baseUrl) {
     </div>
   `;
 
-  if (transporter) {
-    await transporter.sendMail({
-      from: MAIL_FROM_NAME ? `"${MAIL_FROM_NAME}" <${MAIL_FROM_EMAIL}>` : MAIL_FROM_EMAIL,
-      to: user.email,
-      subject,
-      text,
-      html
+  if (REAL_EMAILS_ENABLED) {
+    if (!MAIL_FROM_EMAIL) {
+      const senderError = new Error('MAIL_FROM_EMAIL is missing');
+      senderError.code = 'ESENDER';
+      throw senderError;
+    }
+
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'content-type': 'application/json',
+        'api-key': BREVO_API_KEY
+      },
+      body: JSON.stringify({
+        sender: {
+          name: MAIL_FROM_NAME,
+          email: MAIL_FROM_EMAIL
+        },
+        to: [
+          {
+            email: user.email,
+            name: user.name
+          }
+        ],
+        subject,
+        htmlContent: html
+      })
     });
+
+    const rawResponse = await response.text();
+    let parsedResponse = null;
+    try {
+      parsedResponse = rawResponse ? JSON.parse(rawResponse) : null;
+    } catch (parseError) {
+      parsedResponse = null;
+    }
+
+    if (!response.ok) {
+      const apiError = new Error((parsedResponse && (parsedResponse.message || parsedResponse.code)) || rawResponse || `Brevo API request failed with status ${response.status}`);
+      apiError.code = response.status === 401 || response.status === 403 ? 'EBREVO_API_KEY_INVALID' : 'EBREVOAPI';
+      apiError.status = response.status;
+      apiError.response = rawResponse;
+      throw apiError;
+    }
   } else {
     logMail(user.email, subject, text);
   }
@@ -557,20 +604,27 @@ app.post('/api/auth/register', async (req, res) => {
       const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
       activationUrl = await sendActivationEmail(user, token, getBaseUrl(req));
     } catch (mailError) {
-      console.error(mailError);
+      const details = describeMailError(mailError);
+      console.error(`${details.logLabel} during registration:`, {
+        code: mailError && mailError.code,
+        command: mailError && mailError.command,
+        response: mailError && mailError.response,
+        message: mailError && mailError.message,
+        email
+      });
       if (!isExistingInactiveUser && userId) {
         db.prepare('DELETE FROM users WHERE id = ?').run(userId);
       }
       return res.status(502).json({
         ok: false,
-        error: 'Your account could not be completed because we could not send the activation email. Please try again.'
+        error: details.publicMessage
       });
     }
 
     res.status(isExistingInactiveUser ? 200 : 201).json({
       ok: true,
       status: isExistingInactiveUser ? 'activation-resent' : 'created',
-      message: transporter
+      message: REAL_EMAILS_ENABLED
         ? (
           isExistingInactiveUser
             ? 'This account is not activated yet. A new activation email has been sent to your MUST mailbox.'
@@ -581,7 +635,7 @@ app.post('/api/auth/register', async (req, res) => {
             ? 'This account is not activated yet. A new activation link has been prepared for you below.'
             : 'Your account has been created. Use the activation link below to activate it.'
         ),
-      activationPreviewUrl: transporter ? null : activationUrl
+      activationPreviewUrl: REAL_EMAILS_ENABLED ? null : activationUrl
     });
   } catch (error) {
     console.error(error);
@@ -921,7 +975,13 @@ app.listen(PORT, () => {
   if (SHOULD_RESET_NON_ADMIN_USERS_ON_BOOT) {
     console.log(`Production user reset is ON. Removed ${removedUsersOnBoot} non-admin user(s) on boot.`);
   }
-  if (!transporter) {
-    console.log(`SMTP not configured. Activation links will be logged to ${MAIL_LOG_PATH}`);
+  if (REAL_EMAILS_ENABLED) {
+    if (/^xsmtpsib-/i.test(BREVO_API_KEY)) {
+      console.log('BREVO_API_KEY currently looks like an SMTP key. Replace it with a Brevo API key that starts with xkeysib-.');
+    } else {
+      console.log('Brevo API email delivery is enabled.');
+    }
+  } else {
+    console.log(`BREVO_API_KEY is not configured. Activation links will be logged to ${MAIL_LOG_PATH}`);
   }
 });
