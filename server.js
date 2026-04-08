@@ -16,6 +16,7 @@ const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
 const DB_PATH = path.join(DATA_DIR, 'app.db');
 const MAIL_LOG_PATH = path.join(DATA_DIR, 'mail-log.txt');
+const SESSIONS_DB_PATH = path.join(DATA_DIR, 'sessions.db');
 const UPLOADS_DIR = path.join(ROOT, 'website', 'images', 'uploads');
 const FILE_UPLOADS_DIR = path.join(ROOT, 'website', 'files', 'uploads');
 const CURATED_SITE_CONTENT = require('./content/sector-content.json');
@@ -33,6 +34,12 @@ const MAIL_PASS = process.env.BREVO_SMTP_PASSWORD || process.env.SMTP_PASS || ''
 const MAIL_FROM_EMAIL = process.env.MAIL_FROM_EMAIL || process.env.SMTP_FROM || MAIL_USER;
 const MAIL_FROM_NAME = process.env.MAIL_FROM_NAME || 'MUST';
 const MAIL_SECURE = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true';
+const SHOULD_RESET_NON_ADMIN_USERS_ON_BOOT =
+  String(process.env.RESET_NON_ADMIN_USERS_ON_BOOT || '').toLowerCase() === 'true' ||
+  (
+    !String(process.env.RESET_NON_ADMIN_USERS_ON_BOOT || '').trim() &&
+    (String(process.env.NODE_ENV || '').toLowerCase() === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT))
+  );
 const SQLiteStore = SQLiteStoreFactory(session);
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -280,9 +287,28 @@ function seedAdmin() {
   `).run('MUST Administrator', ADMIN_EMAIL.toLowerCase(), passwordHash, now, now);
 }
 
+function resetNonAdminUsersOnBoot() {
+  const adminEmail = ADMIN_EMAIL.toLowerCase();
+  const removedUsers = db.prepare('DELETE FROM users WHERE LOWER(email) <> ?').run(adminEmail).changes;
+
+  ['-wal', '-shm'].forEach((suffix) => {
+    const candidate = `${SESSIONS_DB_PATH}${suffix}`;
+    if (fs.existsSync(candidate)) {
+      fs.rmSync(candidate, { force: true });
+    }
+  });
+
+  if (fs.existsSync(SESSIONS_DB_PATH)) {
+    fs.rmSync(SESSIONS_DB_PATH, { force: true });
+  }
+
+  return removedUsers;
+}
+
 runMigrations();
 seedDefaultContent();
 seedAdmin();
+const removedUsersOnBoot = SHOULD_RESET_NON_ADMIN_USERS_ON_BOOT ? resetNonAdminUsersOnBoot() : 0;
 
 function createTransporter() {
   if (!MAIL_HOST || !MAIL_PORT || !MAIL_USER || !MAIL_PASS) {
@@ -841,6 +867,9 @@ app.listen(PORT, () => {
   console.log(`Website:   ${BASE_URL}/website/index.html`);
   console.log(`Dashboard: ${BASE_URL}/admin-dashboard/admin-dashboard.html`);
   console.log(`Default admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+  if (SHOULD_RESET_NON_ADMIN_USERS_ON_BOOT) {
+    console.log(`Production user reset is ON. Removed ${removedUsersOnBoot} non-admin user(s) on boot.`);
+  }
   if (!transporter) {
     console.log(`SMTP not configured. Activation links will be logged to ${MAIL_LOG_PATH}`);
   }
