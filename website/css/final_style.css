@@ -1829,12 +1829,12 @@ section[id] {
 .hero-quick-link {
     color: var(--white);
     text-decoration: none;
-    padding: 7px 13px;
+    padding: 6px 10px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.16);
     border: 1px solid rgba(255, 255, 255, 0.26);
     backdrop-filter: blur(8px);
-    font-size: 0.76rem;
+    font-size: 0.7rem;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
@@ -1859,10 +1859,10 @@ section[id] {
     left: 50%;
     top: calc(100% + 10px);
     transform: translateX(-50%);
-    min-width: 176px;
+    min-width: 160px;
     display: grid;
     gap: 4px;
-    padding: 7px;
+    padding: 6px;
     border-radius: 12px;
     background: linear-gradient(180deg, rgba(12, 31, 62, 0.96) 0%, rgba(9, 23, 46, 0.96) 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1873,9 +1873,9 @@ section[id] {
 .hero-submenu a {
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
-    font-size: 0.74rem;
+    font-size: 0.69rem;
     font-weight: 600;
-    padding: 7px 9px;
+    padding: 6px 8px;
     border-radius: 10px;
     white-space: nowrap;
 }
