@@ -121,8 +121,8 @@
     eventsSectionTitle: 'Related Events',
     newsSectionTitle: 'News',
     contactTitle: 'Reach us any time.',
-    contactSubtitle: 'Or contact us by email',
-    contactEmail: 'info.alumni@must.edu.eg',
+    contactSubtitle: 'Send your message directly to the sector team.',
+    contactEmail: '',
     contactFormTitle: 'Leave a message',
     eventsCtaText: 'See All Events',
     eventsCtaUrl: 'https://must.edu.eg/event/',
@@ -170,6 +170,8 @@
   const eventDayInput = document.getElementById('eventCardDay');
   const eventMonthYearInput = document.getElementById('eventCardMonthYear');
   const eventTitleInput = document.getElementById('eventCardTitle');
+  const eventLocationInput = document.getElementById('eventCardLocation');
+  const eventTimeTextInput = document.getElementById('eventCardTimeText');
   const eventImageInput = document.getElementById('eventCardImageUrl');
   const eventSummaryInput = document.getElementById('eventCardSummary');
   const eventLinkTextInput = document.getElementById('eventCardLinkText');
@@ -637,9 +639,11 @@
     eventDayInput.value = '';
     eventMonthYearInput.value = '';
     eventTitleInput.value = '';
+    if (eventLocationInput) eventLocationInput.value = '';
+    if (eventTimeTextInput) eventTimeTextInput.value = '';
     eventImageInput.value = '';
     eventSummaryInput.value = '';
-    eventLinkTextInput.value = 'Register Now';
+    eventLinkTextInput.value = 'Read more';
     eventLinkUrlInput.value = '#';
     eventSubmitBtn.textContent = 'Add event';
     eventCancelEditBtn.hidden = true;
@@ -688,9 +692,11 @@
     eventDayInput.value = item.day || '';
     eventMonthYearInput.value = item.monthYear || '';
     eventTitleInput.value = item.title || '';
+    if (eventLocationInput) eventLocationInput.value = item.location || '';
+    if (eventTimeTextInput) eventTimeTextInput.value = item.timeText || '';
     eventImageInput.value = item.imageUrl || '';
     eventSummaryInput.value = item.summary || '';
-    eventLinkTextInput.value = item.linkText || 'Register Now';
+    eventLinkTextInput.value = item.linkText || 'Read more';
     eventLinkUrlInput.value = item.linkUrl || '#';
     eventSubmitBtn.textContent = 'Update event';
     eventCancelEditBtn.hidden = false;
@@ -1183,7 +1189,10 @@
           '</div>' +
           '<div class="card-foot">' +
             '<span class="muted small">' + escapeHtml(message.created_at) + '</span>' +
-            '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="markMessageReviewed(' + message.id + ')">Mark reviewed</button>' +
+            '<div class="d-flex flex-wrap gap-2">' +
+              '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="markMessageReviewed(' + message.id + ')">Mark reviewed</button>' +
+              '<button class="btn btn-outline-danger btn-sm rounded-pill px-3" type="button" onclick="deleteMessage(' + message.id + ')">Delete</button>' +
+            '</div>' +
           '</div>' +
         '</article>'
       );
@@ -1480,6 +1489,16 @@
     });
   };
 
+  window.deleteMessage = function (id) {
+    const confirmed = window.confirm('Delete this contact message permanently?');
+    if (!confirmed) return;
+    apiRequest(MESSAGES_API + '/' + id, {
+      method: 'DELETE'
+    }).then(loadAll).catch(function (error) {
+      alert(error.message);
+    });
+  };
+
   newsSubmitBtn.addEventListener('click', function () {
     const editingIndex = Number(newsEditingIdInput.value || -1);
     const item = {
@@ -1510,9 +1529,11 @@
       day: eventDayInput.value.trim(),
       monthYear: eventMonthYearInput.value.trim(),
       title: eventTitleInput.value.trim(),
+      location: eventLocationInput ? eventLocationInput.value.trim() : '',
+      timeText: eventTimeTextInput ? eventTimeTextInput.value.trim() : '',
       summary: eventSummaryInput.value.trim(),
       imageUrl: eventImageInput.value.trim(),
-      linkText: eventLinkTextInput.value.trim() || 'Register Now',
+      linkText: eventLinkTextInput.value.trim() || 'Read more',
       linkUrl: eventLinkUrlInput.value.trim() || '#'
     };
     if (!item.day || !item.monthYear || !item.title || !item.summary) {
@@ -1814,7 +1835,9 @@
             planFileMetaInput.value = formatFileSize(file.size);
           }
           updatePlanFilePreview(planFileUrlInput.value.trim());
-          markDirty();
+          savePublishedContent().then(function () {
+            setSaveState('good', 'Plan PDF uploaded');
+          });
         }).catch(function (error) {
           alert(error.message || 'Could not upload the selected PDF.');
         }).finally(function () {
@@ -1840,7 +1863,9 @@
           planFileMetaInput.value = '';
         }
         updatePlanFilePreview('');
-        markDirty();
+        savePublishedContent().then(function () {
+          setSaveState('good', 'Plan PDF removed');
+        });
       };
 
       if (/^(images\/uploads|files\/uploads|files\/plans)\//i.test(currentUrl)) {

@@ -149,8 +149,8 @@ const DEFAULT_SITE_CONTENT = {
   eventsSectionTitle: 'Related Events',
   newsSectionTitle: 'News',
   contactTitle: 'Reach us any time.',
-  contactSubtitle: 'Or contact us by email',
-  contactEmail: 'info.alumni@must.edu.eg',
+  contactSubtitle: 'Send your message directly to the sector team.',
+  contactEmail: '',
   contactFormTitle: 'Leave a message',
   eventsCtaText: 'See All Events',
   eventsCtaUrl: 'https://must.edu.eg/event/',
@@ -207,6 +207,8 @@ function runMigrations() {
       month_year TEXT NOT NULL,
       title TEXT NOT NULL,
       summary TEXT NOT NULL,
+      location TEXT,
+      time_text TEXT,
       image_url TEXT,
       link_text TEXT,
       link_url TEXT,
@@ -225,6 +227,16 @@ function runMigrations() {
   const hasUniversityId = userColumns.some((column) => column.name === 'university_id');
   if (!hasUniversityId) {
     db.exec(`ALTER TABLE users ADD COLUMN university_id TEXT`);
+  }
+
+  const eventColumns = db.prepare(`PRAGMA table_info(events)`).all();
+  const hasEventLocation = eventColumns.some((column) => column.name === 'location');
+  const hasEventTimeText = eventColumns.some((column) => column.name === 'time_text');
+  if (!hasEventLocation) {
+    db.exec(`ALTER TABLE events ADD COLUMN location TEXT`);
+  }
+  if (!hasEventTimeText) {
+    db.exec(`ALTER TABLE events ADD COLUMN time_text TEXT`);
   }
 }
 
@@ -248,16 +260,16 @@ function seedDefaultContent() {
   const eventsCount = db.prepare('SELECT COUNT(*) AS count FROM events').get().count;
   if (!eventsCount) {
     const seedEvents = [
-      ['04', 'Feb', 'Ferrari: Driving Luxury Beyond the Road', 'MUST proudly hosts Rome Business School for a global case study on innovation, AI, and strategic thinking behind Ferrari.', 'images/official/event-ferrari.jpeg', 'Read More', 'https://must.edu.eg/event/ferrari-driving-luxury-beyond-the-road/'],
-      ['09', 'Dec', 'Annual Scientific Day', 'The College of Biotechnology at Misr University for Science and Technology showcases innovation, student projects, and scientific excellence.', 'images/official/event-annual-scientific-day.png', 'Read More', 'https://must.edu.eg/event/annual-scientific-day/'],
-      ['06', 'Nov', 'College of Information Technology conference entitle "Artificial Intelligence for Environmental Sustainability"', 'The College of Information Technology highlights how AI can support sustainable development, climate action, and natural resource management.', 'images/official/event-ai-sustainability.png', 'Read More', 'https://must.edu.eg/event/college-of-information-technology-conference-entitle-artificial-intelligence-for-environmental-sustainability-2/']
+      ['04', 'Feb', 'Ferrari: Driving Luxury Beyond the Road', 'MUST proudly hosts Rome Business School for a global case study on innovation, AI, and strategic thinking behind Ferrari.', 'MUST Convention Center', '10:00 AM', 'images/official/event-ferrari.jpeg', 'Read More', 'https://must.edu.eg/event/ferrari-driving-luxury-beyond-the-road/'],
+      ['09', 'Dec', 'Annual Scientific Day', 'The College of Biotechnology at Misr University for Science and Technology showcases innovation, student projects, and scientific excellence.', 'College of Biotechnology Hall', '11:30 AM', 'images/official/event-annual-scientific-day.png', 'Read More', 'https://must.edu.eg/event/annual-scientific-day/'],
+      ['06', 'Nov', 'College of Information Technology conference entitle "Artificial Intelligence for Environmental Sustainability"', 'The College of Information Technology highlights how AI can support sustainable development, climate action, and natural resource management.', 'MUST Main Auditorium', '09:00 AM', 'images/official/event-ai-sustainability.png', 'Read More', 'https://must.edu.eg/event/college-of-information-technology-conference-entitle-artificial-intelligence-for-environmental-sustainability-2/']
     ];
     const insertEvent = db.prepare(`
-      INSERT INTO events (day, month_year, title, summary, image_url, link_text, link_url, sort_order, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO events (day, month_year, title, summary, location, time_text, image_url, link_text, link_url, sort_order, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     seedEvents.forEach((item, index) => {
-      insertEvent.run(item[0], item[1], item[2], item[3], item[4], item[5], item[6], index, new Date().toISOString());
+      insertEvent.run(item[0], item[1], item[2], item[3], item[4], item[5], item[6], item[7], item[8], index, new Date().toISOString());
     });
   }
 
@@ -538,22 +550,20 @@ app.get('/api/session', (req, res) => {
 
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const name = String(req.body.name || '').trim();
-    const universityId = String(req.body.universityId || '').trim();
+    const firstName = String(req.body.firstName || '').trim();
+    const lastName = String(req.body.lastName || '').trim();
+    const name = [firstName, lastName].filter(Boolean).join(' ').trim();
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
 
-    if (name.length < 2) {
-      return res.status(400).json({ ok: false, error: 'Name must be at least 2 characters' });
+    if (firstName.length < 2) {
+      return res.status(400).json({ ok: false, error: 'First name must be at least 2 characters' });
     }
-    if (universityId.length < 4) {
-      return res.status(400).json({ ok: false, error: 'Enter a valid University ID' });
+    if (lastName.length < 2) {
+      return res.status(400).json({ ok: false, error: 'Last name must be at least 2 characters' });
     }
     if (!mustEmail(email)) {
       return res.status(400).json({ ok: false, error: 'Use your MUST email in the format username@must.edu.eg' });
-    }
-    if (!emailMatchesUniversityId(email, universityId)) {
-      return res.status(400).json({ ok: false, error: `The email must exactly match your University ID in this format: ${universityId}@must.edu.eg` });
     }
     if (password.length < 6) {
       return res.status(400).json({ ok: false, error: 'Password must be at least 6 characters' });
@@ -582,7 +592,7 @@ app.post('/api/auth/register', async (req, res) => {
         UPDATE users
         SET
           name = ?,
-          university_id = ?,
+          university_id = NULL,
           password_hash = ?,
           role = 'user',
           is_active = 0,
@@ -591,13 +601,13 @@ app.post('/api/auth/register', async (req, res) => {
           activated_at = NULL,
           last_login_at = NULL
         WHERE id = ?
-      `).run(name, universityId, passwordHash, token, createdAt, existing.id);
+      `).run(name, passwordHash, token, createdAt, existing.id);
       userId = existing.id;
       } else {
         const created = db.prepare(`
           INSERT INTO users (name, university_id, email, password_hash, role, is_active, activation_token, created_at)
           VALUES (?, ?, ?, ?, 'user', 0, ?, ?)
-        `).run(name, universityId, email, passwordHash, token, createdAt);
+        `).run(name, null, email, passwordHash, token, createdAt);
         userId = created.lastInsertRowid;
       }
 
@@ -645,7 +655,8 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const email = String(req.body.email || '').trim().toLowerCase();
+    const loginValue = String(req.body.login || req.body.email || '').trim().toLowerCase();
+    const email = loginValue.includes('@') ? loginValue : `${loginValue}@must.edu.eg`;
     const password = String(req.body.password || '');
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
 
@@ -817,15 +828,93 @@ app.delete('/api/admin/assets', requireAdmin, (req, res) => {
 });
 
 function listNews() {
-  return db.prepare('SELECT id, badge, title, image_url AS imageUrl, link_text AS linkText, link_url AS linkUrl FROM news ORDER BY sort_order ASC, id DESC').all();
+  return db.prepare(`
+    SELECT
+      id,
+      badge,
+      title,
+      image_url AS imageUrl,
+      link_text AS linkText,
+      link_url AS linkUrl,
+      link_url AS sourceUrl
+    FROM news
+    ORDER BY sort_order ASC, id DESC
+  `).all();
 }
 
 function listEvents() {
-  return db.prepare('SELECT id, day, month_year AS monthYear, title, summary, image_url AS imageUrl, link_text AS linkText, link_url AS linkUrl FROM events ORDER BY sort_order ASC, id DESC').all();
+  return db.prepare(`
+    SELECT
+      id,
+      day,
+      month_year AS monthYear,
+      title,
+      summary,
+      location,
+      time_text AS timeText,
+      image_url AS imageUrl,
+      link_text AS linkText,
+      link_url AS linkUrl,
+      link_url AS sourceUrl
+    FROM events
+    ORDER BY sort_order ASC, id DESC
+  `).all();
+}
+
+function getNewsItemById(id) {
+  return db.prepare(`
+    SELECT
+      id,
+      badge,
+      title,
+      image_url AS imageUrl,
+      link_text AS linkText,
+      link_url AS linkUrl,
+      link_url AS sourceUrl
+    FROM news
+    WHERE id = ?
+  `).get(id);
+}
+
+function getEventItemById(id) {
+  return db.prepare(`
+    SELECT
+      id,
+      day,
+      month_year AS monthYear,
+      title,
+      summary,
+      location,
+      time_text AS timeText,
+      image_url AS imageUrl,
+      link_text AS linkText,
+      link_url AS linkUrl,
+      link_url AS sourceUrl
+    FROM events
+    WHERE id = ?
+  `).get(id);
 }
 
 app.get('/api/content/public', (req, res) => {
   res.json({ ok: true, news: listNews(), events: listEvents(), sections: getSiteContent() });
+});
+
+app.get('/api/content/public/news/:id', (req, res) => {
+  const itemId = Number(req.params.id);
+  const item = Number.isFinite(itemId) ? getNewsItemById(itemId) : null;
+  if (!item) {
+    return res.status(404).json({ ok: false, error: 'News item not found' });
+  }
+  res.json({ ok: true, item });
+});
+
+app.get('/api/content/public/events/:id', (req, res) => {
+  const itemId = Number(req.params.id);
+  const item = Number.isFinite(itemId) ? getEventItemById(itemId) : null;
+  if (!item) {
+    return res.status(404).json({ ok: false, error: 'Event not found' });
+  }
+  res.json({ ok: true, item });
 });
 
 app.get('/api/admin/content', requireAdmin, (req, res) => {
@@ -846,8 +935,8 @@ app.post('/api/admin/content', requireAdmin, (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
   const insertEvent = db.prepare(`
-    INSERT INTO events (day, month_year, title, summary, image_url, link_text, link_url, sort_order, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO events (day, month_year, title, summary, location, time_text, image_url, link_text, link_url, sort_order, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const transaction = db.transaction(() => {
@@ -872,8 +961,10 @@ app.post('/api/admin/content', requireAdmin, (req, res) => {
         String(item.monthYear || '').trim(),
         String(item.title || '').trim(),
         String(item.summary || '').trim(),
+        String(item.location || '').trim(),
+        String(item.timeText || '').trim(),
         String(item.imageUrl || '').trim(),
-        String(item.linkText || 'Register Now').trim(),
+        String(item.linkText || 'Read more').trim(),
         String(item.linkUrl || '#').trim(),
         index,
         now()
@@ -964,6 +1055,15 @@ app.post('/api/admin/messages/:id/status', requireAdmin, (req, res) => {
   const messageId = Number(req.params.id);
   const status = String(req.body.status || 'reviewed').trim();
   db.prepare('UPDATE contact_messages SET status = ? WHERE id = ?').run(status, messageId);
+  res.json({ ok: true });
+});
+
+app.delete('/api/admin/messages/:id', requireAdmin, (req, res) => {
+  const messageId = Number(req.params.id);
+  if (!Number.isFinite(messageId)) {
+    return res.status(400).json({ ok: false, error: 'Invalid message id' });
+  }
+  db.prepare('DELETE FROM contact_messages WHERE id = ?').run(messageId);
   res.json({ ok: true });
 });
 

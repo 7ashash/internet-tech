@@ -77,7 +77,33 @@ document.addEventListener('DOMContentLoaded', function () {
   var contactForm = document.getElementById('contactForm');
   var contactFeedback = document.getElementById('contactFeedback');
   var heroQuickDropdowns = document.querySelectorAll('.hero-quick-dropdown');
+  var activityModal = document.getElementById('activityModal');
+  var activityModalBackdrop = document.getElementById('activityModalBackdrop');
+  var activityModalCloseBtn = document.getElementById('activityModalCloseBtn');
+  var activityModalMedia = document.getElementById('activityModalMedia');
+  var activityModalDate = document.getElementById('activityModalDate');
+  var activityModalTitle = document.getElementById('activityModalTitle');
+  var activityModalText = document.getElementById('activityModalText');
   var currentUser = null;
+  var managedActivityGroupsData = [];
+
+  function buildLocalDetailUrl(type, id) {
+    return 'content-detail.html?type=' + encodeURIComponent(type) + '&id=' + encodeURIComponent(id);
+  }
+
+  function localDetailLinkMarkup(type, item, className, text) {
+    if (!item || !item.id) {
+      return '<span class="' + escapeHtml(className || '') + ' static-card-link">' + escapeHtml(text || 'Read more') + '</span>';
+    }
+
+    return '<a href="' + escapeHtml(buildLocalDetailUrl(type, item.id)) + '" class="' + escapeHtml(className || '') + '">' + escapeHtml(text || 'Read more') + '</a>';
+  }
+
+  function truncateText(text, maxLength) {
+    var value = String(text || '').trim();
+    if (!value || value.length <= maxLength) return value;
+    return value.slice(0, maxLength).trim() + '...';
+  }
 
   function openMenu() {
     if (!menuBtn || !navMenu || !menuBackdrop) return;
@@ -121,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
       closeMenu();
+      closeActivityModal();
     }
   });
 
@@ -174,6 +201,104 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       });
     });
+  }
+
+  function closeActivityModal() {
+    if (!activityModal) return;
+    activityModal.classList.add('hidden');
+    activityModal.setAttribute('aria-hidden', 'true');
+    body.classList.remove('modal-open');
+    if (activityModalMedia && activityModalMedia._activityTimerId) {
+      window.clearInterval(activityModalMedia._activityTimerId);
+    }
+  }
+
+  function initModalActivitySlider() {
+    if (!activityModalMedia) return;
+    var slides = activityModalMedia.querySelectorAll('.content-modal-slide');
+    if (!slides.length) return;
+    var currentIndex = 0;
+    var prevBtn = activityModalMedia.querySelector('.content-modal-prev');
+    var nextBtn = activityModalMedia.querySelector('.content-modal-next');
+
+    function showSlide(nextIndex) {
+      currentIndex = (nextIndex + slides.length) % slides.length;
+      Array.prototype.forEach.call(slides, function (slide, index) {
+        slide.classList.toggle('active', index === currentIndex);
+      });
+    }
+
+    function restartAutoPlay() {
+      if (activityModalMedia._activityTimerId) {
+        window.clearInterval(activityModalMedia._activityTimerId);
+      }
+      activityModalMedia._activityTimerId = window.setInterval(function () {
+        showSlide(currentIndex + 1);
+      }, 4600);
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function () {
+        showSlide(currentIndex - 1);
+        restartAutoPlay();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        showSlide(currentIndex + 1);
+        restartAutoPlay();
+      });
+    }
+
+    showSlide(0);
+    restartAutoPlay();
+  }
+
+  function openActivityModal(groupIndex, itemIndex) {
+    if (!activityModal) return;
+    var group = managedActivityGroupsData[groupIndex];
+    var item = group && Array.isArray(group.items) ? group.items[itemIndex] : null;
+    if (!item) return;
+
+    var images = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
+    if (!images.length) {
+      images = ['images/logo-png.png'];
+    }
+
+    if (activityModalDate) {
+      activityModalDate.textContent = item.dateLabel || group.title || 'Sector activity';
+    }
+    if (activityModalTitle) {
+      activityModalTitle.textContent = item.title || 'Activity';
+    }
+    if (activityModalText) {
+      activityModalText.textContent = item.summary || '';
+    }
+    if (activityModalMedia) {
+      activityModalMedia.innerHTML = images.length > 1
+        ? images.map(function (image, index) {
+            return '<div class="content-modal-slide' + (index === 0 ? ' active' : '') + '">' +
+              '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml((item.title || 'Activity') + ' image ' + (index + 1)) + '">' +
+            '</div>';
+          }).join('') +
+          '<button class="content-modal-nav content-modal-prev" type="button" aria-label="Previous image"><i class="fas fa-chevron-left"></i></button>' +
+          '<button class="content-modal-nav content-modal-next" type="button" aria-label="Next image"><i class="fas fa-chevron-right"></i></button>'
+        : '<div class="content-modal-slide active"><img src="' + escapeHtml(images[0]) + '" alt="' + escapeHtml(item.title || 'Activity') + '"></div>';
+    }
+
+    activityModal.classList.remove('hidden');
+    activityModal.setAttribute('aria-hidden', 'false');
+    body.classList.add('modal-open');
+    initModalActivitySlider();
+  }
+
+  if (activityModalBackdrop) {
+    activityModalBackdrop.addEventListener('click', closeActivityModal);
+  }
+
+  if (activityModalCloseBtn) {
+    activityModalCloseBtn.addEventListener('click', closeActivityModal);
   }
 
   function applyTheme(theme) {
@@ -457,7 +582,7 @@ document.addEventListener('DOMContentLoaded', function () {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: document.getElementById('loginEmail').value.trim(),
+          login: document.getElementById('loginEmail').value.trim(),
           password: document.getElementById('loginPassword').value
         })
       }).then(function (data) {
@@ -474,21 +599,14 @@ document.addEventListener('DOMContentLoaded', function () {
     registerAuthForm.addEventListener('submit', function (event) {
       event.preventDefault();
       clearAuthFeedback();
-      var universityId = document.getElementById('registerUniversityId').value.trim();
       var registerEmail = document.getElementById('registerEmail').value.trim().toLowerCase();
-      var expectedEmail = universityId + '@must.edu.eg';
-
-      if (registerEmail !== expectedEmail) {
-        showAuthFeedback('The university email must exactly match your University ID, for example: ' + expectedEmail, 'error');
-        return;
-      }
 
       apiRequest('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: document.getElementById('registerName').value.trim(),
-          universityId: universityId,
+          firstName: document.getElementById('registerFirstName').value.trim(),
+          lastName: document.getElementById('registerLastName').value.trim(),
           email: registerEmail,
           password: document.getElementById('registerPassword').value
         })
@@ -636,11 +754,15 @@ document.addEventListener('DOMContentLoaded', function () {
   function renderActivityGroups(groups) {
     var target = document.getElementById('activityGroups');
     if (!target || !Array.isArray(groups) || !groups.length) return;
+    managedActivityGroupsData = groups;
     target.innerHTML = groups.map(function (group, groupIndex) {
       var items = Array.isArray(group.items) ? group.items : [];
-      var cards = items.map(function (item) {
+      var cards = items.map(function (item, itemIndex) {
         var images = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
         var mainImage = images[0] || 'images/logo-png.png';
+        var summary = String(item.summary || '').trim();
+        var summaryIsLong = summary.length > 180;
+        var previewText = summaryIsLong ? truncateText(summary, 180) : summary;
         var media = images.length > 1
           ? '<div class="activity-item-media activity-media-slider" data-activity-slider>' +
               images.map(function (image, imageIndex) {
@@ -657,11 +779,12 @@ document.addEventListener('DOMContentLoaded', function () {
               '<span class="activity-date-chip">' + escapeHtml(item.dateLabel || '') + '</span>' +
             '</div>';
         return (
-          '<article class="activity-item-card">' +
+          '<article class="activity-item-card" role="button" tabindex="0" data-activity-open="' + groupIndex + ':' + itemIndex + '" aria-label="Open activity details">' +
             media +
             '<div class="activity-item-body">' +
               '<h4 class="navy-title">' + escapeHtml(item.title || 'Activity') + '</h4>' +
-              (item.summary ? '<p>' + escapeHtml(item.summary) + '</p>' : '') +
+              (previewText ? '<p class="' + (summaryIsLong ? 'is-truncated' : '') + '">' + escapeHtml(previewText) + '</p>' : '') +
+              '<button class="activity-read-more" type="button" data-activity-readmore="' + groupIndex + ':' + itemIndex + '">Read more</button>' +
             '</div>' +
           '</article>'
         );
@@ -735,6 +858,31 @@ document.addEventListener('DOMContentLoaded', function () {
       restartAutoPlay();
     });
   }
+
+  document.addEventListener('click', function (event) {
+    var trigger = event.target.closest('[data-activity-readmore]');
+    var cardTrigger = event.target.closest('[data-activity-open]');
+
+    if (event.target.closest('.activity-slider-btn')) {
+      return;
+    }
+
+    if (!trigger && !cardTrigger) return;
+    var source = trigger || cardTrigger;
+    var rawValue = String(source.getAttribute('data-activity-readmore') || source.getAttribute('data-activity-open') || '');
+    var parts = rawValue.split(':');
+    openActivityModal(Number(parts[0]), Number(parts[1]));
+  });
+
+  document.addEventListener('keydown', function (event) {
+    var cardTrigger = event.target.closest('[data-activity-open]');
+    if (!cardTrigger) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    var rawValue = String(cardTrigger.getAttribute('data-activity-open') || '');
+    var parts = rawValue.split(':');
+    openActivityModal(Number(parts[0]), Number(parts[1]));
+  });
 
   function renderGalleryItems(items) {
     var target = document.getElementById('managedGallerySlides');
@@ -885,11 +1033,12 @@ document.addEventListener('DOMContentLoaded', function () {
     setTextContent('eventsSectionTitleText', sections.eventsSectionTitle);
     setTextContent('newsSectionTitleText', sections.newsSectionTitle);
     setTextContent('contactTitleText', sections.contactTitle);
-    setTextContent('contactSubtitleText', sections.contactSubtitle);
-    setTextContent('contactFormTitleText', sections.contactFormTitle);
-    if (sections.contactEmail) {
-      setLinkContent('contactEmailLink', 'mailto:' + sections.contactEmail, sections.contactEmail);
+    var contactSubtitle = sections.contactSubtitle;
+    if (!contactSubtitle || /contact us by email/i.test(contactSubtitle)) {
+      contactSubtitle = 'Send your message directly to the sector team.';
     }
+    setTextContent('contactSubtitleText', contactSubtitle);
+    setTextContent('contactFormTitleText', sections.contactFormTitle);
     setLinkContent('eventsCtaLink', sections.eventsCtaUrl, sections.eventsCtaText);
     setLinkContent('newsCtaLink', sections.newsCtaUrl, sections.newsCtaText);
     setTextContent('footerPhoneText', sections.footerPhone);
@@ -918,7 +1067,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     target.innerHTML = items.map(function (item) {
       var imgSrc = item.imageUrl ? escapeHtml(item.imageUrl) : 'images/logo-png.png';
-      var linkMarkup = safeLinkMarkup(item.linkUrl, item.linkText || 'Read more', 'news-link');
+      var linkMarkup = localDetailLinkMarkup('news', item, 'news-link', item.linkText || 'Read more');
 
       return (
         '<div class="news-card fade-in-up visible">' +
@@ -941,7 +1090,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     target.innerHTML = items.map(function (item) {
       var imgSrc = item.imageUrl ? escapeHtml(item.imageUrl) : 'images/logo-png.png';
-      var linkMarkup = safeLinkMarkup(item.linkUrl, item.linkText || 'Register Now', 'event-link');
+      var linkMarkup = localDetailLinkMarkup('event', item, 'event-link', item.linkText || 'Read more');
+      var metaPieces = [];
+      if (item.location) {
+        metaPieces.push('<span class="event-meta-item"><i class="fas fa-location-dot"></i><span>' + escapeHtml(item.location) + '</span></span>');
+      }
+      if (item.timeText) {
+        metaPieces.push('<span class="event-meta-item"><i class="far fa-clock"></i><span>' + escapeHtml(item.timeText) + '</span></span>');
+      }
 
       return (
         '<div class="event-card fade-in-up visible">' +
@@ -949,12 +1105,13 @@ document.addEventListener('DOMContentLoaded', function () {
             '<img src="' + imgSrc + '" alt="Event" style="width: 100%; height: 250px; object-fit: cover; object-position: center; display: block; margin: 0 auto;">' +
             '<div class="date-box">' +
               '<span class="day">' + escapeHtml(item.day) + '</span>' +
-              '<span class="month" style="font-size:0.9rem;">' + escapeHtml(item.monthYear) + '</span>' +
+              '<span class="month">' + escapeHtml(item.monthYear) + '</span>' +
             '</div>' +
           '</div>' +
-          '<div class="event-content" style="padding: 40px 20px 20px;">' +
+          '<div class="event-content event-content-rich">' +
             '<h4 class="navy-title">' + escapeHtml(item.title) + '</h4>' +
-            '<p style="font-size: 0.9rem; color: #555; margin-top: 10px; margin-bottom: 15px;">' + escapeHtml(item.summary) + '</p>' +
+            (metaPieces.length ? '<div class="event-meta-row">' + metaPieces.join('') + '</div>' : '') +
+            '<p class="event-summary-text">' + escapeHtml(item.summary) + '</p>' +
             linkMarkup +
           '</div>' +
         '</div>'

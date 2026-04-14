@@ -551,8 +551,7 @@
             <div class="container contact-wrapper">
                 <div class="contact-text-area">
                     <h2 id="contactTitleText">Reach us any time.</h2>
-                    <h3 id="contactSubtitleText">Or contact us by email</h3>
-                    <a href="mailto:info.alumni@must.edu.eg" class="green-email-link" id="contactEmailLink">info.alumni@must.edu.eg</a>
+                    <h3 id="contactSubtitleText">Send your message directly to the sector team.</h3>
                 </div>
 
                 <div class="contact-form-area">
@@ -594,7 +593,7 @@
             </button>
             <p class="auth-modal-eyebrow">Account Registration</p>
             <h2 id="authModalTitle">Create and activate your account</h2>
-            <p class="auth-modal-copy">Enter your personal details, your University ID, and the matching MUST email. The email must exactly equal your ID in this format: UniversityID@must.edu.eg. A verification link will be sent to that university mailbox and you must open it to activate the account before logging in.</p>
+            <p class="auth-modal-copy">Enter your first and last name, your MUST email, and a secure password. A verification link will be sent to that university mailbox and you must open it to activate the account before logging in.</p>
 
             <div class="auth-tabs">
                 <button class="auth-tab active" id="loginTabBtn" type="button" data-auth-tab="login">Login</button>
@@ -604,18 +603,24 @@
             <div class="auth-feedback hidden" id="authFeedback"></div>
 
             <form class="auth-form" id="loginAuthForm">
-                <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="username@must.edu.eg" required>
+                <label>Username or Email</label>
+                <input type="text" id="loginEmail" placeholder="omar or omar@must.edu.eg" required>
                 <label>Password</label>
                 <input type="password" id="loginPassword" placeholder="Enter your password" required>
                 <button class="btn-green-solid auth-submit-btn" type="submit">Login</button>
             </form>
 
             <form class="auth-form hidden" id="registerAuthForm">
-                <label>Full Name</label>
-                <input type="text" id="registerName" placeholder="Enter your name" required>
-                <label>University ID</label>
-                <input type="text" id="registerUniversityId" placeholder="Enter your university ID" required>
+                <div class="auth-form-grid">
+                    <div>
+                        <label>First Name</label>
+                        <input type="text" id="registerFirstName" placeholder="Enter your first name" required>
+                    </div>
+                    <div>
+                        <label>Last Name</label>
+                        <input type="text" id="registerLastName" placeholder="Enter your last name" required>
+                    </div>
+                </div>
                 <label>Email</label>
                 <input type="email" id="registerEmail" placeholder="username@must.edu.eg" required>
                 <label>Password</label>
@@ -684,6 +689,21 @@
             <p id="footerCopyrightText">Copyright All Right Reserved @ MUST UNIVERSITY 2025</p>
         </div>
     </footer>
+
+    <div class="content-modal hidden" id="activityModal" aria-hidden="true">
+        <div class="content-modal-backdrop" id="activityModalBackdrop"></div>
+        <div class="content-modal-card" role="dialog" aria-modal="true" aria-labelledby="activityModalTitle">
+            <button class="content-modal-close" id="activityModalCloseBtn" type="button" aria-label="Close activity details">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="content-modal-media" id="activityModalMedia"></div>
+            <div class="content-modal-body">
+                <p class="content-modal-eyebrow" id="activityModalDate">Activity</p>
+                <h2 id="activityModalTitle">Activity title</h2>
+                <p id="activityModalText"></p>
+            </div>
+        </div>
+    </div>
 
     <script src="js/final_script.js"></script>
 </body>

@@ -137,6 +137,7 @@
       <a class="nav-item-custom" href="#committeesCrudManager"><i class="bi bi-diagram-3-fill"></i> Committees</a>
       <a class="nav-item-custom" href="#protocolsCrudManager"><i class="bi bi-diagram-2-fill"></i> Protocols</a>
       <a class="nav-item-custom" href="#activitiesCrudManager"><i class="bi bi-kanban-fill"></i> Activities</a>
+      <a class="nav-item-custom" href="#galleryManager"><i class="bi bi-images"></i> Hero slider</a>
       <a class="nav-item-custom" href="#siteContentManager"><i class="bi bi-window-stack"></i> Static sections</a>
       <a class="nav-item-custom" href="#usersManager"><i class="bi bi-people-fill"></i> Users manager</a>
       <a class="nav-item-custom" href="#messagesManager"><i class="bi bi-envelope-paper-fill"></i> Contact messages</a>
@@ -248,7 +249,7 @@
                           <input id="newsCardLinkText" class="form-control" value="Read more" autocomplete="off">
                       </div>
                       <div class="col-md-6">
-                          <label class="form-label fw-semibold">Link URL</label>
+                          <label class="form-label fw-semibold">Source URL (optional)</label>
                           <input id="newsCardLinkUrl" class="form-control" value="#" autocomplete="off">
                       </div>
                     </div>
@@ -293,6 +294,10 @@
                       <div class="col-md-4"><label class="form-label fw-semibold">Day</label><input id="eventCardDay" class="form-control" placeholder="15" autocomplete="off"></div>
                       <div class="col-md-8"><label class="form-label fw-semibold">Month / year</label><input id="eventCardMonthYear" class="form-control" placeholder="Mar 2026" autocomplete="off"></div>
                     </div>
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-6"><label class="form-label fw-semibold">Location</label><input id="eventCardLocation" class="form-control" placeholder="MUST Main Hall" autocomplete="off"></div>
+                      <div class="col-md-6"><label class="form-label fw-semibold">Time</label><input id="eventCardTimeText" class="form-control" placeholder="10:00 AM" autocomplete="off"></div>
+                    </div>
                     <div class="mb-3"><label class="form-label fw-semibold">Event title</label><input id="eventCardTitle" class="form-control" placeholder="Enter the event title" autocomplete="off"></div>
                     <div class="mb-3">
                       <label class="form-label fw-semibold">Image URL / Path</label>
@@ -306,10 +311,10 @@
                     <div class="row g-3 mb-3">
                       <div class="col-md-6">
                           <label class="form-label fw-semibold">Link text</label>
-                          <input id="eventCardLinkText" class="form-control" value="Register Now" autocomplete="off">
+                          <input id="eventCardLinkText" class="form-control" value="Read more" autocomplete="off">
                       </div>
                       <div class="col-md-6">
-                          <label class="form-label fw-semibold">Link URL</label>
+                          <label class="form-label fw-semibold">Source URL (optional)</label>
                           <input id="eventCardLinkUrl" class="form-control" value="#" autocomplete="off">
                       </div>
                     </div>
@@ -518,6 +523,48 @@
           </section>
         </div>
 
+        <div class="col-12" id="galleryManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Hero Slider Manager</div>
+                <div class="muted small">Edit the images that appear in the fullscreen homepage slider.</div>
+              </div>
+              <span class="status-pill good"><i class="bi bi-images"></i> Homepage hero</span>
+            </div>
+            <div class="manager-stack">
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Manage hero slide</h3><div class="muted small">Upload an image and optional alt text for the hero slider.</div></div>
+                <div class="editor-body">
+                  <form id="galleryForm" class="manager-form">
+                    <input id="galleryEditingId" type="hidden">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Image URL / Path</label>
+                      <div class="image-input-row">
+                        <input id="galleryImageUrl" class="form-control" placeholder="images/photo-slider1.jpeg" autocomplete="off">
+                        <button class="btn btn-soft upload-btn" id="galleryUploadBtn" type="button"><i class="bi bi-upload me-1"></i>Upload image</button>
+                      </div>
+                      <div id="galleryImagePreview" class="thumbnail-preview">No image selected</div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Alt text</label>
+                      <input id="galleryAlt" class="form-control" placeholder="Hero slide description" autocomplete="off">
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                      <button class="btn btn-must flex-grow-1" id="gallerySubmitBtn" type="submit">Add hero slide</button>
+                      <button class="btn btn-outline-secondary" id="galleryCancelEditBtn" type="button" hidden>Cancel edit</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="editor-card">
+                <div class="editor-header"><h3 class="h5 mb-1">Current hero slides</h3><div class="muted small">These images rotate automatically on the homepage.</div></div>
+                <div class="editor-body"><div id="galleryList" class="item-grid"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
         <div class="col-12" id="siteContentManager">
           <section class="panel">
             <div class="toolbar">
@@ -658,7 +705,7 @@
               <span class="status-pill good"><i class="bi bi-inbox-fill"></i> Contact inbox</span>
             </div>
             <div class="editor-card">
-              <div class="editor-header"><h3 class="h5 mb-1">Recent messages</h3><div class="muted small">Mark messages as reviewed after checking them.</div></div>
+              <div class="editor-header"><h3 class="h5 mb-1">Recent messages</h3><div class="muted small">Mark messages as reviewed or delete them after checking them.</div></div>
               <div class="editor-body"><div id="messagesList" class="item-grid"></div></div>
             </div>
           </section>
@@ -669,6 +716,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- legacy dashboard script removed -->
-  <script src="dashboard.js?v=20260408c"></script>
+  <script src="dashboard.js?v=20260414b"></script>
 </body>
 </html>
