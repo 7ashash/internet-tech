@@ -817,29 +817,39 @@ textarea {
 
 .contact-section {
     position: relative;
-    background:
-        linear-gradient(90deg, rgba(16, 34, 68, 0.95) 0%, rgba(24, 58, 107, 0.92) 55%, rgba(16, 34, 68, 0.78) 100%),
-        url('../images/background2.jfif') right 6% center / 380px auto no-repeat;
-    background-color: #102244;
-    padding: 100px 0;
-    margin-bottom: 120px;
+    background: linear-gradient(135deg, #102244 0%, #1c4578 100%);
+    padding: 72px 0;
+    margin-bottom: 92px;
 }
 
-.contact-wrapper { display: flex; align-items: flex-start; justify-content: space-between; gap: 40px; }
-.contact-text-area { flex: 1; color: var(--white); padding-top: 40px; }
+.contact-wrapper { display: grid; grid-template-columns: 0.8fr 0.95fr 1.15fr; align-items: center; gap: 28px; }
+.contact-text-area { color: var(--white); }
 .contact-text-area h2 { font-size: 3.2rem; font-weight: 700; line-height: 1.1; margin-bottom: 10px; }
 .contact-text-area h3 { font-size: 2rem; font-weight: 600; line-height: 1.2; margin-bottom: 15px; }
 .green-email-link { color: var(--must-green); font-size: 1.1rem; font-weight: 600; text-decoration: none; transition: 0.3s; }
 .green-email-link:hover { color: #ffffff; }
-.contact-form-area { flex: 1; display: flex; justify-content: flex-end; }
+.contact-image-area {
+    display: flex;
+    justify-content: center;
+}
+
+.contact-image-area img {
+    width: 100%;
+    max-width: 310px;
+    border-radius: 26px;
+    object-fit: cover;
+    box-shadow: 0 22px 42px rgba(6, 18, 40, 0.28);
+}
+
+.contact-form-area { display: flex; justify-content: flex-end; }
 
 .form-box {
     background: var(--white);
-    padding: 40px;
-    border-radius: 5px;
+    padding: 34px 30px;
+    border-radius: 24px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.15);
     width: 100%;
-    max-width: 550px;
+    max-width: 500px;
     margin-bottom: 0;
     margin-top: 0;
     position: relative;
@@ -902,6 +912,23 @@ textarea {
 #sector-mission.visible,
 #sector-objectives.visible {
     animation: sectionRevealSoft 0.9s ease forwards;
+}
+
+#sector-vision.visible .icon-circle,
+#sector-mission.visible .icon-circle,
+#sector-objectives.visible .icon-circle {
+    animation: iconLiftGlow 0.9s ease forwards;
+}
+
+@keyframes iconLiftGlow {
+    0% {
+        transform: translateY(10px) scale(0.9);
+        box-shadow: 0 0 0 rgba(0, 166, 81, 0);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 16px 30px rgba(0, 166, 81, 0.16);
+    }
 }
 
 .objective-list li {
@@ -1379,10 +1406,20 @@ body.dark-mode .captcha-mockup {
 
     .contact-section {
         margin-bottom: 80px;
-        background:
-            linear-gradient(180deg, rgba(16, 34, 68, 0.94) 0%, rgba(24, 58, 107, 0.9) 100%),
-            url('../images/background2.jfif') center bottom / 220px auto no-repeat;
-        padding-bottom: 120px;
+        padding: 56px 0;
+    }
+
+    .contact-wrapper {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .contact-image-area {
+        order: 2;
+    }
+
+    .contact-image-area img {
+        max-width: 230px;
     }
 
     .form-box {
@@ -1749,7 +1786,7 @@ section[id] {
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 130px 24px 96px;
+    padding: 152px 24px 86px;
     color: var(--white);
 }
 
@@ -1770,7 +1807,7 @@ section[id] {
     flex-wrap: wrap;
     gap: 8px;
     max-width: 860px;
-    margin-top: 10px;
+    margin-top: 16px;
 }
 
 .hero-quick-item {
@@ -2233,6 +2270,25 @@ section[id] {
     font-size: 1.02rem;
 }
 
+.detail-body-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.detail-section-title {
+    color: var(--must-navy);
+    font-size: 1.18rem;
+    font-weight: 800;
+    margin-top: 12px;
+}
+
+.detail-body-stack ul {
+    padding-left: 20px;
+    color: #465466;
+    line-height: 1.9;
+}
+
 .detail-actions {
     margin-top: 24px;
 }
@@ -2459,13 +2515,13 @@ body.dark-mode .activity-count-pill {
 
     .hero-content {
         justify-content: center;
-        padding: 112px 18px 74px;
+        padding: 126px 18px 68px;
     }
 
     .hero-quick-links {
         gap: 8px;
         max-width: 100%;
-        margin-top: 14px;
+        margin-top: 18px;
     }
 
     .hero-slider-shell .banner-title {
