@@ -125,6 +125,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
+  const params = new URLSearchParams(window.location.search);
+  const queryLang = params.get('lang');
+  let currentDetailLanguage = queryLang === 'ar' || (!queryLang && window.localStorage.getItem('must-site-language') === 'ar') ? 'ar' : 'en';
+  let currentRawItem = null;
+
+  const defaultUi = {
+    sectorName: document.getElementById('detailSectorName') ? document.getElementById('detailSectorName').textContent.trim() : '',
+    back: document.getElementById('detailBackLinkText') ? document.getElementById('detailBackLinkText').textContent.trim() : '',
+    copyright: document.getElementById('detailFooterCopyright') ? document.getElementById('detailFooterCopyright').textContent.trim() : '',
+    loadingTitle: document.getElementById('detailTitle') ? document.getElementById('detailTitle').textContent.trim() : 'Loading details...',
+    loadingBody: document.getElementById('detailDescription') ? document.getElementById('detailDescription').textContent.trim() : 'Please wait while we load the selected item.',
+    eyebrowEvent: 'MUST Event',
+    eyebrowNews: 'MUST News',
+    invalid: 'The selected content could not be identified.',
+    loadError: 'Could not load the selected item.'
+  };
+
+  function getArabicI18n() {
+    return window.MUST_SITE_I18N && window.MUST_SITE_I18N.ar ? window.MUST_SITE_I18N.ar : null;
+  }
+
   function apiRequest(url) {
     return fetch(url, { cache: 'no-store' }).then(async function (response) {
       const data = await response.json();
@@ -135,28 +156,124 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  function localizeMessage(message) {
+    const value = String(message || '');
+    if (currentDetailLanguage !== 'ar') return value;
+    const arabic = getArabicI18n();
+    const exact = arabic && arabic.messages && arabic.messages.exact ? arabic.messages.exact : {};
+    return exact[value] || value;
+  }
+
+  function applyDetailLanguageShell(lang) {
+    const arabic = getArabicI18n();
+    const detailUi = lang === 'ar' && arabic && arabic.ui ? arabic.ui.detail : defaultUi;
+    const toggleBtn = document.getElementById('detailLanguageToggleBtn');
+
+    currentDetailLanguage = lang === 'ar' ? 'ar' : 'en';
+    window.localStorage.setItem('must-site-language', currentDetailLanguage);
+    document.documentElement.lang = currentDetailLanguage;
+    document.documentElement.dir = currentDetailLanguage === 'ar' ? 'rtl' : 'ltr';
+    document.body.classList.toggle('site-language-ar', currentDetailLanguage === 'ar');
+
+    if (document.getElementById('detailSectorName')) document.getElementById('detailSectorName').textContent = detailUi.sectorName || defaultUi.sectorName;
+    if (document.getElementById('detailBackLinkText')) document.getElementById('detailBackLinkText').textContent = detailUi.back || defaultUi.back;
+    if (document.getElementById('detailFooterCopyright')) document.getElementById('detailFooterCopyright').textContent = detailUi.copyright || defaultUi.copyright;
+    if (toggleBtn) {
+      toggleBtn.textContent = currentDetailLanguage === 'ar' && arabic ? arabic.ui.button.short : 'ع';
+      toggleBtn.setAttribute('aria-label', currentDetailLanguage === 'ar' && arabic ? arabic.ui.button.ariaLabel : 'التحويل إلى العربية');
+    }
+  }
+
   function setStatus(message, type) {
     const status = document.getElementById('detailStatus');
     if (!status) return;
     status.className = 'detail-status ' + (type || 'error');
-    status.textContent = message;
+    status.textContent = localizeMessage(message);
     status.classList.remove('hidden');
   }
 
-  function buildFallbackSections(type, item) {
-    return [
-      {
-        title: type === 'event' ? 'Overview' : 'Details',
-        paragraphs: [
-          item.summary || 'The selected item is part of the Environmental and Community Service Sector updates at Misr University for Science and Technology.'
-        ]
-      }
+  function renderDetailHeroSlider(items) {
+    const target = document.getElementById('detailHeroSlider');
+    if (!target) return;
+    const slides = Array.isArray(items) && items.length ? items : [
+      { imageUrl: 'images/photo-slider1.jpeg', alt: 'MUST gallery 1' },
+      { imageUrl: 'images/photo-slider2.jpeg', alt: 'MUST gallery 2' },
+      { imageUrl: 'images/memory-slide-11.jpg', alt: 'MUST gallery 3' }
     ];
+
+    target.innerHTML = slides.map(function (item, index) {
+      return '<div class="detail-hero-slide' + (index === 0 ? ' active' : '') + '"><img src="' + (item.imageUrl || 'images/photo-slider1.jpeg') + '" alt="' + (item.alt || ('Slide ' + (index + 1))) + '"></div>';
+    }).join('');
+
+    const heroSlides = target.querySelectorAll('.detail-hero-slide');
+    if (!heroSlides.length) return;
+    let currentIndex = 0;
+
+    function showSlide(nextIndex) {
+      currentIndex = (nextIndex + heroSlides.length) % heroSlides.length;
+      heroSlides.forEach(function (slide, index) {
+        slide.classList.toggle('active', index === currentIndex);
+      });
+    }
+
+    if (target._sliderTimer) {
+      window.clearInterval(target._sliderTimer);
+    }
+    target._sliderTimer = window.setInterval(function () {
+      showSlide(currentIndex + 1);
+    }, 4200);
+  }
+
+  function buildFallbackSections(type, item) {
+    const arabic = getArabicI18n();
+    if (currentDetailLanguage === 'ar' && arabic && arabic.ui) {
+      return [{ title: 'التفاصيل', paragraphs: [item.summary || 'المحتوى المحدد جزء من تحديثات قطاع خدمة المجتمع وتنمية البيئة بجامعة مصر للعلوم والتكنولوجيا.'] }];
+    }
+    return [{ title: type === 'event' ? 'Overview' : 'Details', paragraphs: [item.summary || 'The selected item is part of the Environmental and Community Service Sector updates at Misr University for Science and Technology.'] }];
+  }
+
+  function translateItem(type, item) {
+    if (currentDetailLanguage !== 'ar') return item;
+    const arabic = getArabicI18n();
+    const map = arabic && arabic.itemTranslations && arabic.itemTranslations[type] ? arabic.itemTranslations[type][item.title] : null;
+    if (!map) return item;
+    return Object.assign({}, item, map, { _translationKey: item.title });
+  }
+
+  function enrichEventMeta(item) {
+    if (!item) return item;
+    const defaultsByTitle = {
+      'Ferrari: Driving Luxury Beyond the Road': {
+        location: 'MUST Convention Center',
+        timeText: '10:00 AM'
+      },
+      'Annual Scientific Day': {
+        location: 'College of Biotechnology Hall',
+        timeText: '11:30 AM'
+      },
+      'College of Information Technology conference entitle "Artificial Intelligence for Environmental Sustainability"': {
+        location: 'MUST Main Auditorium',
+        timeText: '09:00 AM'
+      }
+    };
+    const fallback = defaultsByTitle[item.title] || {};
+    return Object.assign({}, item, {
+      location: item.location || fallback.location || '',
+      timeText: item.timeText || fallback.timeText || ''
+    });
   }
 
   function resolveSections(type, item) {
+    const key = item._translationKey || item.title;
+    if (currentDetailLanguage === 'ar') {
+      const arabic = getArabicI18n();
+      const byLang = arabic && arabic.detailCopy && arabic.detailCopy[type] ? arabic.detailCopy[type][key] : null;
+      if (byLang && Array.isArray(byLang.sections)) {
+        return byLang.sections;
+      }
+    }
     const group = DETAIL_COPY[type] || {};
-    const byTitle = group[item.title];
+    const byTitle = group[key];
     if (byTitle && Array.isArray(byTitle.sections)) {
       return byTitle.sections;
     }
@@ -167,29 +284,24 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!target) return;
     target.innerHTML = sections.map(function (section) {
       const titleMarkup = section.title ? '<h3 class="detail-section-title">' + section.title + '</h3>' : '';
-      const paragraphsMarkup = Array.isArray(section.paragraphs)
-        ? section.paragraphs.map(function (paragraph) {
-            return '<p>' + paragraph + '</p>';
-          }).join('')
-        : '';
-      const bulletsMarkup = Array.isArray(section.bullets) && section.bullets.length
-        ? '<ul>' + section.bullets.map(function (bullet) {
-            return '<li>' + bullet + '</li>';
-          }).join('') + '</ul>'
-        : '';
+      const paragraphsMarkup = Array.isArray(section.paragraphs) ? section.paragraphs.map(function (paragraph) { return '<p>' + paragraph + '</p>'; }).join('') : '';
+      const bulletsMarkup = Array.isArray(section.bullets) && section.bullets.length ? '<ul>' + section.bullets.map(function (bullet) { return '<li>' + bullet + '</li>'; }).join('') + '</ul>' : '';
       return titleMarkup + paragraphsMarkup + bulletsMarkup;
     }).join('');
   }
 
-  function renderItem(type, item) {
+  function renderItem(type, rawItem) {
+    const arabic = getArabicI18n();
+    const detailUi = currentDetailLanguage === 'ar' && arabic && arabic.ui ? arabic.ui.detail : defaultUi;
+    const item = type === 'event' ? enrichEventMeta(translateItem(type, rawItem || {})) : translateItem(type, rawItem || {});
     const title = document.getElementById('detailTitle');
     const eyebrow = document.getElementById('detailEyebrow');
     const meta = document.getElementById('detailMeta');
     const image = document.getElementById('detailImage');
     const description = document.getElementById('detailDescription');
 
-    if (title) title.textContent = item.title || 'Untitled';
-    if (eyebrow) eyebrow.textContent = type === 'event' ? 'MUST Event' : 'MUST News';
+    if (title) title.textContent = item.title || (currentDetailLanguage === 'ar' ? 'تفاصيل المحتوى' : 'Untitled');
+    if (eyebrow) eyebrow.textContent = type === 'event' ? (detailUi.eyebrowEvent || defaultUi.eyebrowEvent) : (detailUi.eyebrowNews || defaultUi.eyebrowNews);
     if (image) {
       image.src = item.imageUrl || 'images/logo-png.png';
       image.alt = item.title || (type === 'event' ? 'Event image' : 'News image');
@@ -201,41 +313,57 @@ document.addEventListener('DOMContentLoaded', function () {
         parts.push('<span><i class="far fa-calendar"></i> ' + item.badge + '</span>');
       }
       if (type === 'event') {
-        if (item.day || item.monthYear) {
-          parts.push('<span><i class="far fa-calendar"></i> ' + ((item.day || '') + ' ' + (item.monthYear || '')).trim() + '</span>');
-        }
-        if (item.location) {
-          parts.push('<span><i class="fas fa-location-dot"></i> ' + item.location + '</span>');
-        }
-        if (item.timeText) {
-          parts.push('<span><i class="far fa-clock"></i> ' + item.timeText + '</span>');
-        }
+        if (item.day || item.monthYear) parts.push('<span><i class="far fa-calendar"></i> ' + ((item.day || '') + ' ' + (item.monthYear || '')).trim() + '</span>');
+        if (item.location) parts.push('<span><i class="fas fa-location-dot"></i> ' + item.location + '</span>');
+        if (item.timeText) parts.push('<span><i class="far fa-clock"></i> ' + item.timeText + '</span>');
       }
       meta.innerHTML = parts.join('');
     }
 
     renderSections(description, resolveSections(type, item));
-    document.title = (item.title || 'Content Details') + ' | MUST';
+    document.title = (item.title || (currentDetailLanguage === 'ar' ? 'تفاصيل المحتوى' : 'Content Details')) + ' | MUST';
   }
 
-  const params = new URLSearchParams(window.location.search);
+  applyDetailLanguageShell(currentDetailLanguage);
+
+  apiRequest('/api/content/public')
+    .then(function (data) {
+      const sections = data.sections || {};
+      renderDetailHeroSlider(sections.galleryItems || []);
+    })
+    .catch(function () {
+      renderDetailHeroSlider([]);
+    });
+
+  const toggleBtn = document.getElementById('detailLanguageToggleBtn');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function () {
+      applyDetailLanguageShell(currentDetailLanguage === 'ar' ? 'en' : 'ar');
+      if (currentRawItem) {
+        renderItem(type, currentRawItem);
+      }
+    });
+  }
+
   const type = params.get('type');
   const id = params.get('id');
-
   if (!type || !id || (type !== 'news' && type !== 'event')) {
-    setStatus('The selected content could not be identified.', 'error');
+    const arabic = getArabicI18n();
+    const invalidMessage = currentDetailLanguage === 'ar' && arabic && arabic.ui ? (arabic.ui.detail.invalid || defaultUi.invalid) : defaultUi.invalid;
+    setStatus(invalidMessage, 'error');
     return;
   }
 
-  const endpoint = type === 'event'
-    ? '/api/content/public/events/' + encodeURIComponent(id)
-    : '/api/content/public/news/' + encodeURIComponent(id);
+  const endpoint = type === 'event' ? '/api/content/public/events/' + encodeURIComponent(id) : '/api/content/public/news/' + encodeURIComponent(id);
 
   apiRequest(endpoint)
     .then(function (data) {
-      renderItem(type, data.item || {});
+      currentRawItem = data.item || {};
+      renderItem(type, currentRawItem);
     })
     .catch(function (error) {
-      setStatus(error.message || 'Could not load the selected item.', 'error');
+      const arabic = getArabicI18n();
+      const loadErrorMessage = currentDetailLanguage === 'ar' && arabic && arabic.ui ? (arabic.ui.detail.loadError || defaultUi.loadError) : defaultUi.loadError;
+      setStatus(error.message || loadErrorMessage, 'error');
     });
 });

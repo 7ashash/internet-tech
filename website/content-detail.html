@@ -8,22 +8,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/final_style.css">
+    <link rel="stylesheet" href="css/final_style.css?v=20260414q">
 </head>
 <body class="content-detail-page">
     <header class="detail-topbar">
         <div class="container detail-topbar-inner">
             <a href="index.html" class="detail-logo-link">
                 <img src="images/must-logo.png" alt="MUST Logo" class="detail-logo">
-                <span>Environmental and Community Service Sector</span>
+                <span id="detailSectorName">Environmental and Community Service Sector</span>
             </a>
-            <a href="index.html" class="detail-back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            <div class="detail-topbar-actions">
+                <button class="language-toggle-btn detail-language-toggle" id="detailLanguageToggleBtn" type="button" aria-label="التحويل إلى العربية">ع</button>
+                <a href="index.html" class="detail-back-link"><i class="fas fa-arrow-left"></i> <span id="detailBackLinkText">Back to Home</span></a>
+            </div>
         </div>
     </header>
 
     <main class="detail-page-main">
         <section class="detail-hero">
+            <div class="detail-hero-slider" id="detailHeroSlider"></div>
+            <div class="detail-hero-overlay"></div>
             <div class="container">
                 <p class="detail-eyebrow" id="detailEyebrow">MUST Content</p>
                 <h1 id="detailTitle">Loading details...</h1>
@@ -47,9 +53,10 @@
     </main>
 
     <footer class="detail-footer">
-        <p>Copyright All Right Reserved @ MUST UNIVERSITY 2025</p>
+        <p id="detailFooterCopyright">Copyright All Right Reserved @ MUST UNIVERSITY 2025</p>
     </footer>
 
-    <script src="js/content_detail.js"></script>
+    <script src="js/site_i18n.js"></script>
+    <script src="js/content_detail.js?v=20260414l"></script>
 </body>
 </html>

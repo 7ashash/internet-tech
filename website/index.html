@@ -8,8 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/final_style.css">
+    <link rel="stylesheet" href="css/final_style.css?v=20260414q">
 </head>
 <body>
     <div class="floating-socials">
@@ -90,6 +91,7 @@
                 </nav>
 
                 <div class="nav-right-cluster">
+                    <button class="language-toggle-btn" id="languageToggleBtn" type="button" aria-label="التحويل إلى العربية">ع</button>
                     <button class="nav-icon-link theme-toggle" type="button" aria-label="Toggle Light or Dark Mode">
                         <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                             <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
@@ -254,17 +256,17 @@
                 <div class="vmo-grid">
                     <div id="sector-vision" class="vmo-card fade-in-up">
                         <div class="icon-circle"><i class="fas fa-eye"></i></div>
-                        <h3 class="navy-title">Sector's Vision</h3>
+                        <h3 class="navy-title" id="visionCardTitleText">Sector's Vision</h3>
                         <p id="visionText">To be a leading sector in achieving sustainable environmental and community development locally and regionally, while maintaining an unbreakable bond with our esteemed alumni.</p>
                     </div>
                     <div id="sector-mission" class="vmo-card fade-in-up" style="transition-delay: 0.1s;">
                         <div class="icon-circle"><i class="fas fa-bullseye"></i></div>
-                        <h3 class="navy-title">Sector's Mission</h3>
+                        <h3 class="navy-title" id="missionCardTitleText">Sector's Mission</h3>
                         <p id="missionText">Providing exceptional community services, managing environmental crises effectively, and continuously upgrading the skills of our alumni to meet the dynamic demands of the labor market.</p>
                     </div>
                     <div id="sector-objectives" class="vmo-card fade-in-up" style="transition-delay: 0.2s;">
                         <div class="icon-circle"><i class="fas fa-tasks"></i></div>
-                        <h3 class="navy-title">Sector's Objectives</h3>
+                        <h3 class="navy-title" id="objectivesCardTitleText">Sector's Objectives</h3>
                         <ul class="custom-list objective-list" id="objectivesList">
                             <li><i class="fas fa-check"></i> <span id="objective1Text">Supporting sustainable development through projects that contribute to environmental conservation and promote environmental awareness.</span></li>
                             <li><i class="fas fa-check"></i> <span id="objective2Text">Qualifying graduates for the labor market through specialized training programs and partnerships with various institutions.</span></li>
@@ -436,6 +438,8 @@
     "monthYear": "Feb",
     "title": "Ferrari: Driving Luxury Beyond the Road",
     "summary": "MUST proudly hosts Rome Business School for a global case study on innovation, AI, and strategic thinking behind Ferrari.",
+    "location": "MUST Convention Center",
+    "timeText": "10:00 AM",
     "imageUrl": "images/official/event-ferrari.jpeg",
     "linkText": "Read More",
     "linkUrl": "https://must.edu.eg/event/ferrari-driving-luxury-beyond-the-road/"
@@ -446,6 +450,8 @@
     "monthYear": "Dec",
     "title": "Annual Scientific Day",
     "summary": "The College of Biotechnology at Misr University for Science and Technology showcases innovation, student projects, and scientific excellence.",
+    "location": "College of Biotechnology Hall",
+    "timeText": "11:30 AM",
     "imageUrl": "images/official/event-annual-scientific-day.png",
     "linkText": "Read More",
     "linkUrl": "https://must.edu.eg/event/annual-scientific-day/"
@@ -456,6 +462,8 @@
     "monthYear": "Nov",
     "title": "College of Information Technology conference entitle \"Artificial Intelligence for Environmental Sustainability\"",
     "summary": "The College of Information Technology highlights how AI can support sustainable development, climate action, and natural resource management.",
+    "location": "MUST Main Auditorium",
+    "timeText": "09:00 AM",
     "imageUrl": "images/official/event-ai-sustainability.png",
     "linkText": "Read More",
     "linkUrl": "https://must.edu.eg/event/college-of-information-technology-conference-entitle-artificial-intelligence-for-environmental-sustainability-2/"
@@ -552,10 +560,6 @@
                 <div class="contact-text-area">
                     <h2 id="contactTitleText">Reach us any time.</h2>
                     <h3 id="contactSubtitleText">Send your message directly to the sector team.</h3>
-                </div>
-
-                <div class="contact-image-area">
-                    <img src="images/contact-agent.jpg" alt="Customer service representative">
                 </div>
 
                 <div class="contact-form-area">
@@ -709,6 +713,7 @@
         </div>
     </div>
 
-    <script src="js/final_script.js"></script>
+    <script src="js/site_i18n.js"></script>
+    <script src="js/final_script.js?v=20260414p"></script>
 </body>
 </html>
