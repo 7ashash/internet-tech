@@ -915,7 +915,7 @@
     const items = Array.isArray(state.sections.galleryItems) ? state.sections.galleryItems : [];
     if (!galleryList) return;
     if (!items.length) {
-      galleryList.innerHTML = '<div class="empty-state"><i class="bi bi-images fs-3 d-block mb-2"></i>No memory slides yet.</div>';
+      galleryList.innerHTML = '<div class="empty-state"><i class="bi bi-images fs-3 d-block mb-2"></i>No hero slides yet.</div>';
       return;
     }
     galleryList.innerHTML = items.map(function (item, index) {
@@ -1327,7 +1327,7 @@
   };
 
   window.deleteGalleryItem = function (index) {
-    const confirmed = window.confirm('Delete this memory slide?');
+    const confirmed = window.confirm('Delete this hero slide from the homepage and detail pages?');
     if (!confirmed) return;
     state.sections.galleryItems = (state.sections.galleryItems || []).filter(function (_, itemIndex) { return itemIndex !== index; });
     renderGallery();

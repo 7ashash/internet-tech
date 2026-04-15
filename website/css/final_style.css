@@ -2293,6 +2293,16 @@ section[id] {
     color: #122952;
 }
 
+.detail-navbar .detail-nav-actions {
+    gap: 12px;
+}
+
+.detail-home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .detail-topbar {
     background: var(--must-navy);
     padding: 18px 0;
@@ -2492,6 +2502,10 @@ section[id] {
     text-align: center;
     padding: 18px 12px 24px;
     font-weight: 600;
+}
+
+.content-detail-page .main-footer {
+    margin-top: 0;
 }
 
 .nav-right-cluster {

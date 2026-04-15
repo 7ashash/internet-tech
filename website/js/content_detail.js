@@ -130,16 +130,54 @@ document.addEventListener('DOMContentLoaded', function () {
   let currentDetailLanguage = queryLang === 'ar' || (!queryLang && window.localStorage.getItem('must-site-language') === 'ar') ? 'ar' : 'en';
   let currentRawItem = null;
 
+  function captureTexts(nodes) {
+    return Array.prototype.map.call(nodes || [], function (node) {
+      return (node.textContent || '').trim();
+    });
+  }
+
+  function setTexts(nodes, values) {
+    Array.prototype.forEach.call(nodes || [], function (node, index) {
+      if (values && typeof values[index] === 'string') {
+        node.textContent = values[index];
+      }
+    });
+  }
+
+  function setGroupedTexts(groups, values) {
+    (groups || []).forEach(function (group, index) {
+      setTexts(group, values && Array.isArray(values[index]) ? values[index] : []);
+    });
+  }
+
   const defaultUi = {
-    sectorName: document.getElementById('detailSectorName') ? document.getElementById('detailSectorName').textContent.trim() : '',
     back: document.getElementById('detailBackLinkText') ? document.getElementById('detailBackLinkText').textContent.trim() : '',
-    copyright: document.getElementById('detailFooterCopyright') ? document.getElementById('detailFooterCopyright').textContent.trim() : '',
+    copyright: document.getElementById('footerCopyrightText') ? document.getElementById('footerCopyrightText').textContent.trim() : '',
     loadingTitle: document.getElementById('detailTitle') ? document.getElementById('detailTitle').textContent.trim() : 'Loading details...',
     loadingBody: document.getElementById('detailDescription') ? document.getElementById('detailDescription').textContent.trim() : 'Please wait while we load the selected item.',
     eyebrowEvent: 'MUST Event',
     eyebrowNews: 'MUST News',
     invalid: 'The selected content could not be identified.',
     loadError: 'Could not load the selected item.'
+  };
+
+  const detailShellDefaults = {
+    topNavMain: captureTexts(document.querySelectorAll('.site-primary-list > .site-primary-item > .site-primary-link')),
+    topNavDropdowns: Array.prototype.map.call(document.querySelectorAll('.site-primary-list > .site-primary-item.has-desktop-dropdown .desktop-dropdown'), function (dropdown) {
+      return captureTexts(dropdown.querySelectorAll('a'));
+    }),
+    navMenuTitle: document.getElementById('detailMenuTitleText') ? document.getElementById('detailMenuTitleText').textContent.trim() : 'Menu',
+    navMenuMain: captureTexts(document.querySelectorAll('.detail-nav-menu-list > .nav-menu-item > .nav-menu-link, .detail-nav-menu-list > .nav-menu-item > .submenu-toggle')),
+    navMenuSubmenus: Array.prototype.map.call(document.querySelectorAll('.detail-nav-menu-list > .nav-menu-item.has-submenu .submenu-list'), function (submenu) {
+      return captureTexts(submenu.querySelectorAll('.submenu-link'));
+    }),
+    footerHeadings: captureTexts(document.querySelectorAll('.main-footer .footer-col h4')),
+    footerColumns: Array.prototype.map.call(document.querySelectorAll('.main-footer .footer-col ul'), function (list) {
+      return captureTexts(list.querySelectorAll('a'));
+    }),
+    footerPhone: document.getElementById('footerPhoneText') ? document.getElementById('footerPhoneText').textContent.trim() : '',
+    footerEmail: document.getElementById('footerEmailText') ? document.getElementById('footerEmailText').textContent.trim() : '',
+    footerAddress: document.getElementById('footerAddressText') ? document.getElementById('footerAddressText').textContent.trim() : ''
   };
 
   function getArabicI18n() {
@@ -164,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return exact[value] || value;
   }
 
-  function applyDetailLanguageShell(lang) {
+  function applyDetailLanguageShellLegacy(lang) {
     const arabic = getArabicI18n();
     const detailUi = lang === 'ar' && arabic && arabic.ui ? arabic.ui.detail : defaultUi;
     const toggleBtn = document.getElementById('detailLanguageToggleBtn');
@@ -190,6 +228,111 @@ document.addEventListener('DOMContentLoaded', function () {
     status.className = 'detail-status ' + (type || 'error');
     status.textContent = localizeMessage(message);
     status.classList.remove('hidden');
+  }
+
+  function applyDetailLanguageShell(lang) {
+    const arabic = getArabicI18n();
+    const ui = lang === 'ar' && arabic && arabic.ui ? arabic.ui : null;
+    const detailUi = ui && ui.detail ? ui.detail : defaultUi;
+    const toggleBtn = document.getElementById('detailLanguageToggleBtn');
+    const topNavDropdownGroups = Array.prototype.map.call(document.querySelectorAll('.site-primary-list > .site-primary-item.has-desktop-dropdown .desktop-dropdown'), function (dropdown) {
+      return dropdown.querySelectorAll('a');
+    });
+    const detailMenuSubGroups = Array.prototype.map.call(document.querySelectorAll('.detail-nav-menu-list > .nav-menu-item.has-submenu .submenu-list'), function (submenu) {
+      return submenu.querySelectorAll('.submenu-link');
+    });
+
+    currentDetailLanguage = lang === 'ar' ? 'ar' : 'en';
+    window.localStorage.setItem('must-site-language', currentDetailLanguage);
+    document.documentElement.lang = currentDetailLanguage;
+    document.documentElement.dir = currentDetailLanguage === 'ar' ? 'rtl' : 'ltr';
+    document.body.classList.toggle('site-language-ar', currentDetailLanguage === 'ar');
+
+    if (document.getElementById('detailBackLinkText')) document.getElementById('detailBackLinkText').textContent = detailUi.back || defaultUi.back;
+    if (document.getElementById('footerCopyrightText')) document.getElementById('footerCopyrightText').textContent = detailUi.copyright || defaultUi.copyright;
+    if (document.getElementById('detailMenuTitleText')) {
+      document.getElementById('detailMenuTitleText').textContent = ui && ui.navMenuTitle ? ui.navMenuTitle : detailShellDefaults.navMenuTitle;
+    }
+
+    setTexts(document.querySelectorAll('.site-primary-list > .site-primary-item > .site-primary-link'), ui && ui.topNavMain ? ui.topNavMain : detailShellDefaults.topNavMain);
+    setGroupedTexts(topNavDropdownGroups, ui && ui.topNavDropdowns ? ui.topNavDropdowns : detailShellDefaults.topNavDropdowns);
+    setTexts(document.querySelectorAll('.detail-nav-menu-list > .nav-menu-item > .nav-menu-link, .detail-nav-menu-list > .nav-menu-item > .submenu-toggle'), ui && ui.navMenuMain ? ui.navMenuMain : detailShellDefaults.navMenuMain);
+    setGroupedTexts(detailMenuSubGroups, ui && ui.navMenuSubmenus ? ui.navMenuSubmenus : detailShellDefaults.navMenuSubmenus);
+    setTexts(document.querySelectorAll('.main-footer .footer-col h4'), ui && ui.footer ? ui.footer.headings : detailShellDefaults.footerHeadings);
+    setGroupedTexts(Array.prototype.map.call(document.querySelectorAll('.main-footer .footer-col ul'), function (list) { return list.querySelectorAll('a'); }), ui && ui.footer ? ui.footer.columns : detailShellDefaults.footerColumns);
+
+    const sectionTexts = currentDetailLanguage === 'ar' && arabic && arabic.sections ? arabic.sections : null;
+    if (document.getElementById('footerPhoneText')) document.getElementById('footerPhoneText').textContent = sectionTexts && sectionTexts.footerPhone ? sectionTexts.footerPhone : detailShellDefaults.footerPhone;
+    if (document.getElementById('footerEmailText')) document.getElementById('footerEmailText').textContent = sectionTexts && sectionTexts.footerEmail ? sectionTexts.footerEmail : detailShellDefaults.footerEmail;
+    if (document.getElementById('footerAddressText')) document.getElementById('footerAddressText').textContent = sectionTexts && sectionTexts.footerAddress ? sectionTexts.footerAddress : detailShellDefaults.footerAddress;
+
+    if (toggleBtn) {
+      toggleBtn.textContent = currentDetailLanguage === 'ar' && arabic ? arabic.ui.button.short : 'ع';
+      toggleBtn.setAttribute('aria-label', currentDetailLanguage === 'ar' && arabic ? arabic.ui.button.ariaLabel : 'التحويل إلى العربية');
+    }
+  }
+
+  function closeDetailMenu() {
+    const menuBtn = document.querySelector('.detail-menu-btn');
+    const navMenu = document.getElementById('detailSiteMenu');
+    const backdrop = document.querySelector('.menu-backdrop');
+    if (menuBtn) {
+      menuBtn.classList.remove('is-open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+    if (navMenu) {
+      navMenu.classList.remove('active');
+      navMenu.setAttribute('aria-hidden', 'true');
+    }
+    if (backdrop) backdrop.classList.remove('active');
+    document.body.classList.remove('menu-open');
+    document.querySelectorAll('.detail-nav-menu-list .has-submenu').forEach(function (item) {
+      item.classList.remove('open');
+    });
+    document.querySelectorAll('.detail-nav-menu-list .submenu-toggle').forEach(function (toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function initDetailMenu() {
+    const menuBtn = document.querySelector('.detail-menu-btn');
+    const navMenu = document.getElementById('detailSiteMenu');
+    const menuCloseBtn = navMenu ? navMenu.querySelector('.nav-menu-close') : null;
+    const backdrop = document.querySelector('.menu-backdrop');
+    const submenuToggles = document.querySelectorAll('.detail-nav-menu-list .submenu-toggle');
+
+    if (!menuBtn || !navMenu) return;
+
+    menuBtn.addEventListener('click', function () {
+      const willOpen = !navMenu.classList.contains('active');
+      navMenu.classList.toggle('active', willOpen);
+      navMenu.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
+      menuBtn.classList.toggle('is-open', willOpen);
+      menuBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      if (backdrop) backdrop.classList.toggle('active', willOpen);
+      document.body.classList.toggle('menu-open', willOpen);
+    });
+
+    if (menuCloseBtn) menuCloseBtn.addEventListener('click', closeDetailMenu);
+    if (backdrop) backdrop.addEventListener('click', closeDetailMenu);
+
+    submenuToggles.forEach(function (toggle) {
+      toggle.addEventListener('click', function () {
+        const parent = toggle.closest('.has-submenu');
+        const willOpen = !parent.classList.contains('open');
+        submenuToggles.forEach(function (otherToggle) {
+          const otherParent = otherToggle.closest('.has-submenu');
+          otherParent.classList.remove('open');
+          otherToggle.setAttribute('aria-expanded', 'false');
+        });
+        parent.classList.toggle('open', willOpen);
+        toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      });
+    });
+
+    navMenu.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', closeDetailMenu);
+    });
   }
 
   function renderDetailHeroSlider(items) {
@@ -324,6 +467,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.title = (item.title || (currentDetailLanguage === 'ar' ? 'تفاصيل المحتوى' : 'Content Details')) + ' | MUST';
   }
 
+  initDetailMenu();
   applyDetailLanguageShell(currentDetailLanguage);
 
   apiRequest('/api/content/public')
