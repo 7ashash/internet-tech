@@ -57,7 +57,7 @@ const DEFAULT_SITE_CONTENT = {
   viceDeanParagraph3: "We consistently aspire to innovate and advance all the activities and services we provide, aligning with the state's vision for comprehensive development.",
   viceDeanClosing: 'With best wishes for your success,',
   viceDeanSignatureRole: '- Vice Dean of Community Service and Environmental Development',
-  viceDeanSignatureName: 'Dr. Khaled Abdel Salam',
+  viceDeanSignatureName: 'Assoc. Prof. Khaled Abdel Salam',
   viceDeanImageUrl: 'images/Dr-Khaled.jpeg',
   visionText: 'To be a leading sector in achieving sustainable environmental and community development locally and regionally, while maintaining an unbreakable bond with our esteemed alumni.',
   missionText: 'Providing exceptional community services, managing environmental crises effectively, and continuously upgrading the skills of our alumni to meet the dynamic demands of the labor market.',
