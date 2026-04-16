@@ -208,8 +208,8 @@ document.addEventListener('DOMContentLoaded', function () {
   function applyDetailLanguageShellLegacy(lang) {
     const arabic = getArabicI18n();
     const detailUi = lang === 'ar' && arabic && arabic.ui ? arabic.ui.detail : defaultUi;
-    const toggleBtn = document.getElementById('detailLanguageToggleBtn');
     const authActionBtn = document.getElementById('detailAuthAction');
+    const toggleBtn = null;
 
     currentDetailLanguage = lang === 'ar' ? 'ar' : 'en';
     window.localStorage.setItem('must-site-language', currentDetailLanguage);
@@ -238,7 +238,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const arabic = getArabicI18n();
     const ui = lang === 'ar' && arabic && arabic.ui ? arabic.ui : null;
     const detailUi = ui && ui.detail ? ui.detail : defaultUi;
-    const toggleBtn = document.getElementById('detailLanguageToggleBtn');
+    const authActionBtn = document.getElementById('detailAuthAction');
+    const toggleBtn = null;
     const topNavDropdownGroups = Array.prototype.map.call(document.querySelectorAll('.site-primary-list > .site-primary-item.has-desktop-dropdown .desktop-dropdown'), function (dropdown) {
       return dropdown.querySelectorAll('a');
     });
