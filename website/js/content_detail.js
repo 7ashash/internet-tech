@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const queryLang = params.get('lang');
   let currentDetailLanguage = queryLang === 'ar' || (!queryLang && window.localStorage.getItem('must-site-language') === 'ar') ? 'ar' : 'en';
   let currentRawItem = null;
+  let currentDetailUser = null;
 
   function captureTexts(nodes) {
     return Array.prototype.map.call(nodes || [], function (node) {
@@ -152,6 +153,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const defaultUi = {
     back: document.getElementById('detailBackLinkText') ? document.getElementById('detailBackLinkText').textContent.trim() : '',
+    authOpen: document.getElementById('detailAuthAction') ? document.getElementById('detailAuthAction').textContent.trim() : 'Login / Register',
+    authLogout: 'Logout',
     copyright: document.getElementById('footerCopyrightText') ? document.getElementById('footerCopyrightText').textContent.trim() : '',
     loadingTitle: document.getElementById('detailTitle') ? document.getElementById('detailTitle').textContent.trim() : 'Loading details...',
     loadingBody: document.getElementById('detailDescription') ? document.getElementById('detailDescription').textContent.trim() : 'Please wait while we load the selected item.',
@@ -206,6 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const arabic = getArabicI18n();
     const detailUi = lang === 'ar' && arabic && arabic.ui ? arabic.ui.detail : defaultUi;
     const toggleBtn = document.getElementById('detailLanguageToggleBtn');
+    const authActionBtn = document.getElementById('detailAuthAction');
 
     currentDetailLanguage = lang === 'ar' ? 'ar' : 'en';
     window.localStorage.setItem('must-site-language', currentDetailLanguage);
@@ -265,6 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('footerPhoneText')) document.getElementById('footerPhoneText').textContent = sectionTexts && sectionTexts.footerPhone ? sectionTexts.footerPhone : detailShellDefaults.footerPhone;
     if (document.getElementById('footerEmailText')) document.getElementById('footerEmailText').textContent = sectionTexts && sectionTexts.footerEmail ? sectionTexts.footerEmail : detailShellDefaults.footerEmail;
     if (document.getElementById('footerAddressText')) document.getElementById('footerAddressText').textContent = sectionTexts && sectionTexts.footerAddress ? sectionTexts.footerAddress : detailShellDefaults.footerAddress;
+    if (authActionBtn) authActionBtn.textContent = currentDetailUser ? ((ui && ui.auth && ui.auth.logout) || defaultUi.authLogout) : ((ui && ui.auth && ui.auth.open) || defaultUi.authOpen);
 
     if (toggleBtn) {
       toggleBtn.textContent = currentDetailLanguage === 'ar' && arabic ? arabic.ui.button.short : 'ع';
@@ -333,6 +338,28 @@ document.addEventListener('DOMContentLoaded', function () {
     navMenu.querySelectorAll('a').forEach(function (link) {
       link.addEventListener('click', closeDetailMenu);
     });
+  }
+
+  function updateDetailAuthAction(user) {
+    const authActionBtn = document.getElementById('detailAuthAction');
+    const arabic = getArabicI18n();
+    if (!authActionBtn) return;
+    currentDetailUser = user || null;
+    document.body.classList.toggle('user-logged-in', !!currentDetailUser);
+    authActionBtn.textContent = currentDetailUser
+      ? ((currentDetailLanguage === 'ar' && arabic && arabic.ui && arabic.ui.auth ? arabic.ui.auth.logout : null) || defaultUi.authLogout)
+      : ((currentDetailLanguage === 'ar' && arabic && arabic.ui && arabic.ui.auth ? arabic.ui.auth.open : null) || defaultUi.authOpen);
+  }
+
+  function loadDetailSession() {
+    return fetch('/api/session', { cache: 'no-store' })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        updateDetailAuthAction(data && data.authenticated ? data.user : null);
+      })
+      .catch(function () {
+        updateDetailAuthAction(null);
+      });
   }
 
   function renderDetailHeroSlider(items) {
@@ -469,6 +496,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   initDetailMenu();
   applyDetailLanguageShell(currentDetailLanguage);
+  loadDetailSession();
 
   apiRequest('/api/content/public')
     .then(function (data) {
@@ -486,6 +514,24 @@ document.addEventListener('DOMContentLoaded', function () {
       if (currentRawItem) {
         renderItem(type, currentRawItem);
       }
+    });
+  }
+
+  const authActionBtn = document.getElementById('detailAuthAction');
+  if (authActionBtn) {
+    authActionBtn.addEventListener('click', function () {
+      if (currentDetailUser) {
+        fetch('/api/auth/logout', { method: 'POST' })
+          .then(function (response) { return response.json(); })
+          .then(function () {
+            updateDetailAuthAction(null);
+          })
+          .catch(function () {
+            updateDetailAuthAction(null);
+          });
+        return;
+      }
+      window.location.href = 'index.html';
     });
   }
 

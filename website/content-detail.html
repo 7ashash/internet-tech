@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/final_style.css?v=20260415a">
+    <link rel="stylesheet" href="css/final_style.css?v=20260416b">
 </head>
 <body class="content-detail-page">
     <div class="floating-socials">
@@ -26,9 +26,12 @@
     <header class="big-navbar detail-navbar">
         <div class="must-navbar-main">
             <div class="nav-container primary-nav-shell">
-                <a href="https://must.edu.eg/" class="nav-logo" aria-label="MUST Home">
-                    <img src="images/must-logo.png" alt="MUST Logo" class="navbar-logo-img">
-                </a>
+                <div class="detail-left-cluster">
+                    <a href="index.html" class="auth-dashboard-link detail-back-home-link"><i class="fas fa-arrow-left"></i> <span id="detailBackLinkText">Back to Home</span></a>
+                    <a href="https://must.edu.eg/" class="nav-logo" aria-label="MUST Home">
+                        <img src="images/must-logo.png" alt="MUST Logo" class="navbar-logo-img">
+                    </a>
+                </div>
 
                 <nav class="site-primary-nav" aria-label="Official MUST navigation">
                     <ul class="site-primary-list">
@@ -92,7 +95,7 @@
 
                 <div class="nav-right-cluster detail-nav-actions">
                     <button class="language-toggle-btn detail-language-toggle" id="detailLanguageToggleBtn" type="button" aria-label="التحويل إلى العربية">ع</button>
-                    <a href="index.html" class="auth-dashboard-link detail-home-link"><i class="fas fa-arrow-left"></i> <span id="detailBackLinkText">Back to Home</span></a>
+                    <button class="auth-dashboard-link detail-auth-btn" id="detailAuthAction" type="button">Login / Register</button>
                     <button class="nav-icon-link custom-menu-btn detail-menu-btn" type="button" aria-label="Open Menu" aria-expanded="false" aria-controls="detailSiteMenu">
                         <svg width="28" height="20" viewBox="0 0 24 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                             <rect x="0" y="0" width="24" height="2" rx="1"></rect>
@@ -241,6 +244,6 @@
     </footer>
 
     <script src="js/site_i18n.js"></script>
-    <script src="js/content_detail.js?v=20260415a"></script>
+    <script src="js/content_detail.js?v=20260416b"></script>
 </body>
 </html>

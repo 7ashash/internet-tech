@@ -2297,10 +2297,26 @@ section[id] {
     gap: 12px;
 }
 
-.detail-home-link {
+.detail-home-link,
+.detail-back-home-link {
     display: inline-flex;
     align-items: center;
     gap: 10px;
+}
+
+.detail-left-cluster {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 0 0 auto;
+}
+
+.detail-left-cluster .nav-logo {
+    flex: 0 0 auto;
+}
+
+.detail-auth-btn {
+    white-space: nowrap;
 }
 
 .detail-topbar {
