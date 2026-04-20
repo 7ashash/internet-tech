@@ -671,10 +671,12 @@ textarea {
 .vice-dean-layout .awards-text {
     flex: 1 1 56%;
     min-width: 0;
+    contain: layout paint;
 }
 
 .vice-dean-layout .awards-image {
     flex: 0 0 340px;
+    min-width: 340px;
     display: flex;
     justify-content: center;
 }
@@ -696,6 +698,7 @@ textarea {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     will-change: auto;
+    transform: translateZ(0);
 }
 .notice-box { background-color: rgba(0, 166, 81, 0.1); color: var(--must-green); padding: 15px; border-left: 4px solid var(--must-green); font-weight: 600; margin-top: 20px; }
 
@@ -1899,7 +1902,7 @@ section[id] {
     justify-content: flex-end;
     align-items: center;
     text-align: center;
-    padding: 182px 24px 72px;
+    padding: 182px 24px 34px;
     color: var(--white);
 }
 
@@ -2769,7 +2772,7 @@ body.dark-mode .activity-count-pill {
 
     .hero-content {
         justify-content: flex-end;
-        padding: 142px 18px 54px;
+        padding: 142px 18px 24px;
     }
 
     .hero-quick-links {
