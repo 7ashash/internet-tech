@@ -373,7 +373,8 @@ document.addEventListener('DOMContentLoaded', function () {
     ];
 
     target.innerHTML = slides.map(function (item, index) {
-      return '<div class="detail-hero-slide' + (index === 0 ? ' active' : '') + '"><img src="' + (item.imageUrl || 'images/photo-slider1.jpeg') + '" alt="' + (item.alt || ('Slide ' + (index + 1))) + '"></div>';
+      const imgSrc = item.imageUrl || 'images/photo-slider1.jpeg';
+      return '<div class="detail-hero-slide' + (index === 0 ? ' active' : '') + '"><img class="detail-hero-slide-fill" src="' + imgSrc + '" alt="" aria-hidden="true"><img class="detail-hero-slide-main" src="' + imgSrc + '" alt="' + (item.alt || ('Slide ' + (index + 1))) + '"></div>';
     }).join('');
 
     const heroSlides = target.querySelectorAll('.detail-hero-slide');
