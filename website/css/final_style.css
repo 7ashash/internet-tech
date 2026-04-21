@@ -1075,8 +1075,8 @@ textarea {
     transform: translateY(-50%) scale(1.06);
 }
 
-.gallery-prev { left: 18px; }
-.gallery-next { right: 18px; }
+.gallery-prev { left: 34px; }
+.gallery-next { right: 34px; }
 .awards-prev { left: 18px; }
 .awards-next { right: 18px; }
 .gallery-dots,
@@ -1908,6 +1908,7 @@ section[id] {
 
 .hero-slider-shell .banner-title {
     max-width: 1200px;
+    padding-inline: 18px;
     font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
     font-size: clamp(1.9rem, 3.2vw, 3.35rem);
     line-height: 1.08;
@@ -1921,9 +1922,9 @@ section[id] {
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
-    max-width: 860px;
-    margin-top: 16px;
+    gap: 12px;
+    max-width: 980px;
+    margin-top: 22px;
     position: relative;
     z-index: 9;
     overflow: visible;
@@ -1956,12 +1957,12 @@ section[id] {
 .hero-quick-link {
     color: var(--white);
     text-decoration: none;
-    padding: 6px 10px;
+    padding: 10px 16px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.16);
     border: 1px solid rgba(255, 255, 255, 0.26);
     backdrop-filter: blur(8px);
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
@@ -2037,6 +2038,10 @@ section[id] {
 .hero-slider-shell .gallery-dots {
     bottom: 34px;
     z-index: 4;
+}
+
+.hero-slider-shell .gallery-nav {
+    z-index: 5;
 }
 
 .hero-slider-shell .gallery-dot {
@@ -2776,7 +2781,7 @@ body.dark-mode .activity-count-pill {
     }
 
     .hero-quick-links {
-        gap: 8px;
+        gap: 10px;
         max-width: 100%;
         margin-top: 18px;
     }
@@ -2788,8 +2793,8 @@ body.dark-mode .activity-count-pill {
     }
 
     .hero-quick-link {
-        padding: 8px 14px;
-        font-size: 0.8rem;
+        padding: 9px 14px;
+        font-size: 0.82rem;
     }
 
     .hero-submenu {

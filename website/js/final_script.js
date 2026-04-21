@@ -773,6 +773,20 @@ document.addEventListener('DOMContentLoaded', function () {
       }, 7000);
     }
 
+    if (galleryPrevBtn) {
+      galleryPrevBtn.onclick = function () {
+        goToGallerySlide(currentGallerySlide - 1);
+        resetGalleryTimer();
+      };
+    }
+
+    if (galleryNextBtn) {
+      galleryNextBtn.onclick = function () {
+        goToGallerySlide(currentGallerySlide + 1);
+        resetGalleryTimer();
+      };
+    }
+
     resetGalleryTimer();
   }
 
