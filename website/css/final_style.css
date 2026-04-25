@@ -1907,10 +1907,10 @@ section[id] {
 }
 
 .hero-slider-shell .banner-title {
-    max-width: 1200px;
+    max-width: 1120px;
     padding-inline: 18px;
     font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
-    font-size: clamp(1.9rem, 3.2vw, 3.35rem);
+    font-size: clamp(1.5rem, 2.3vw, 2.45rem);
     line-height: 1.08;
     margin-bottom: 20px;
     text-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);

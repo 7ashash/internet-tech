@@ -46,7 +46,7 @@ const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 
 const DEFAULT_SITE_CONTENT = {
-  heroTitle: 'Environmental and Community Service Sector',
+  heroTitle: 'Community Service & Environmental Development Sector',
   briefTitle: 'Brief',
   briefParagraph1: 'Our goal is to prepare a distinguished graduate with the competitive ability and morals to meet the challenges of his time.',
   briefParagraph2: 'Let us all work together in harmony and remain united with the vision of a better tomorrow for all.',
@@ -58,7 +58,7 @@ const DEFAULT_SITE_CONTENT = {
   viceDeanClosing: 'With best wishes for your success,',
   viceDeanSignatureRole: '- Vice Dean of Community Service and Environmental Development',
   viceDeanSignatureName: 'Assoc. Prof. Khaled Abdel Salam',
-  viceDeanImageUrl: 'images/Dr-Khaled.jpeg',
+  viceDeanImageUrl: 'images/vice-dean-2026.jpg',
   visionText: 'To be a leading sector in achieving sustainable environmental and community development locally and regionally, while maintaining an unbreakable bond with our esteemed alumni.',
   missionText: 'Providing exceptional community services, managing environmental crises effectively, and continuously upgrading the skills of our alumni to meet the dynamic demands of the labor market.',
   objective1: 'Supporting sustainable development through projects that contribute to environmental conservation and promote environmental awareness.',
