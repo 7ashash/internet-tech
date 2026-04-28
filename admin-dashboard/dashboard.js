@@ -7,6 +7,7 @@
   const CONTENT_API = '/api/admin/content';
   const USERS_API = '/api/admin/users';
   const MESSAGES_API = '/api/admin/messages';
+  const CHATBOT_ADMIN_API = '/api/admin/chatbot';
   const ASSET_UPLOAD_API = '/api/admin/assets';
   const LOCAL_ACTIVATION_BASE_URL = 'http://127.0.0.1:3000';
   const ONLINE_ACTIVATION_BASE_URL = 'https://internet-tech-production.up.railway.app';
@@ -150,6 +151,30 @@
   const reloadEventsBtn = document.getElementById('reloadEventsBtn');
   const usersList = document.getElementById('usersList');
   const messagesList = document.getElementById('messagesList');
+  const chatbotRefreshBtn = document.getElementById('chatbotRefreshBtn');
+  const chatbotTotalSessions = document.getElementById('chatbotTotalSessions');
+  const chatbotTotalMessages = document.getElementById('chatbotTotalMessages');
+  const chatbotTotalUsers = document.getElementById('chatbotTotalUsers');
+  const chatbotUnknownCount = document.getElementById('chatbotUnknownCount');
+  const chatbotHelpfulCount = document.getElementById('chatbotHelpfulCount');
+  const chatbotNotHelpfulCount = document.getElementById('chatbotNotHelpfulCount');
+  const chatbotSessionsToday = document.getElementById('chatbotSessionsToday');
+  const chatbotAvgMessages = document.getElementById('chatbotAvgMessages');
+  const chatbotLoggedSessions = document.getElementById('chatbotLoggedSessions');
+  const chatbotGuestSessions = document.getElementById('chatbotGuestSessions');
+  const chatbotReviewedUnknown = document.getElementById('chatbotReviewedUnknown');
+  const chatbotTotalUnknown = document.getElementById('chatbotTotalUnknown');
+  const chatbotRecentList = document.getElementById('chatbotRecentList');
+  const chatbotUnknownList = document.getElementById('chatbotUnknownList');
+  const chatbotConversationDetails = document.getElementById('chatbotConversationDetails');
+  const chatbotPopularList = document.getElementById('chatbotPopularList');
+  const chatbotSettingsForm = document.getElementById('chatbotSettingsForm');
+  const chatbotSettingsResetBtn = document.getElementById('chatbotSettingsResetBtn');
+  const chatbotSettingEnabled = document.getElementById('chatbotSettingEnabled');
+  const chatbotSettingShowSuggestions = document.getElementById('chatbotSettingShowSuggestions');
+  const chatbotSettingAssistantName = document.getElementById('chatbotSettingAssistantName');
+  const chatbotSettingMaxResponseLength = document.getElementById('chatbotSettingMaxResponseLength');
+  const chatbotSettingWelcomeMessage = document.getElementById('chatbotSettingWelcomeMessage');
 
   const newsForm = document.getElementById('newsCardForm');
   const newsEditingIdInput = document.getElementById('newsCardEditingIndex');
@@ -283,6 +308,14 @@
     events: [],
     users: [],
     messages: [],
+    chatbot: {
+      stats: {},
+      recentConversations: [],
+      unknownQuestions: [],
+      popularQuestions: [],
+      settings: {},
+      selectedSessionId: null
+    },
     sections: { ...DEFAULT_SITE_CONTENT },
     dirty: 0,
     connected: false,
@@ -334,6 +367,19 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  function formatDateTime(value) {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString([], {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 
   function apiRequest(url, options) {
@@ -1199,6 +1245,165 @@
     }).join('');
   }
 
+  function getChatActorLabel(item) {
+    if (!item) return 'Guest';
+    if (item.userId) {
+      return item.userLabel || item.userEmail || ('User #' + item.userId);
+    }
+    const visitorId = item.visitorId ? String(item.visitorId) : '';
+    return visitorId ? 'Guest ' + visitorId.slice(-8) : 'Guest';
+  }
+
+  function setChatbotText(node, value) {
+    if (node) node.textContent = String(value || 0);
+  }
+
+  function fillChatbotSettingsForm() {
+    const settings = state.chatbot && state.chatbot.settings ? state.chatbot.settings : {};
+    if (chatbotSettingEnabled) chatbotSettingEnabled.checked = settings.enabled !== false;
+    if (chatbotSettingShowSuggestions) chatbotSettingShowSuggestions.checked = settings.showSuggestedQuestions !== false;
+    if (chatbotSettingAssistantName) chatbotSettingAssistantName.value = settings.assistantName || 'Sector AI Assistant';
+    if (chatbotSettingMaxResponseLength) chatbotSettingMaxResponseLength.value = settings.maxResponseLength || 450;
+    if (chatbotSettingWelcomeMessage) chatbotSettingWelcomeMessage.value = settings.welcomeMessage || '';
+  }
+
+  function readChatbotSettingsForm() {
+    return {
+      enabled: chatbotSettingEnabled ? chatbotSettingEnabled.checked : true,
+      showSuggestedQuestions: chatbotSettingShowSuggestions ? chatbotSettingShowSuggestions.checked : true,
+      assistantName: chatbotSettingAssistantName ? chatbotSettingAssistantName.value.trim() : 'Sector AI Assistant',
+      maxResponseLength: chatbotSettingMaxResponseLength ? Number(chatbotSettingMaxResponseLength.value || 450) : 450,
+      welcomeMessage: chatbotSettingWelcomeMessage ? chatbotSettingWelcomeMessage.value.trim() : ''
+    };
+  }
+
+  function renderChatbotOverview() {
+    const chatbot = state.chatbot || {};
+    const stats = chatbot.stats || {};
+    setChatbotText(chatbotTotalSessions, stats.totalSessions);
+    setChatbotText(chatbotTotalMessages, stats.totalMessages);
+    setChatbotText(chatbotTotalUsers, stats.totalUsersUsed);
+    setChatbotText(chatbotUnknownCount, stats.unknownQuestions);
+    setChatbotText(chatbotHelpfulCount, stats.helpfulFeedback);
+    setChatbotText(chatbotNotHelpfulCount, stats.notHelpfulFeedback);
+    setChatbotText(chatbotSessionsToday, stats.sessionsToday);
+    setChatbotText(chatbotAvgMessages, stats.averageMessagesPerSession);
+    setChatbotText(chatbotLoggedSessions, stats.loggedInSessions);
+    setChatbotText(chatbotGuestSessions, stats.guestSessions);
+    setChatbotText(chatbotReviewedUnknown, stats.reviewedUnknownQuestions);
+    setChatbotText(chatbotTotalUnknown, stats.totalUnknownQuestions);
+
+    if (chatbotRecentList) {
+      const conversations = Array.isArray(chatbot.recentConversations) ? chatbot.recentConversations : [];
+      if (!conversations.length) {
+        chatbotRecentList.innerHTML = '<div class="empty-state"><i class="bi bi-chat-square-dots fs-3 d-block mb-2"></i>No chatbot conversations yet.</div>';
+      } else {
+        chatbotRecentList.innerHTML = conversations.map(function (session) {
+          return (
+            '<article class="chatbot-row">' +
+              '<div class="d-flex justify-content-between gap-2 align-items-start flex-wrap">' +
+                '<div>' +
+                  '<div class="chatbot-row-title">' + escapeHtml(session.title || ('Conversation #' + session.id)) + '</div>' +
+                  '<div class="chatbot-meta">' +
+                    '<span><i class="bi bi-person me-1"></i>' + escapeHtml(getChatActorLabel(session)) + '</span>' +
+                    '<span><i class="bi bi-chat-left-text me-1"></i>' + escapeHtml(session.messageCount || 0) + ' messages</span>' +
+                    '<span><i class="bi bi-clock me-1"></i>' + escapeHtml(formatDateTime(session.updatedAt)) + '</span>' +
+                  '</div>' +
+                '</div>' +
+                '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="viewChatConversation(' + Number(session.id) + ')">View Conversation</button>' +
+              '</div>' +
+              '<div class="chatbot-preview mt-2">' + escapeHtml(session.lastMessage || 'No messages yet.') + '</div>' +
+            '</article>'
+          );
+        }).join('');
+      }
+    }
+
+    if (chatbotUnknownList) {
+      const questions = Array.isArray(chatbot.unknownQuestions) ? chatbot.unknownQuestions : [];
+      if (!questions.length) {
+        chatbotUnknownList.innerHTML = '<div class="empty-state"><i class="bi bi-patch-question fs-3 d-block mb-2"></i>No unknown questions yet.</div>';
+      } else {
+        chatbotUnknownList.innerHTML = questions.map(function (question) {
+          const reviewedLabel = question.reviewed ? '<span class="status-pill good"><i class="bi bi-check-circle-fill"></i> Reviewed</span>' : '<span class="status-pill warn"><i class="bi bi-exclamation-circle-fill"></i> Needs content</span>';
+          return (
+            '<article class="chatbot-row">' +
+              '<div class="d-flex justify-content-between gap-2 align-items-start flex-wrap">' +
+                '<div>' +
+                  '<div class="chatbot-row-title">' + escapeHtml(question.question || '') + '</div>' +
+                  '<div class="chatbot-meta">' +
+                    '<span><i class="bi bi-person me-1"></i>' + escapeHtml(getChatActorLabel(question)) + '</span>' +
+                    '<span><i class="bi bi-clock me-1"></i>' + escapeHtml(formatDateTime(question.createdAt)) + '</span>' +
+                  '</div>' +
+                '</div>' +
+                reviewedLabel +
+              '</div>' +
+              '<div class="card-foot">' +
+                '<button class="btn btn-soft btn-sm rounded-pill px-3" type="button" onclick="viewChatConversation(' + Number(question.sessionId) + ')">View Conversation</button>' +
+                (!question.reviewed ? '<button class="btn btn-must btn-sm rounded-pill px-3" type="button" onclick="markUnknownQuestionReviewed(' + Number(question.id) + ')">Mark as Reviewed</button>' : '') +
+                '<a class="btn btn-outline-primary btn-sm rounded-pill px-3" href="#siteContentManager">Suggest adding content</a>' +
+              '</div>' +
+            '</article>'
+          );
+        }).join('');
+      }
+    }
+
+    if (chatbotPopularList) {
+      const popularQuestions = Array.isArray(chatbot.popularQuestions) ? chatbot.popularQuestions : [];
+      if (!popularQuestions.length) {
+        chatbotPopularList.innerHTML = '<div class="empty-state"><i class="bi bi-stars fs-3 d-block mb-2"></i>No repeated questions yet.</div>';
+      } else {
+        chatbotPopularList.innerHTML = popularQuestions.map(function (item) {
+          return (
+            '<article class="chatbot-row">' +
+              '<div class="d-flex justify-content-between gap-2 align-items-start flex-wrap">' +
+                '<div>' +
+                  '<div class="chatbot-row-title">' + escapeHtml(item.question || item.normalizedQuestion || '') + '</div>' +
+                  '<div class="chatbot-meta">' +
+                    '<span><i class="bi bi-repeat me-1"></i>' + escapeHtml(item.count || 0) + ' asks</span>' +
+                    '<span><i class="bi bi-clock me-1"></i>' + escapeHtml(formatDateTime(item.lastAskedAt)) + '</span>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</article>'
+          );
+        }).join('');
+      }
+    }
+
+    fillChatbotSettingsForm();
+  }
+
+  function renderChatbotConversationDetails(data) {
+    if (!chatbotConversationDetails) return;
+    if (!data || !data.session) {
+      chatbotConversationDetails.innerHTML = '<div class="empty-state"><i class="bi bi-chat-square-text fs-3 d-block mb-2"></i>Select a conversation to view details.</div>';
+      return;
+    }
+
+    const session = data.session;
+    const messages = Array.isArray(data.messages) ? data.messages : [];
+    chatbotConversationDetails.innerHTML =
+      '<div class="mb-3">' +
+        '<div class="chatbot-row-title">' + escapeHtml(session.title || ('Conversation #' + session.id)) + '</div>' +
+        '<div class="chatbot-meta">' +
+          '<span><i class="bi bi-person me-1"></i>' + escapeHtml(getChatActorLabel(session)) + '</span>' +
+          '<span><i class="bi bi-clock me-1"></i>' + escapeHtml(formatDateTime(session.updatedAt)) + '</span>' +
+        '</div>' +
+      '</div>' +
+      (messages.length ? messages.map(function (message) {
+        const role = message.role === 'assistant' ? 'assistant' : 'user';
+        return (
+          '<div class="chatbot-message ' + role + '">' +
+            '<div class="role">' + escapeHtml(role) + ' - ' + escapeHtml(formatDateTime(message.createdAt)) + '</div>' +
+            '<div>' + escapeHtml(message.content || '') + '</div>' +
+            (role === 'assistant' && message.feedback ? '<div class="chatbot-meta mt-2"><span><i class="bi bi-hand-thumbs-up me-1"></i>Feedback: ' + escapeHtml(message.feedback) + '</span></div>' : '') +
+          '</div>'
+        );
+      }).join('') : '<div class="empty-state">No messages saved for this conversation.</div>');
+  }
+
   function renderAll() {
     renderNews();
     renderEvents();
@@ -1212,6 +1417,7 @@
     renderAwards();
     renderUsers();
     renderMessages();
+    renderChatbotOverview();
     fillSiteContentForm();
   }
 
@@ -1269,13 +1475,22 @@
     Promise.all([
       apiRequest(CONTENT_API, { method: 'GET' }),
       apiRequest(USERS_API, { method: 'GET' }),
-      apiRequest(MESSAGES_API, { method: 'GET' })
+      apiRequest(MESSAGES_API, { method: 'GET' }),
+      apiRequest(CHATBOT_ADMIN_API + '/overview', { method: 'GET' })
     ]).then(function (results) {
       state.news = Array.isArray(results[0].news) ? results[0].news : [];
       state.events = Array.isArray(results[0].events) ? results[0].events : [];
       state.sections = normalizeSections(results[0].sections);
       state.users = Array.isArray(results[1].users) ? results[1].users : [];
       state.messages = Array.isArray(results[2].messages) ? results[2].messages : [];
+      state.chatbot = {
+        stats: results[3].stats || {},
+        recentConversations: Array.isArray(results[3].recentConversations) ? results[3].recentConversations : [],
+        unknownQuestions: Array.isArray(results[3].unknownQuestions) ? results[3].unknownQuestions : [],
+        popularQuestions: Array.isArray(results[3].popularQuestions) ? results[3].popularQuestions : [],
+        settings: results[3].settings || {},
+        selectedSessionId: state.chatbot && state.chatbot.selectedSessionId ? state.chatbot.selectedSessionId : null
+      };
       renderAll();
       if (!state.newsDraftDirty && !(newsForm && newsForm.matches(':focus-within'))) {
         resetNewsFormState();
@@ -1498,6 +1713,50 @@
       alert(error.message);
     });
   };
+
+  window.viewChatConversation = function (id) {
+    if (!id) return;
+    if (chatbotConversationDetails) {
+      chatbotConversationDetails.innerHTML = '<div class="empty-state"><i class="bi bi-hourglass-split fs-3 d-block mb-2"></i>Loading conversation...</div>';
+    }
+    apiRequest(CHATBOT_ADMIN_API + '/conversations/' + id, { method: 'GET' })
+      .then(function (data) {
+        state.chatbot.selectedSessionId = Number(id);
+        renderChatbotConversationDetails(data);
+      })
+      .catch(function (error) {
+        if (chatbotConversationDetails) {
+          chatbotConversationDetails.innerHTML = '<div class="empty-state text-danger"><i class="bi bi-exclamation-triangle fs-3 d-block mb-2"></i>' + escapeHtml(error.message) + '</div>';
+        }
+      });
+  };
+
+  window.markUnknownQuestionReviewed = function (id) {
+    apiRequest(CHATBOT_ADMIN_API + '/unknown/' + id + '/reviewed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reviewed: true })
+    }).then(loadAll).catch(function (error) {
+      alert(error.message);
+    });
+  };
+
+  function saveChatbotSettings() {
+    setSaveState('warn', 'Saving chatbot settings');
+    return apiRequest(CHATBOT_ADMIN_API + '/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ settings: readChatbotSettingsForm() })
+    }).then(function (data) {
+      state.chatbot.settings = data.settings || state.chatbot.settings;
+      fillChatbotSettingsForm();
+      setSaveState('good', 'Chatbot settings saved');
+      alert('Chatbot settings were updated successfully.');
+    }).catch(function (error) {
+      setSaveState('warn', 'Chatbot settings failed');
+      alert(error.message);
+    });
+  }
 
   newsSubmitBtn.addEventListener('click', function () {
     const editingIndex = Number(newsEditingIdInput.value || -1);
@@ -1883,6 +2142,18 @@
   refreshBtn.addEventListener('click', loadAll);
   reloadNewsBtn.addEventListener('click', loadAll);
   reloadEventsBtn.addEventListener('click', loadAll);
+  if (chatbotRefreshBtn) {
+    chatbotRefreshBtn.addEventListener('click', loadAll);
+  }
+  if (chatbotSettingsForm) {
+    chatbotSettingsForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      saveChatbotSettings();
+    });
+  }
+  if (chatbotSettingsResetBtn) {
+    chatbotSettingsResetBtn.addEventListener('click', fillChatbotSettingsForm);
+  }
   openWebsiteBtn.addEventListener('click', function () { window.open('/website/index.html', '_blank'); });
 
   bindUploadButton(newsUploadBtn, newsImageInput, newsImagePreview);

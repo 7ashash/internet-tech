@@ -7,11 +7,28 @@ const SQLiteStoreFactory = require('connect-sqlite3');
 const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 
+function loadLocalEnv() {
+  const envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return;
+
+  fs.readFileSync(envPath, 'utf8').split(/\r?\n/).forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) return;
+    const separatorIndex = trimmed.indexOf('=');
+    if (separatorIndex <= 0) return;
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const rawValue = trimmed.slice(separatorIndex + 1).trim();
+    if (!key || Object.prototype.hasOwnProperty.call(process.env, key)) return;
+    process.env[key] = rawValue.replace(/^['"]|['"]$/g, '');
+  });
+}
+
 function normalizeBaseUrl(url) {
   return String(url || '').trim().replace(/\/+$/, '');
 }
 
 const ROOT = __dirname;
+loadLocalEnv();
 const DATA_DIR = path.join(ROOT, 'data');
 const DB_PATH = path.join(DATA_DIR, 'app.db');
 const MAIL_LOG_PATH = path.join(DATA_DIR, 'mail-log.txt');
@@ -27,9 +44,33 @@ const BASE_URL = CONFIGURED_BASE_URL || `http://127.0.0.1:${PORT}`;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@must.edu.eg';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MustAdmin2026!';
 const BREVO_API_KEY = String(process.env.BREVO_API_KEY || '').trim();
+const OPENAI_API_KEY = String(process.env.OPENAI_API_KEY || '').trim();
+const OPENAI_MODEL = String(process.env.OPENAI_MODEL || 'gpt-5-mini').trim();
 const MAIL_FROM_EMAIL = process.env.MAIL_FROM_EMAIL || process.env.SMTP_FROM || process.env.BREVO_SMTP_LOGIN || process.env.SMTP_USER || '';
 const MAIL_FROM_NAME = process.env.MAIL_FROM_NAME || 'MUST';
 const REAL_EMAILS_ENABLED = Boolean(BREVO_API_KEY);
+const CHAT_SYSTEM_PROMPT = [
+  'You are the official AI assistant for a university sector website.',
+  'Your role is to help visitors find and understand information already available on the website.',
+  'Answer only using the provided website content.',
+  'Understand short, incomplete, misspelled, Arabic, or English questions by meaning, not by exact wording.',
+  'Use section titles, aliases, and related terms in the website content to find the closest relevant answer.',
+  'Do not invent information.',
+  'If the answer is not available in the provided content, say exactly: "This information is not available on the website. Please check the related sections or contact the sector."',
+  'Keep answers short, clear, and professional.',
+  'When relevant, suggest the website section the user should open.'
+].join('\n');
+const CHAT_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const CHAT_RATE_LIMIT_MAX = 20;
+const chatRateLimits = new Map();
+const CHAT_UNAVAILABLE_RESPONSE = 'This information is not available on the website. Please check the related sections or contact the sector.';
+const DEFAULT_CHATBOT_SETTINGS = {
+  enabled: true,
+  welcomeMessage: 'Hello. I can help with the sector vision, mission, objectives, committees, protocols, annual plan, news, events, gallery, and contact information.',
+  assistantName: 'Sector AI Assistant',
+  maxResponseLength: 450,
+  showSuggestedQuestions: true
+};
 const SHOULD_RESET_NON_ADMIN_USERS_ON_BOOT =
   String(process.env.RESET_NON_ADMIN_USERS_ON_BOOT || '').toLowerCase() === 'true' ||
   (
@@ -44,6 +85,7 @@ fs.mkdirSync(FILE_UPLOADS_DIR, { recursive: true });
 
 const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
 const DEFAULT_SITE_CONTENT = {
   heroTitle: 'Community Service & Environmental Development Sector',
@@ -221,6 +263,55 @@ function runMigrations() {
       value TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS chat_sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      visitor_id TEXT,
+      title TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS chat_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id INTEGER NOT NULL,
+      role TEXT NOT NULL CHECK(role IN ('user', 'assistant')),
+      content TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS chatbot_unknown_questions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id INTEGER NOT NULL,
+      user_id INTEGER,
+      visitor_id TEXT,
+      question TEXT NOT NULL,
+      reviewed INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS chat_feedback (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      message_id INTEGER NOT NULL UNIQUE,
+      rating TEXT NOT NULL CHECK(rating IN ('helpful', 'not_helpful')),
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(message_id) REFERENCES chat_messages(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_id ON chat_sessions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_chat_sessions_visitor_id ON chat_sessions(visitor_id);
+    CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id ON chat_messages(session_id);
+    CREATE INDEX IF NOT EXISTS idx_unknown_questions_reviewed ON chatbot_unknown_questions(reviewed);
+    CREATE INDEX IF NOT EXISTS idx_chat_feedback_rating ON chat_feedback(rating);
   `);
 
   const userColumns = db.prepare(`PRAGMA table_info(users)`).all();
@@ -483,6 +574,53 @@ function saveSiteContent(content) {
     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
   `).run(SITE_CONTENT_KEY, JSON.stringify(merged), now());
   return merged;
+}
+
+function parseBooleanSetting(value, fallback) {
+  if (typeof value === 'boolean') return value;
+  if (value === 'true' || value === '1') return true;
+  if (value === 'false' || value === '0') return false;
+  return fallback;
+}
+
+function normalizeChatbotSettings(settings) {
+  const source = settings && typeof settings === 'object' ? settings : {};
+  const maxResponseLength = Number(source.maxResponseLength);
+  return {
+    enabled: parseBooleanSetting(source.enabled, DEFAULT_CHATBOT_SETTINGS.enabled),
+    welcomeMessage: compactText(source.welcomeMessage || DEFAULT_CHATBOT_SETTINGS.welcomeMessage).slice(0, 500),
+    assistantName: compactText(source.assistantName || DEFAULT_CHATBOT_SETTINGS.assistantName).slice(0, 80),
+    maxResponseLength: Number.isFinite(maxResponseLength) ? Math.min(Math.max(Math.round(maxResponseLength), 120), 900) : DEFAULT_CHATBOT_SETTINGS.maxResponseLength,
+    showSuggestedQuestions: parseBooleanSetting(source.showSuggestedQuestions, DEFAULT_CHATBOT_SETTINGS.showSuggestedQuestions)
+  };
+}
+
+function getAppSetting(key, fallback) {
+  const row = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(key);
+  if (!row) return fallback;
+  try {
+    return JSON.parse(row.value);
+  } catch (error) {
+    return row.value;
+  }
+}
+
+function saveAppSetting(key, value) {
+  db.prepare(`
+    INSERT INTO app_settings (key, value, updated_at)
+    VALUES (?, ?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+  `).run(key, JSON.stringify(value), now());
+}
+
+function getChatbotSettings() {
+  return normalizeChatbotSettings(getAppSetting('chatbot_settings', DEFAULT_CHATBOT_SETTINGS));
+}
+
+function saveChatbotSettings(settings) {
+  const normalized = normalizeChatbotSettings(settings);
+  saveAppSetting('chatbot_settings', normalized);
+  return normalized;
 }
 
 function mustEmail(email) {
@@ -895,8 +1033,756 @@ function getEventItemById(id) {
   `).get(id);
 }
 
+function compactText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+const CHAT_TOPIC_ALIASES = [
+  {
+    canonical: "Vice Dean's Message",
+    aliases: ['vice dean', 'dean message', 'dean word', 'dean speech', 'vice dean message', '\u0643\u0644\u0645\u0629\u0020\u0627\u0644\u0639\u0645\u064a\u062f', '\u0631\u0633\u0627\u0644\u0629\u0020\u0627\u0644\u0639\u0645\u064a\u062f', '\u0631\u0633\u0627\u0644\u0647\u0020\u0627\u0644\u0639\u0645\u064a\u062f', '\u0643\u0644\u0645\u0629\u0020\u0646\u0627\u0626\u0628\u0020\u0627\u0644\u0639\u0645\u064a\u062f', '\u0631\u0633\u0627\u0644\u0629\u0020\u0646\u0627\u0626\u0628\u0020\u0627\u0644\u0639\u0645\u064a\u062f']
+  },
+  {
+    canonical: 'Sector Vision',
+    aliases: ['vision', 'sector vision', '\u0627\u0644\u0631\u0624\u064a\u0629', '\u0631\u0624\u064a\u0629\u0020\u0627\u0644\u0642\u0637\u0627\u0639']
+  },
+  {
+    canonical: 'Sector Mission',
+    aliases: ['mission', 'sector mission', '\u0627\u0644\u0631\u0633\u0627\u0644\u0629', '\u0631\u0633\u0627\u0644\u0629\u0020\u0627\u0644\u0642\u0637\u0627\u0639']
+  },
+  {
+    canonical: 'Sector Objectives',
+    aliases: ['objectives', 'objective', 'goals', 'aims', '\u0627\u0644\u0623\u0647\u062f\u0627\u0641', '\u0627\u0647\u062f\u0627\u0641', '\u0623\u0647\u062f\u0627\u0641\u0020\u0627\u0644\u0642\u0637\u0627\u0639']
+  },
+  {
+    canonical: 'Sector Committees',
+    aliases: ['committees', 'committee', '\u0627\u0644\u0644\u062c\u0627\u0646', '\u0644\u062c\u0627\u0646\u0020\u0627\u0644\u0642\u0637\u0627\u0639']
+  },
+  {
+    canonical: 'Protocols',
+    aliases: ['protocols', 'protocol', 'partnerships', 'agreements', '\u0627\u0644\u0628\u0631\u0648\u062a\u0648\u0643\u0648\u0644\u0627\u062a', '\u0628\u0631\u0648\u062a\u0648\u0643\u0648\u0644', '\u0627\u0644\u0634\u0631\u0627\u0643\u0627\u062a', '\u0627\u0644\u0627\u062a\u0641\u0627\u0642\u064a\u0627\u062a']
+  },
+  {
+    canonical: 'Sector Annual Plan',
+    aliases: ['annual plan', 'plan', 'sector plan', '\u0627\u0644\u062e\u0637\u0629', '\u0627\u0644\u062e\u0637\u0629\u0020\u0627\u0644\u0633\u0646\u0648\u064a\u0629']
+  },
+  {
+    canonical: 'Sector Activities',
+    aliases: ['activities', 'activity', '\u0627\u0644\u0623\u0646\u0634\u0637\u0629', '\u0627\u0644\u0641\u0639\u0627\u0644\u064a\u0627\u062a', '\u0627\u0646\u0634\u0637\u0629', '\u0646\u0634\u0627\u0637']
+  },
+  {
+    canonical: 'Events',
+    aliases: ['events', 'event', '\u0627\u0644\u0627\u064a\u0641\u0646\u062a', '\u0627\u0644\u0627\u064a\u0641\u0646\u062a\u0627\u062a', '\u0627\u0644\u0623\u062d\u062f\u0627\u062b', '\u0627\u0644\u0641\u0639\u0627\u0644\u064a\u0627\u062a']
+  },
+  {
+    canonical: 'News',
+    aliases: ['news', '\u0627\u0644\u0623\u062e\u0628\u0627\u0631', '\u0627\u0644\u0627\u062e\u0628\u0627\u0631']
+  },
+  {
+    canonical: 'Gallery',
+    aliases: ['gallery', 'photos', 'images', 'slider', '\u0627\u0644\u0635\u0648\u0631', '\u0627\u0644\u0645\u0639\u0631\u0636', '\u0627\u0644\u0633\u0644\u0627\u064a\u062f\u0631']
+  },
+  {
+    canonical: 'Contact',
+    aliases: ['contact', 'contact us', 'reach us', '\u062a\u0648\u0627\u0635\u0644', '\u0627\u062a\u0635\u0627\u0644', '\u0627\u062a\u0635\u0644\u0020\u0628\u0646\u0627', '\u062a\u0648\u0627\u0635\u0644\u0020\u0645\u0639\u0646\u0627', '\u0643\u0648\u0646\u062a\u0627\u0643\u062a']
+  }
+];
+
+function detectChatTopics(message) {
+  const original = compactText(message);
+  const normalized = original.toLowerCase();
+  if (!normalized) {
+    return [];
+  }
+
+  if (normalized.includes('\u0639\u0645\u064a\u062f')) {
+    return ["Vice Dean's Message"];
+  }
+  if (normalized.includes('\u0631\u0624\u064a\u0629')) {
+    return ['Sector Vision'];
+  }
+  if (normalized.includes('\u0631\u0633\u0627\u0644\u0629')) {
+    return ['Sector Mission'];
+  }
+  if (normalized.includes('\u0647\u062f\u0641') || normalized.includes('\u0627\u0647\u062f\u0627\u0641') || normalized.includes('\u0623\u0647\u062f\u0627\u0641')) {
+    return ['Sector Objectives'];
+  }
+  if (normalized.includes('\u0644\u062c\u0627\u0646')) {
+    return ['Sector Committees'];
+  }
+  if (normalized.includes('\u0628\u0631\u0648\u062a\u0648\u0643\u0648\u0644') || normalized.includes('\u0634\u0631\u0627\u0643\u0627\u062a') || normalized.includes('\u0627\u062a\u0641\u0627\u0642\u064a\u0627\u062a')) {
+    return ['Protocols'];
+  }
+  if (normalized.includes('\u062e\u0637\u0629')) {
+    return ['Sector Annual Plan'];
+  }
+  if (normalized.includes('\u0646\u0634\u0627\u0637') || normalized.includes('\u0627\u0646\u0634\u0637\u0629')) {
+    return ['Sector Activities'];
+  }
+  if (normalized.includes('\u062e\u0628\u0631') || normalized.includes('\u0627\u062e\u0628\u0627\u0631')) {
+    return ['News'];
+  }
+  if (normalized.includes('\u062a\u0648\u0627\u0635\u0644') || normalized.includes('\u0627\u062a\u0635\u0627\u0644') || normalized.includes('\u0643\u0648\u0646\u062a\u0627\u0643\u062a')) {
+    return ['Contact'];
+  }
+
+  return CHAT_TOPIC_ALIASES
+    .filter((group) => group.aliases.some((alias) => normalized.includes(alias.toLowerCase())))
+    .map((group) => group.canonical);
+}
+
+function expandChatQuery(message, matchedTopics) {
+  const original = compactText(message);
+  if (!matchedTopics.length) {
+    return original;
+  }
+
+  return `${original}\n\nLikely intended website sections: ${matchedTopics.join(', ')}`;
+}
+
+function listTitles(items, mapper) {
+  if (!Array.isArray(items) || !items.length) return 'None listed.';
+  return items.map(mapper).filter(Boolean).join('\n');
+}
+
+function buildChatWebsiteContext() {
+  const sections = getSiteContent();
+  const news = listNews();
+  const events = listEvents();
+  const objectives = Array.isArray(sections.objectiveItems)
+    ? sections.objectiveItems
+    : [sections.objective1, sections.objective2, sections.objective3, sections.objective4].filter(Boolean);
+  const committees = Array.isArray(sections.committeeItems) ? sections.committeeItems : [];
+  const protocols = Array.isArray(sections.protocolItems) ? sections.protocolItems : [];
+  const activityGroups = Array.isArray(sections.activityGroups) ? sections.activityGroups : [];
+  const galleryItems = Array.isArray(sections.galleryItems) ? sections.galleryItems : [];
+
+  return [
+    `Website: ${compactText(sections.heroTitle)}`,
+    'Search aliases: vice dean message = dean message = dean word = dean speech = رسالة العميد = كلمة العميد; vision = الرؤية; mission = الرسالة; objectives = goals = aims = الأهداف; committees = اللجان; protocols = partnerships = agreements = البروتوكولات; plan = annual plan = الخطة; activities = الأنشطة; events = الفعاليات; news = الأخبار; gallery = photo slider = الصور; contact = contact us = تواصل معنا.',
+    '',
+    `Vice Dean's Message section title: ${compactText(sections.viceDeanSectionTitle)}`,
+    `Vice Dean's Message heading: ${compactText(sections.viceDeanHeading)}`,
+    `Vice Dean's Message: ${[
+      sections.viceDeanParagraph1,
+      sections.viceDeanParagraph2,
+      sections.viceDeanParagraph3,
+      sections.viceDeanClosing,
+      sections.viceDeanSignatureRole,
+      sections.viceDeanSignatureName
+    ].map(compactText).filter(Boolean).join(' ')}`,
+    '',
+    `Vision: ${compactText(sections.visionText)}`,
+    `Mission: ${compactText(sections.missionText)}`,
+    '',
+    'Objectives:',
+    listTitles(objectives, (item, index) => `${index + 1}. ${compactText(item)}`),
+    '',
+    'Committees:',
+    listTitles(committees, (item) => `- ${compactText(item.title)}: ${compactText(item.summary)} Responsibilities: ${Array.isArray(item.responsibilities) ? item.responsibilities.map(compactText).join('; ') : ''}`),
+    '',
+    `Annual Plan: ${compactText(sections.planFileTitle)}. ${compactText(sections.planIntro)} File: ${compactText(sections.planFileUrl)}`,
+    '',
+    'Protocols:',
+    listTitles(protocols, (item) => `- ${compactText(item.title)}. Partner: ${compactText(item.partner)}. Objective: ${compactText(item.objective)}`),
+    '',
+    'Activity Groups:',
+    listTitles(activityGroups, (group) => `- ${compactText(group.title)}: ${compactText(group.intro)} Items: ${Array.isArray(group.items) ? group.items.map((item) => `${compactText(item.dateLabel)} - ${compactText(item.title)}: ${compactText(item.summary)}`).join('; ') : ''}`),
+    '',
+    'Latest Events:',
+    listTitles(events, (item) => `- ${compactText(item.title)} (${compactText(item.day)} ${compactText(item.monthYear)}${item.location ? `, ${compactText(item.location)}` : ''}${item.timeText ? `, ${compactText(item.timeText)}` : ''}): ${compactText(item.summary)}`),
+    '',
+    'News:',
+    listTitles(news, (item) => `- ${compactText(item.title)} (${compactText(item.badge)})`),
+    '',
+    `Gallery: ${galleryItems.length} images are available in the homepage photo slider.`,
+    '',
+    `Contact: ${compactText(sections.contactTitle)} ${compactText(sections.contactSubtitle)} Phone: ${compactText(sections.footerPhone)} Email: ${compactText(sections.footerEmail)} Address: ${compactText(sections.footerAddress)}`
+  ].join('\n');
+}
+
+function buildPriorityChatContext(sections, matchedTopics) {
+  if (!Array.isArray(matchedTopics) || !matchedTopics.length) {
+    return '';
+  }
+
+  const objectives = Array.isArray(sections.objectiveItems)
+    ? sections.objectiveItems
+    : [sections.objective1, sections.objective2, sections.objective3, sections.objective4].filter(Boolean);
+  const committees = Array.isArray(sections.committeeItems) ? sections.committeeItems : [];
+  const protocols = Array.isArray(sections.protocolItems) ? sections.protocolItems : [];
+
+  const priorityParts = matchedTopics.map((topic) => {
+    switch (topic) {
+      case "Vice Dean's Message":
+        return `Priority section - Vice Dean's Message:\nTitle: ${compactText(sections.viceDeanSectionTitle)}\nHeading: ${compactText(sections.viceDeanHeading)}\nContent: ${[
+          sections.viceDeanParagraph1,
+          sections.viceDeanParagraph2,
+          sections.viceDeanParagraph3,
+          sections.viceDeanClosing,
+          sections.viceDeanSignatureRole,
+          sections.viceDeanSignatureName
+        ].map(compactText).filter(Boolean).join(' ')}`;
+      case 'Sector Vision':
+        return `Priority section - Vision:\n${compactText(sections.visionText)}`;
+      case 'Sector Mission':
+        return `Priority section - Mission:\n${compactText(sections.missionText)}`;
+      case 'Sector Objectives':
+        return `Priority section - Objectives:\n${listTitles(objectives, (item, index) => `${index + 1}. ${compactText(item)}`)}`;
+      case 'Sector Committees':
+        return `Priority section - Committees:\n${listTitles(committees, (item) => `- ${compactText(item.title)}: ${compactText(item.summary)}`)}`;
+      case 'Protocols':
+        return `Priority section - Protocols:\n${listTitles(protocols, (item) => `- ${compactText(item.title)}. Partner: ${compactText(item.partner)}. Objective: ${compactText(item.objective)}`)}`;
+      case 'Sector Annual Plan':
+        return `Priority section - Annual Plan:\n${compactText(sections.planFileTitle)}. ${compactText(sections.planIntro)} File: ${compactText(sections.planFileUrl)}`;
+      case 'Contact':
+        return `Priority section - Contact:\n${compactText(sections.contactTitle)} ${compactText(sections.contactSubtitle)} Phone: ${compactText(sections.footerPhone)} Email: ${compactText(sections.footerEmail)} Address: ${compactText(sections.footerAddress)}`;
+      default:
+        return '';
+    }
+  }).filter(Boolean);
+
+  return priorityParts.join('\n\n');
+}
+
+function getDirectChatAnswer(message) {
+  const sections = getSiteContent();
+  const matchedTopics = detectChatTopics(message);
+  if (!matchedTopics.length) {
+    return '';
+  }
+
+  const objectives = Array.isArray(sections.objectiveItems)
+    ? sections.objectiveItems
+    : [sections.objective1, sections.objective2, sections.objective3, sections.objective4].filter(Boolean);
+  const committees = Array.isArray(sections.committeeItems) ? sections.committeeItems : [];
+  const protocols = Array.isArray(sections.protocolItems) ? sections.protocolItems : [];
+
+  const primaryTopic = matchedTopics[0];
+  switch (primaryTopic) {
+    case "Vice Dean's Message":
+      return [
+        "Vice Dean's Message",
+        compactText(sections.viceDeanHeading),
+        compactText(sections.viceDeanParagraph1),
+        compactText(sections.viceDeanParagraph2),
+        compactText(sections.viceDeanParagraph3),
+        compactText(sections.viceDeanClosing),
+        compactText(sections.viceDeanSignatureRole),
+        compactText(sections.viceDeanSignatureName)
+      ].filter(Boolean).join('\n\n');
+    case 'Sector Vision':
+      return compactText(sections.visionText);
+    case 'Sector Mission':
+      return compactText(sections.missionText);
+    case 'Sector Objectives':
+      return [
+        "Sector Objectives",
+        ...objectives.map((item, index) => `${index + 1}. ${compactText(item)}`)
+      ].join('\n');
+    case 'Sector Committees':
+      return [
+        'Sector Committees',
+        ...committees.map((item) => `- ${compactText(item.title)}: ${compactText(item.summary)}`)
+      ].join('\n');
+    case 'Protocols':
+      return [
+        'Protocols',
+        ...protocols.map((item) => `- ${compactText(item.title)}. Partner: ${compactText(item.partner)}. Objective: ${compactText(item.objective)}`)
+      ].join('\n');
+    case 'Sector Annual Plan':
+      return `${compactText(sections.planFileTitle)}\n${compactText(sections.planIntro)}\nFile: ${compactText(sections.planFileUrl)}`;
+    case 'Contact':
+      return `Contact Us\n${compactText(sections.contactTitle)}\n${compactText(sections.contactSubtitle)}\nPhone: ${compactText(sections.footerPhone)}\nEmail: ${compactText(sections.footerEmail)}\nAddress: ${compactText(sections.footerAddress)}`;
+    default:
+      return '';
+  }
+}
+
+function getChatRateLimitKey(req, visitorId) {
+  if (req.session && req.session.user && req.session.user.id) {
+    return `user:${req.session.user.id}`;
+  }
+  if (visitorId) {
+    return `visitor:${visitorId}`;
+  }
+  return `ip:${req.ip || 'unknown'}`;
+}
+
+function checkChatRateLimit(key) {
+  const timestamp = Date.now();
+  const entry = chatRateLimits.get(key) || { count: 0, resetAt: timestamp + CHAT_RATE_LIMIT_WINDOW_MS };
+  if (timestamp > entry.resetAt) {
+    entry.count = 0;
+    entry.resetAt = timestamp + CHAT_RATE_LIMIT_WINDOW_MS;
+  }
+  entry.count += 1;
+  chatRateLimits.set(key, entry);
+  return {
+    allowed: entry.count <= CHAT_RATE_LIMIT_MAX,
+    resetAt: entry.resetAt
+  };
+}
+
+function getChatOwner(req, visitorId) {
+  const userId = req.session && req.session.user && req.session.user.id ? Number(req.session.user.id) : null;
+  return {
+    userId: Number.isFinite(userId) ? userId : null,
+    visitorId: userId ? null : compactText(visitorId).slice(0, 80)
+  };
+}
+
+function getRequiredChatOwner(req, visitorId) {
+  const owner = getChatOwner(req, visitorId);
+  if (!owner.userId && !owner.visitorId) {
+    return null;
+  }
+  return owner;
+}
+
+function getOwnedChatSession(sessionId, owner) {
+  const numericSessionId = Number(sessionId);
+  if (!Number.isFinite(numericSessionId) || numericSessionId <= 0) return null;
+
+  if (owner.userId) {
+    return db.prepare('SELECT id FROM chat_sessions WHERE id = ? AND user_id = ?').get(numericSessionId, owner.userId) || null;
+  }
+
+  if (owner.visitorId) {
+    return db.prepare('SELECT id FROM chat_sessions WHERE id = ? AND visitor_id = ? AND user_id IS NULL').get(numericSessionId, owner.visitorId) || null;
+  }
+
+  return null;
+}
+
+function createChatSession(owner, firstMessage) {
+  const timestamp = now();
+  const title = compactText(firstMessage).slice(0, 70) || 'New chat';
+  const result = db.prepare(`
+    INSERT INTO chat_sessions (user_id, visitor_id, title, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(owner.userId || null, owner.visitorId || null, title, timestamp, timestamp);
+  return { id: result.lastInsertRowid };
+}
+
+function getOrCreateChatSession(sessionId, owner, firstMessage) {
+  const existing = getOwnedChatSession(sessionId, owner);
+  if (existing) return existing;
+  return createChatSession(owner, firstMessage);
+}
+
+function saveChatMessage(sessionId, role, content) {
+  const timestamp = now();
+  const result = db.prepare(`
+    INSERT INTO chat_messages (session_id, role, content, created_at)
+    VALUES (?, ?, ?, ?)
+  `).run(sessionId, role, content, timestamp);
+  db.prepare('UPDATE chat_sessions SET updated_at = ? WHERE id = ?').run(timestamp, sessionId);
+  return result.lastInsertRowid;
+}
+
+function saveUnknownQuestion(sessionId, owner, question) {
+  db.prepare(`
+    INSERT INTO chatbot_unknown_questions (session_id, user_id, visitor_id, question, reviewed, created_at)
+    VALUES (?, ?, ?, ?, 0, ?)
+  `).run(sessionId, owner.userId || null, owner.visitorId || null, question, now());
+}
+
+function listOwnedChatSessions(owner) {
+  const sql = `
+    SELECT
+      s.id,
+      s.title,
+      s.created_at AS createdAt,
+      s.updated_at AS updatedAt,
+      COUNT(m.id) AS messageCount,
+      (
+        SELECT content
+        FROM chat_messages
+        WHERE session_id = s.id
+        ORDER BY id DESC
+        LIMIT 1
+      ) AS lastMessage
+    FROM chat_sessions s
+    LEFT JOIN chat_messages m ON m.session_id = s.id
+  `;
+
+  const suffix = `
+    GROUP BY s.id
+    ORDER BY s.updated_at DESC, s.id DESC
+    LIMIT 30
+  `;
+
+  if (owner.userId) {
+    return db.prepare(`${sql} WHERE s.user_id = ? ${suffix}`).all(owner.userId);
+  }
+
+  return db.prepare(`${sql} WHERE s.user_id IS NULL AND s.visitor_id = ? ${suffix}`).all(owner.visitorId);
+}
+
+function listOwnedChatMessages(sessionId, owner) {
+  const session = getOwnedChatSession(sessionId, owner);
+  if (!session) return null;
+
+  return db.prepare(`
+    SELECT
+      m.id,
+      m.role,
+      m.content,
+      m.created_at AS createdAt,
+      f.rating AS feedback
+    FROM chat_messages m
+    LEFT JOIN chat_feedback f ON f.message_id = m.id
+    WHERE m.session_id = ?
+    ORDER BY m.id ASC
+  `).all(session.id);
+}
+
+function deleteOwnedChatSession(sessionId, owner) {
+  const session = getOwnedChatSession(sessionId, owner);
+  if (!session) return false;
+
+  const transaction = db.transaction(() => {
+    db.prepare('DELETE FROM chatbot_unknown_questions WHERE session_id = ?').run(session.id);
+    db.prepare('DELETE FROM chat_messages WHERE session_id = ?').run(session.id);
+    db.prepare('DELETE FROM chat_sessions WHERE id = ?').run(session.id);
+  });
+  transaction();
+  return true;
+}
+
+function getOwnedAssistantMessage(messageId, owner) {
+  const numericMessageId = Number(messageId);
+  if (!Number.isFinite(numericMessageId) || numericMessageId <= 0) return null;
+
+  let row = null;
+  if (owner.userId) {
+    row = db.prepare(`
+      SELECT m.id
+      FROM chat_messages m
+      JOIN chat_sessions s ON s.id = m.session_id
+      WHERE m.id = ? AND m.role = 'assistant' AND s.user_id = ?
+    `).get(numericMessageId, owner.userId);
+  } else if (owner.visitorId) {
+    row = db.prepare(`
+      SELECT m.id
+      FROM chat_messages m
+      JOIN chat_sessions s ON s.id = m.session_id
+      WHERE m.id = ? AND m.role = 'assistant' AND s.user_id IS NULL AND s.visitor_id = ?
+    `).get(numericMessageId, owner.visitorId);
+  }
+
+  return row || null;
+}
+
+function saveChatFeedback(messageId, rating) {
+  db.prepare(`
+    INSERT INTO chat_feedback (message_id, rating, created_at)
+    VALUES (?, ?, ?)
+    ON CONFLICT(message_id) DO UPDATE SET rating = excluded.rating, created_at = excluded.created_at
+  `).run(messageId, rating, now());
+}
+
+function getChatbotAdminOverview() {
+  const todayPrefix = new Date().toISOString().slice(0, 10);
+  const stats = {
+    totalSessions: db.prepare('SELECT COUNT(*) AS count FROM chat_sessions').get().count,
+    totalMessages: db.prepare('SELECT COUNT(*) AS count FROM chat_messages').get().count,
+    totalUsersUsed: db.prepare(`
+      SELECT COUNT(*) AS count
+      FROM (
+        SELECT DISTINCT
+          CASE
+            WHEN user_id IS NOT NULL THEN 'user:' || user_id
+            ELSE 'guest:' || COALESCE(visitor_id, 'unknown')
+          END AS actor
+        FROM chat_sessions
+      )
+    `).get().count,
+    unknownQuestions: db.prepare('SELECT COUNT(*) AS count FROM chatbot_unknown_questions WHERE reviewed = 0').get().count,
+    totalUnknownQuestions: db.prepare('SELECT COUNT(*) AS count FROM chatbot_unknown_questions').get().count,
+    reviewedUnknownQuestions: db.prepare('SELECT COUNT(*) AS count FROM chatbot_unknown_questions WHERE reviewed = 1').get().count,
+    helpfulFeedback: db.prepare("SELECT COUNT(*) AS count FROM chat_feedback WHERE rating = 'helpful'").get().count,
+    notHelpfulFeedback: db.prepare("SELECT COUNT(*) AS count FROM chat_feedback WHERE rating = 'not_helpful'").get().count,
+    loggedInSessions: db.prepare('SELECT COUNT(*) AS count FROM chat_sessions WHERE user_id IS NOT NULL').get().count,
+    guestSessions: db.prepare('SELECT COUNT(*) AS count FROM chat_sessions WHERE user_id IS NULL').get().count,
+    sessionsToday: db.prepare('SELECT COUNT(*) AS count FROM chat_sessions WHERE created_at LIKE ?').get(`${todayPrefix}%`).count,
+    averageMessagesPerSession: db.prepare(`
+      SELECT ROUND(AVG(message_count), 1) AS averageCount
+      FROM (
+        SELECT COUNT(m.id) AS message_count
+        FROM chat_sessions s
+        LEFT JOIN chat_messages m ON m.session_id = s.id
+        GROUP BY s.id
+      )
+    `).get().averageCount || 0
+  };
+
+  const recentConversations = db.prepare(`
+    SELECT
+      s.id,
+      s.title,
+      s.user_id AS userId,
+      s.visitor_id AS visitorId,
+      s.created_at AS createdAt,
+      s.updated_at AS updatedAt,
+      COALESCE(NULLIF(TRIM(u.name), ''), NULLIF(TRIM(u.email), ''), 'Guest') AS userLabel,
+      u.email AS userEmail,
+      COUNT(m.id) AS messageCount,
+      (
+        SELECT content
+        FROM chat_messages
+        WHERE session_id = s.id
+        ORDER BY id DESC
+        LIMIT 1
+      ) AS lastMessage
+    FROM chat_sessions s
+    LEFT JOIN users u ON u.id = s.user_id
+    LEFT JOIN chat_messages m ON m.session_id = s.id
+    GROUP BY s.id
+    ORDER BY s.updated_at DESC, s.id DESC
+    LIMIT 20
+  `).all();
+
+  const unknownQuestions = db.prepare(`
+    SELECT
+      q.id,
+      q.session_id AS sessionId,
+      q.user_id AS userId,
+      q.visitor_id AS visitorId,
+      q.question,
+      q.reviewed,
+      q.created_at AS createdAt,
+      COALESCE(NULLIF(TRIM(u.name), ''), NULLIF(TRIM(u.email), ''), 'Guest') AS userLabel,
+      u.email AS userEmail
+    FROM chatbot_unknown_questions q
+    LEFT JOIN users u ON u.id = q.user_id
+    ORDER BY q.reviewed ASC, q.created_at DESC, q.id DESC
+    LIMIT 50
+  `).all();
+
+  const popularQuestions = db.prepare(`
+    SELECT
+      LOWER(TRIM(content)) AS normalizedQuestion,
+      MIN(content) AS question,
+      COUNT(*) AS count,
+      MAX(created_at) AS lastAskedAt
+    FROM chat_messages
+    WHERE role = 'user' AND TRIM(content) <> ''
+    GROUP BY LOWER(TRIM(content))
+    ORDER BY count DESC, lastAskedAt DESC
+    LIMIT 20
+  `).all();
+
+  return {
+    stats,
+    recentConversations,
+    unknownQuestions: unknownQuestions.map((item) => ({
+      ...item,
+      reviewed: Boolean(item.reviewed)
+    })),
+    popularQuestions,
+    settings: getChatbotSettings()
+  };
+}
+
+function getAdminChatConversation(sessionId) {
+  const numericSessionId = Number(sessionId);
+  if (!Number.isFinite(numericSessionId) || numericSessionId <= 0) return null;
+
+  const session = db.prepare(`
+    SELECT
+      s.id,
+      s.title,
+      s.user_id AS userId,
+      s.visitor_id AS visitorId,
+      s.created_at AS createdAt,
+      s.updated_at AS updatedAt,
+      COALESCE(NULLIF(TRIM(u.name), ''), NULLIF(TRIM(u.email), ''), 'Guest') AS userLabel,
+      u.email AS userEmail
+    FROM chat_sessions s
+    LEFT JOIN users u ON u.id = s.user_id
+    WHERE s.id = ?
+  `).get(numericSessionId);
+
+  if (!session) return null;
+
+  const messages = db.prepare(`
+    SELECT
+      m.id,
+      m.role,
+      m.content,
+      m.created_at AS createdAt,
+      f.rating AS feedback
+    FROM chat_messages m
+    LEFT JOIN chat_feedback f ON f.message_id = m.id
+    WHERE m.session_id = ?
+    ORDER BY m.id ASC
+  `).all(session.id);
+
+  return { session, messages };
+}
+
+function extractOpenAIText(payload) {
+  if (!payload || typeof payload !== 'object') return '';
+  if (typeof payload.output_text === 'string') {
+    return payload.output_text.trim();
+  }
+  if (!Array.isArray(payload.output)) return '';
+  return payload.output.map((item) => {
+    if (!item || !Array.isArray(item.content)) return '';
+    return item.content.map((part) => {
+      if (!part) return '';
+      if (typeof part.text === 'string') return part.text;
+      if (typeof part.output_text === 'string') return part.output_text;
+      return '';
+    }).join('');
+  }).join('\n').trim();
+}
+
+async function askOpenAIAboutWebsite(message, maxOutputTokens) {
+  const sections = getSiteContent();
+  const websiteContext = buildChatWebsiteContext();
+  const matchedTopics = detectChatTopics(message);
+  const enrichedMessage = expandChatQuery(message, matchedTopics);
+  const priorityContext = buildPriorityChatContext(sections, matchedTopics);
+  const tokenLimit = Number.isFinite(Number(maxOutputTokens)) ? Number(maxOutputTokens) : DEFAULT_CHATBOT_SETTINGS.maxResponseLength;
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      instructions: CHAT_SYSTEM_PROMPT,
+      input: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'input_text',
+              text: `${priorityContext ? `Priority website sections:\n${priorityContext}\n\n` : ''}Website content:\n${websiteContext}\n\nVisitor question:\n${enrichedMessage}`
+            }
+          ]
+        }
+      ],
+      max_output_tokens: Math.min(Math.max(Math.round(tokenLimit), 120), 900)
+    })
+  });
+
+  const rawBody = await response.text();
+  let parsedBody = null;
+  try {
+    parsedBody = rawBody ? JSON.parse(rawBody) : null;
+  } catch (error) {
+    parsedBody = null;
+  }
+
+  if (!response.ok) {
+    const apiMessage = parsedBody && parsedBody.error && parsedBody.error.message
+      ? parsedBody.error.message
+      : `OpenAI request failed with status ${response.status}`;
+    const apiError = new Error(apiMessage);
+    apiError.status = response.status;
+    throw apiError;
+  }
+
+  return extractOpenAIText(parsedBody) || CHAT_UNAVAILABLE_RESPONSE;
+}
+
 app.get('/api/content/public', (req, res) => {
   res.json({ ok: true, news: listNews(), events: listEvents(), sections: getSiteContent() });
+});
+
+app.get('/api/chat/settings', (req, res) => {
+  res.json({ ok: true, settings: getChatbotSettings() });
+});
+
+app.post('/api/chat', async (req, res) => {
+  let chatSession = null;
+  let chatOwner = null;
+  let message = '';
+  try {
+    message = compactText(req.body && req.body.message);
+    const visitorId = compactText(req.body && req.body.visitorId).slice(0, 80);
+    const requestedSessionId = req.body && req.body.sessionId;
+
+    if (!message) {
+      return res.status(400).json({ ok: false, error: 'Please enter a message.' });
+    }
+    if (message.length > 1000) {
+      return res.status(400).json({ ok: false, error: 'Messages must be 1000 characters or less.' });
+    }
+    if (!req.session.user && !visitorId) {
+      return res.status(400).json({ ok: false, error: 'Missing visitor id.' });
+    }
+    const chatbotSettings = getChatbotSettings();
+    if (!chatbotSettings.enabled) {
+      return res.status(503).json({ ok: false, error: 'The AI assistant is currently disabled.' });
+    }
+    if (!OPENAI_API_KEY) {
+      return res.status(503).json({ ok: false, error: 'The AI assistant is not configured yet.' });
+    }
+
+    const rateLimit = checkChatRateLimit(getChatRateLimitKey(req, visitorId));
+    if (!rateLimit.allowed) {
+      return res.status(429).json({ ok: false, error: 'You reached the hourly chat limit. Please try again later.' });
+    }
+
+    chatOwner = getChatOwner(req, visitorId);
+    chatSession = getOrCreateChatSession(requestedSessionId, chatOwner, message);
+    saveChatMessage(chatSession.id, 'user', message);
+
+    const directAnswer = getDirectChatAnswer(message);
+    const answer = directAnswer || await askOpenAIAboutWebsite(message, chatbotSettings.maxResponseLength);
+    const assistantMessageId = saveChatMessage(chatSession.id, 'assistant', answer);
+    if (answer.trim() === CHAT_UNAVAILABLE_RESPONSE) {
+      saveUnknownQuestion(chatSession.id, chatOwner, message);
+    }
+
+    res.json({
+      ok: true,
+      sessionId: chatSession.id,
+      messageId: assistantMessageId,
+      answer,
+      model: OPENAI_MODEL
+    });
+  } catch (error) {
+    console.error('AI chat request failed:', error.message);
+    if (chatSession) {
+      try {
+        saveChatMessage(chatSession.id, 'assistant', 'The AI assistant could not answer right now. Please try again later.');
+      } catch (saveError) {
+        console.error('Could not save failed chat response:', saveError.message);
+      }
+    }
+    res.status(500).json({
+      ok: false,
+      sessionId: chatSession ? chatSession.id : null,
+      error: 'The AI assistant could not answer right now. Please try again later.'
+    });
+  }
+});
+
+app.post('/api/chat/feedback', (req, res) => {
+  const visitorId = compactText(req.body && req.body.visitorId).slice(0, 80);
+  const rating = req.body && req.body.rating === 'not_helpful' ? 'not_helpful' : req.body && req.body.rating === 'helpful' ? 'helpful' : '';
+  const owner = getRequiredChatOwner(req, visitorId);
+  if (!owner) {
+    return res.status(400).json({ ok: false, error: 'Missing visitor id.' });
+  }
+  if (!rating) {
+    return res.status(400).json({ ok: false, error: 'Invalid feedback rating.' });
+  }
+
+  const message = getOwnedAssistantMessage(req.body && req.body.messageId, owner);
+  if (!message) {
+    return res.status(404).json({ ok: false, error: 'Assistant message not found.' });
+  }
+
+  saveChatFeedback(message.id, rating);
+  res.json({ ok: true });
 });
 
 app.get('/api/content/public/news/:id', (req, res) => {
@@ -915,6 +1801,76 @@ app.get('/api/content/public/events/:id', (req, res) => {
     return res.status(404).json({ ok: false, error: 'Event not found' });
   }
   res.json({ ok: true, item });
+});
+
+app.get('/api/chat/sessions', (req, res) => {
+  const owner = getRequiredChatOwner(req, req.query && req.query.visitorId);
+  if (!owner) {
+    return res.status(400).json({ ok: false, error: 'Missing visitor id.' });
+  }
+
+  res.json({ ok: true, sessions: listOwnedChatSessions(owner) });
+});
+
+app.get('/api/chat/sessions/:id/messages', (req, res) => {
+  const owner = getRequiredChatOwner(req, req.query && req.query.visitorId);
+  if (!owner) {
+    return res.status(400).json({ ok: false, error: 'Missing visitor id.' });
+  }
+
+  const messages = listOwnedChatMessages(req.params.id, owner);
+  if (!messages) {
+    return res.status(404).json({ ok: false, error: 'Chat session not found' });
+  }
+
+  res.json({ ok: true, sessionId: Number(req.params.id), messages });
+});
+
+app.delete('/api/chat/sessions/:id', (req, res) => {
+  const owner = getRequiredChatOwner(req, req.body && req.body.visitorId);
+  if (!owner) {
+    return res.status(400).json({ ok: false, error: 'Missing visitor id.' });
+  }
+
+  const deleted = deleteOwnedChatSession(req.params.id, owner);
+  if (!deleted) {
+    return res.status(404).json({ ok: false, error: 'Chat session not found' });
+  }
+
+  res.json({ ok: true });
+});
+
+app.get('/api/admin/chatbot/overview', requireAdmin, (req, res) => {
+  res.json({ ok: true, ...getChatbotAdminOverview() });
+});
+
+app.post('/api/admin/chatbot/settings', requireAdmin, (req, res) => {
+  const settings = saveChatbotSettings(req.body && req.body.settings ? req.body.settings : req.body);
+  res.json({ ok: true, settings });
+});
+
+app.get('/api/admin/chatbot/conversations/:id', requireAdmin, (req, res) => {
+  const conversation = getAdminChatConversation(req.params.id);
+  if (!conversation) {
+    return res.status(404).json({ ok: false, error: 'Chat conversation not found' });
+  }
+
+  res.json({ ok: true, ...conversation });
+});
+
+app.post('/api/admin/chatbot/unknown/:id/reviewed', requireAdmin, (req, res) => {
+  const questionId = Number(req.params.id);
+  if (!Number.isFinite(questionId) || questionId <= 0) {
+    return res.status(400).json({ ok: false, error: 'Invalid unknown question id' });
+  }
+
+  const reviewed = req.body && req.body.reviewed === false ? 0 : 1;
+  const result = db.prepare('UPDATE chatbot_unknown_questions SET reviewed = ? WHERE id = ?').run(reviewed, questionId);
+  if (!result.changes) {
+    return res.status(404).json({ ok: false, error: 'Unknown question not found' });
+  }
+
+  res.json({ ok: true });
 });
 
 app.get('/api/admin/content', requireAdmin, (req, res) => {

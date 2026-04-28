@@ -92,8 +92,24 @@
     .section-block h4 { margin-bottom: .85rem; color: var(--must-primary); font-size: 1rem; }
     .section-block textarea.form-control { min-height: 108px; }
     .section-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
+    .chatbot-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .9rem; margin-bottom: 1rem; }
+    .chatbot-stat { border: 1px solid var(--must-border); border-radius: 18px; padding: 1rem; background: linear-gradient(180deg, #fff, #f8fbff); }
+    .chatbot-stat strong { display: block; color: var(--must-primary); font-size: 1.75rem; line-height: 1.1; }
+    .chatbot-list { display: grid; gap: .75rem; }
+    .chatbot-row { border: 1px solid var(--must-border); border-radius: 16px; padding: .9rem; background: #fff; }
+    .chatbot-row-title { color: var(--must-primary); font-weight: 700; }
+    .chatbot-preview { color: var(--must-muted); font-size: .9rem; overflow-wrap: anywhere; }
+    .chatbot-meta { color: var(--must-muted); font-size: .78rem; display: flex; gap: .65rem; flex-wrap: wrap; margin-top: .4rem; }
+    .chatbot-message { border-radius: 16px; padding: .85rem .95rem; margin-bottom: .75rem; border: 1px solid var(--must-border); }
+    .chatbot-message.user { background: #eef4fb; }
+    .chatbot-message.assistant { background: #f8fff9; border-color: #d7ecdc; }
+    .chatbot-message .role { color: var(--must-primary); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .35rem; }
+    .chatbot-details-scroll { max-height: 560px; overflow-y: auto; padding-right: .35rem; }
+    .chatbot-settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .chatbot-settings-grid .col-span-2 { grid-column: 1 / -1; }
+    .chatbot-toggle-line { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid var(--must-border); border-radius: 16px; padding: .9rem 1rem; background: #fff; }
     @media (max-width: 1199.98px) { .grid-two { grid-template-columns: 1fr; } .sticky-box { position: static; } }
-    @media (max-width: 991.98px) { .sidebar { position: static; width: 100%; border-radius: 0 0 24px 24px; } .main { margin-left: 0; padding: 1rem .85rem 1.4rem; } .topbar { padding: 1rem; } .stats-row, .item-grid, .editor-grid { grid-template-columns: 1fr; } .content-card .card-foot .btn { flex: 1 1 calc(50% - .35rem); } }
+    @media (max-width: 991.98px) { .sidebar { position: static; width: 100%; border-radius: 0 0 24px 24px; } .main { margin-left: 0; padding: 1rem .85rem 1.4rem; } .topbar { padding: 1rem; } .stats-row, .item-grid, .editor-grid, .chatbot-stats, .chatbot-settings-grid { grid-template-columns: 1fr; } .content-card .card-foot .btn { flex: 1 1 calc(50% - .35rem); } }
     @media (max-width: 575.98px) { .panel { padding: 1rem; } .editor-header, .editor-body { padding: 1rem; } .content-card { padding: .95rem; } .content-card .summary { font-size: .9rem; } .content-card .card-foot .btn, .section-actions .btn { flex: 1 1 100%; } .image-input-row { flex-direction: column; } }
   </style>
 </head>
@@ -141,6 +157,7 @@
       <a class="nav-item-custom" href="#siteContentManager"><i class="bi bi-window-stack"></i> Static sections</a>
       <a class="nav-item-custom" href="#usersManager"><i class="bi bi-people-fill"></i> Users manager</a>
       <a class="nav-item-custom" href="#messagesManager"><i class="bi bi-envelope-paper-fill"></i> Contact messages</a>
+      <a class="nav-item-custom" href="#chatbotManager"><i class="bi bi-robot"></i> Chatbot</a>
       <a class="nav-item-custom" href="/website/index.html" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Open website</a>
       <div class="nav-label">Usage</div>
       <a class="nav-item-custom" href="#howTo"><i class="bi bi-info-circle-fill"></i> How it works</a>
@@ -710,12 +727,144 @@
             </div>
           </section>
         </div>
+
+        <div class="col-12" id="chatbotManager">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <div class="section-title mb-1">Chatbot</div>
+                <div class="muted small">Review AI assistant usage, conversations, and questions that need more website content.</div>
+              </div>
+              <button class="btn btn-soft" id="chatbotRefreshBtn" type="button"><i class="bi bi-arrow-clockwise me-1"></i> Reload chatbot data</button>
+            </div>
+
+            <div class="chatbot-stats">
+              <div class="chatbot-stat"><span class="muted small">Total Chat Sessions</span><strong id="chatbotTotalSessions">0</strong></div>
+              <div class="chatbot-stat"><span class="muted small">Total Messages</span><strong id="chatbotTotalMessages">0</strong></div>
+              <div class="chatbot-stat"><span class="muted small">Total Users Used Chatbot</span><strong id="chatbotTotalUsers">0</strong></div>
+              <div class="chatbot-stat"><span class="muted small">Unknown Questions</span><strong id="chatbotUnknownCount">0</strong></div>
+              <div class="chatbot-stat"><span class="muted small">Helpful Feedback</span><strong id="chatbotHelpfulCount">0</strong></div>
+              <div class="chatbot-stat"><span class="muted small">Not Helpful Feedback</span><strong id="chatbotNotHelpfulCount">0</strong></div>
+              <div class="chatbot-stat"><span class="muted small">Sessions Today</span><strong id="chatbotSessionsToday">0</strong></div>
+              <div class="chatbot-stat"><span class="muted small">Average Messages / Session</span><strong id="chatbotAvgMessages">0</strong></div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12 col-xl-6">
+                <div class="editor-card h-100">
+                  <div class="editor-header">
+                    <h3 class="h5 mb-1">Recent Conversations</h3>
+                    <div class="muted small">Latest chatbot sessions from logged-in users and guests.</div>
+                  </div>
+                  <div class="editor-body">
+                    <div id="chatbotRecentList" class="chatbot-list"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-xl-6">
+                <div class="editor-card h-100">
+                  <div class="editor-header">
+                    <h3 class="h5 mb-1">Conversation Details</h3>
+                    <div class="muted small">Open a conversation to inspect user and assistant messages.</div>
+                  </div>
+                  <div class="editor-body">
+                    <div id="chatbotConversationDetails" class="chatbot-details-scroll">
+                      <div class="empty-state"><i class="bi bi-chat-square-text fs-3 d-block mb-2"></i>Select a conversation to view details.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="editor-card">
+                  <div class="editor-header">
+                    <h3 class="h5 mb-1">Unknown Questions</h3>
+                    <div class="muted small">Questions the assistant could not answer from the website content.</div>
+                  </div>
+                  <div class="editor-body">
+                    <div id="chatbotUnknownList" class="chatbot-list"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-xl-6">
+                <div class="editor-card h-100">
+                  <div class="editor-header">
+                    <h3 class="h5 mb-1">Popular Questions</h3>
+                    <div class="muted small">Repeated user questions grouped by lowercase exact match.</div>
+                  </div>
+                  <div class="editor-body">
+                    <div id="chatbotPopularList" class="chatbot-list"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-xl-6">
+                <div class="editor-card h-100">
+                  <div class="editor-header">
+                    <h3 class="h5 mb-1">Advanced Analytics</h3>
+                    <div class="muted small">Quick operational signals for discussion and maintenance.</div>
+                  </div>
+                  <div class="editor-body">
+                    <div class="chatbot-stats mb-0" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                      <div class="chatbot-stat"><span class="muted small">Logged-in Sessions</span><strong id="chatbotLoggedSessions">0</strong></div>
+                      <div class="chatbot-stat"><span class="muted small">Guest Sessions</span><strong id="chatbotGuestSessions">0</strong></div>
+                      <div class="chatbot-stat"><span class="muted small">Reviewed Unknown</span><strong id="chatbotReviewedUnknown">0</strong></div>
+                      <div class="chatbot-stat"><span class="muted small">Total Unknown</span><strong id="chatbotTotalUnknown">0</strong></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="editor-card">
+                  <div class="editor-header">
+                    <h3 class="h5 mb-1">Chatbot Settings</h3>
+                    <div class="muted small">These settings control the public chatbot widget on the website.</div>
+                  </div>
+                  <div class="editor-body">
+                    <form id="chatbotSettingsForm" class="manager-form">
+                      <div class="chatbot-settings-grid">
+                        <div class="chatbot-toggle-line">
+                          <div>
+                            <strong>Enable chatbot</strong>
+                            <div class="muted small">Hide or show the floating assistant.</div>
+                          </div>
+                          <input id="chatbotSettingEnabled" class="form-check-input" type="checkbox">
+                        </div>
+                        <div class="chatbot-toggle-line">
+                          <div>
+                            <strong>Show suggested questions</strong>
+                            <div class="muted small">Show the quick question chips inside the widget.</div>
+                          </div>
+                          <input id="chatbotSettingShowSuggestions" class="form-check-input" type="checkbox">
+                        </div>
+                        <div>
+                          <label class="form-label fw-semibold">Assistant name</label>
+                          <input id="chatbotSettingAssistantName" class="form-control" placeholder="Sector AI Assistant">
+                        </div>
+                        <div>
+                          <label class="form-label fw-semibold">Max response length</label>
+                          <input id="chatbotSettingMaxResponseLength" class="form-control" type="number" min="120" max="900" step="10" placeholder="450">
+                        </div>
+                        <div class="col-span-2">
+                          <label class="form-label fw-semibold">Welcome message</label>
+                          <textarea id="chatbotSettingWelcomeMessage" class="form-control" rows="3" placeholder="Welcome visitors..."></textarea>
+                        </div>
+                      </div>
+                      <div class="section-actions">
+                        <button class="btn btn-must" type="submit"><i class="bi bi-save me-1"></i>Save chatbot settings</button>
+                        <button class="btn btn-soft" id="chatbotSettingsResetBtn" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset form</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- legacy dashboard script removed -->
-  <script src="dashboard.js?v=20260415a"></script>
+  <script src="dashboard.js?v=20260428e"></script>
 </body>
 </html>
